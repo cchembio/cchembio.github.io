@@ -284,6 +284,11 @@ footer strong { color: #fff; }
 .software-card p { font-size: 0.92rem; }
 .software-card .links { margin-top: 1rem; font-size: 0.88rem; }
 .software-card .links a { margin-right: 1rem; }
+.software-card .reference {
+  font-size: 0.82rem;
+  margin-top: 0.75rem;
+  color: var(--muted);
+}
 
 /* ============================================================
    Links & Teaching — simple
