@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Software — Computerchemie und Biochemie</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <nav class="navbar">
+      <a href="index.html" class="nav-brand">Computerchemie und Biochemie</a>
+      <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="research.html">Research</a></li>
+        <li><a href="members.html">Members</a></li>
+        <li><a href="publications.html">Publications</a></li>
+        <li><a href="software.html" class="active">Software</a></li>
+        <li><a href="teaching.html">Teaching</a></li>
+        <li><a href="links.html">Links</a></li>
+        <li><a href="https://github.com/cchembio" target="_blank" rel="noopener">GitHub ↗</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    <div class="page-header">
+      <h1>Software</h1>
+      <p>Computational tools developed by the group</p>
+    </div>
+
+    <div class="software-cards">
+
+      <div class="software-card">
+        <h3>PMC</h3>
+        <div class="meta">Perturbative QM/MM Monte Carlo Package &mdash; Jonas Feldt</div>
+        <p>
+          A suite of programs for QM/MM simulations of molecules in solution.
+          Employs fast sampling of the solvent space through first-order perturbation theory
+          with hybrid CPU-GPU computation. Interfaces directly with Molpro.
+        </p>
+        <div class="links">
+          <a href="https://bitbucket.org/jonas-feldt/mc-ocl/wiki/Home" target="_blank" rel="noopener">
+            Bitbucket ↗
+          </a>
+        </div>
+        <p style="font-size:0.82rem; margin-top:0.75rem; color:#555">
+          References: <em>Int. J. High Perform. Comput. Appl.</em> 31, 499–516 (2017);
+          <em>J. Chem. Phys.</em> 147, 244105 (2017)
+        </p>
+      </div>
+
+      <div class="software-card">
+        <h3>QVib / QVib-Fit</h3>
+        <div class="meta">Anharmonic Frequency Program &mdash; Benjamin Schröder</div>
+        <p>
+          Programs for calculating anharmonic frequencies and wave functions from
+          normal mode calculations in a low-dimensional space. Based on original
+          code from Prof. Peter Botschwina (University of Göttingen).
+          QVib-Fit provides fitting capabilities for potential energy surfaces.
+        </p>
+      </div>
+
+      <div class="software-card">
+        <h3>Atomdroid</h3>
+        <div class="meta">Mobile Molecular Mechanics Viewer &amp; Builder</div>
+        <p>
+          A mobile viewer, builder, and molecular mechanics simulator for Android devices.
+          Features a molecular structure database and optimized visualization for large PDB files.
+          Useful for teaching and quick structural inspection on mobile platforms.
+        </p>
+        <div class="links">
+          <a href="https://play.google.com/store/apps/details?id=org.atomdroid" target="_blank" rel="noopener">
+            Google Play ↗
+          </a>
+        </div>
+        <p style="font-size:0.82rem; margin-top:0.75rem; color:#555">
+          Reference: <em>J. Chem. Inf. Model.</em> 52, 1072–1078 (2012)
+        </p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>
+        <strong>Prof. Dr. Ricardo Mata</strong><br>
+        Institut für Physikalische Chemie<br>
+        Georg-August-Universität Göttingen<br>
+        Tammannstraße 6, 37077 Göttingen, Germany<br>
+        Phone: +49-(551) 39-23149 &nbsp;|&nbsp;
+        Email: <a href="mailto:rmata@gwdg.de">rmata@gwdg.de</a>
+      </div>
+      <div>
+        <a href="https://www.uni-goettingen.de/de/123987.html" target="_blank" rel="noopener">
+          University page ↗
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
