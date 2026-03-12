@@ -1,7 +1,7 @@
 // Mobile navigation toggle
 document.addEventListener('DOMContentLoaded', function () {
-  var toggle = document.querySelector('.nav-toggle');
-  var links  = document.querySelector('.nav-links');
+  const toggle = document.querySelector('.nav-toggle');
+  const links  = document.querySelector('.nav-links');
 
   if (toggle && links) {
     toggle.addEventListener('click', function () {
