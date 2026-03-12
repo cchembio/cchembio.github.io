@@ -1,0 +1,342 @@
+/* ============================================================
+   CSS Custom Properties
+   ============================================================ */
+:root {
+  --blue:       #003d73;
+  --blue-dark:  #002a50;
+  --gold:       #c8a951;
+  --bg:         #ffffff;
+  --text:       #1a1a1a;
+  --muted:      #555555;
+  --border:     #dde3ea;
+  --max-width:  1100px;
+  --radius:     4px;
+}
+
+/* ============================================================
+   Reset & Base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.7;
+}
+
+h1, h2, h3, h4 {
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--blue);
+  line-height: 1.3;
+}
+
+h1 { font-size: 2rem;   margin-bottom: 0.75rem; }
+h2 { font-size: 1.5rem; margin-bottom: 0.6rem;  border-bottom: 2px solid var(--gold); padding-bottom: 0.25rem; }
+h3 { font-size: 1.15rem; margin-bottom: 0.4rem; }
+
+p  { margin-bottom: 1rem; }
+a  { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; color: var(--gold); }
+
+ul, ol { padding-left: 1.25rem; margin-bottom: 1rem; }
+li { margin-bottom: 0.25rem; }
+
+/* ============================================================
+   Layout
+   ============================================================ */
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+main.container { padding-top: 2.5rem; padding-bottom: 3rem; }
+
+/* ============================================================
+   Navigation
+   ============================================================ */
+header {
+  background: var(--blue);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.navbar {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+
+.nav-brand {
+  color: #fff;
+  font-family: Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: bold;
+  white-space: nowrap;
+}
+.nav-brand:hover { text-decoration: none; color: var(--gold); }
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  color: rgba(255,255,255,0.88);
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  transition: background 0.15s, color 0.15s;
+}
+.nav-links a:hover,
+.nav-links a.active {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  text-decoration: none;
+}
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+}
+
+/* ============================================================
+   Footer
+   ============================================================ */
+footer {
+  background: var(--blue-dark);
+  color: rgba(255,255,255,0.8);
+  padding: 2rem 0;
+  margin-top: 4rem;
+  font-size: 0.88rem;
+  line-height: 1.8;
+}
+
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+footer a { color: var(--gold); }
+footer a:hover { color: #fff; }
+footer strong { color: #fff; }
+
+/* ============================================================
+   Home page — two-column layout
+   ============================================================ */
+.home-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 3rem;
+  align-items: start;
+}
+
+.highlights {
+  background: #f4f7fb;
+  border-left: 4px solid var(--gold);
+  padding: 1.25rem 1.5rem;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin-top: 2rem;
+}
+
+.highlights h3 { color: var(--blue); margin-bottom: 0.5rem; }
+
+.contact-card {
+  background: #f4f7fb;
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--blue);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  font-size: 0.92rem;
+  line-height: 1.9;
+}
+
+.contact-card h3 {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  border: none;
+}
+
+/* ============================================================
+   Research page
+   ============================================================ */
+.research-section {
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+.research-section:last-child { border-bottom: none; }
+
+.research-section .key-publications {
+  background: #f9fafb;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  font-size: 0.88rem;
+  margin-top: 0.75rem;
+}
+.research-section .key-publications li { margin-bottom: 0.15rem; }
+
+/* ============================================================
+   Members page
+   ============================================================ */
+.members-group { margin-bottom: 2.5rem; }
+.members-group h2 { margin-bottom: 1rem; }
+
+.member-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.member-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  background: #fafafa;
+}
+
+.member-card h3 { font-size: 1rem; margin-bottom: 0.2rem; color: var(--blue); }
+.member-card .role { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem; font-style: italic; }
+.member-card .details { font-size: 0.88rem; line-height: 1.7; }
+.member-card .details a { word-break: break-all; }
+
+/* Leader card gets a slightly more prominent style */
+.member-card.leader {
+  border-top: 4px solid var(--blue);
+  background: #f4f7fb;
+}
+
+/* ============================================================
+   Publications page
+   ============================================================ */
+.pub-year { margin-bottom: 2.5rem; }
+.pub-year h2 { font-size: 1.3rem; margin-bottom: 1rem; }
+
+.pub-list {
+  list-style: none;
+  padding: 0;
+}
+
+.pub-list li {
+  padding-left: 1.5rem;
+  text-indent: -1.5rem;
+  margin-bottom: 0.9rem;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 0.8rem;
+}
+
+.pub-list li:last-child { border-bottom: none; }
+
+.pub-title { font-style: italic; }
+.pub-doi { font-size: 0.82rem; margin-left: 0.25rem; }
+
+/* ============================================================
+   Software page
+   ============================================================ */
+.software-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.software-card {
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--blue);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.software-card h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+.software-card .meta { font-size: 0.82rem; color: var(--muted); margin-bottom: 0.75rem; }
+.software-card p { font-size: 0.92rem; }
+.software-card .links { margin-top: 1rem; font-size: 0.88rem; }
+.software-card .links a { margin-right: 1rem; }
+
+/* ============================================================
+   Links & Teaching — simple
+   ============================================================ */
+.link-group { margin-bottom: 2rem; }
+.link-group h3 { margin-bottom: 0.5rem; }
+.placeholder-note {
+  background: #f4f7fb;
+  border: 1px solid var(--border);
+  padding: 2rem;
+  border-radius: var(--radius);
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ============================================================
+   Page header strip
+   ============================================================ */
+.page-header {
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+}
+.page-header h1 { margin-bottom: 0.25rem; }
+.page-header p { color: var(--muted); margin: 0; }
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 768px) {
+  .nav-toggle { display: block; }
+
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    position: absolute;
+    top: 56px;
+    left: 0;
+    right: 0;
+    background: var(--blue);
+    padding: 0.5rem 0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+
+  .nav-links.open { display: flex; }
+
+  .nav-links a {
+    padding: 0.65rem 1.5rem;
+    border-radius: 0;
+    display: block;
+  }
+
+  .home-grid { grid-template-columns: 1fr; }
+
+  .member-grid { grid-template-columns: 1fr; }
+
+  .software-cards { grid-template-columns: 1fr; }
+
+  .footer-inner { flex-direction: column; }
+}
