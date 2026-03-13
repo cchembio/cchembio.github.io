@@ -94,8 +94,8 @@ PUBLISHER_STRATEGY = {
 
 MIN_WIDTH_PX       = 100
 MIN_HEIGHT_PX      = 50
-MAX_WIDTH_PX       = 2000
-MAX_HEIGHT_PX      = 2000
+MAX_WIDTH_PX       = 4000
+MAX_HEIGHT_PX      = 4000
 MAX_PORTRAIT_RATIO = 1.3    # skip if height / width > this
 MIN_FILE_BYTES     = 5 * 1024  # 5 KB
 
