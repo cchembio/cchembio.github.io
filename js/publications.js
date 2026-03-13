@@ -43,11 +43,8 @@ async function fetchORCID() {
   if (!res.ok) throw new Error(`ORCID ${res.status}`);
   const data = await res.json();
 
-  // Publication work types to include (exclude data-set, other, etc.)
-  const PUB_TYPES = new Set([
-    'journal-article', 'conference-paper', 'book-chapter', 'book',
-    'edited-book', 'report', 'dissertation', 'preprint'
-  ]);
+  // Only include peer-reviewed journal articles
+  const PUB_TYPES = new Set(['journal-article']);
 
   // Each group may have multiple external-ids; grab the first DOI per group
   const works = (data.group || []).map(group => {
