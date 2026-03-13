@@ -1,9 +1,10 @@
 /**
  * publications.js
- * Fetches publications from ORCID, enriches via Crossref, renders accordion.
- * Falls back to data/publications.json if APIs are unavailable.
+ * Fetches publications from OpenAlex (primary), ORCID (fallback), enriches via Crossref, renders accordion.
+ * Falls back to data/publications.json if all APIs are unavailable.
  *
- * ORCID: https://pub.orcid.org/v3.0/0000-0002-2720-3364/works
+ * OpenAlex: https://api.openalex.org/authors?filter=orcid:0000-0002-2720-3364
+ * ORCID:    https://pub.orcid.org/v3.0/0000-0002-2720-3364/works
  * Crossref: https://api.crossref.org/works/{DOI}
  */
 
@@ -99,7 +100,7 @@ async function fetchOpenAlexAuthorId() {
   if (!author?.id) throw new Error('OpenAlex: author not found');
 
   // Strip URL prefix: "https://openalex.org/A2345678901" -> "A2345678901"
-  const id = author.id.replace('https://openalex.org/', '');
+  const id = author.id.replace(/^https?:\/\/openalex\.org\//i, '');
   sessionSet(cacheKey, id);
   return id;
 }
