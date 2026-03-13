@@ -100,7 +100,7 @@ MAX_PORTRAIT_RATIO = 1.3    # skip if height / width > this
 MIN_FILE_BYTES     = 5 * 1024  # 5 KB
 
 # Target display width for saved images (2× CSS display width for Retina)
-RESIZE_WIDTH = 200
+RESIZE_WIDTH = 360
 
 # ── HTTP clients ──────────────────────────────────────────────────────────────
 

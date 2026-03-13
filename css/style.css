@@ -441,8 +441,9 @@ footer strong { color: #fff; }
 .pub-entry:last-child { border-bottom: none; }
 
 .pub-toc {
-  width: 90px;
-  min-width: 90px;
+  width: 180px;
+  min-width: 180px;
+  flex-shrink: 0;
   height: auto;
   border: 2px solid var(--border);
   border-radius: var(--radius);
@@ -622,6 +623,6 @@ main.container.has-hero { padding-top: 0; }
 @media (max-width: 768px) {
   .hero h1  { font-size: 1.8rem; }
   .hero p   { font-size: 1rem; }
-  .pub-toc  { width: 60px; min-width: 60px; }
+  .pub-toc  { width: 120px; min-width: 120px; }
   .group-gallery { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
 }
