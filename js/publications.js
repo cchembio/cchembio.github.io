@@ -335,7 +335,7 @@ async function initPublications() {
       console.warn('ORCID failed, using fallback:', e2);
       try {
         allWorks = await fetchFallback();
-      } catch (e3) {
+      } catch {
         container.innerHTML = '<p class="pub-error">Could not load publications. Please try again later.</p>';
         return;
       }
