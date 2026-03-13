@@ -11,8 +11,12 @@ const ORCID_ID   = '0000-0002-2720-3364';
 const ORCID_URL  = `https://pub.orcid.org/v3.0/${ORCID_ID}/works`;
 const CROSSREF   = doi => `https://api.crossref.org/works/${encodeURIComponent(doi)}?mailto=rmata@gwdg.de`;
 const FALLBACK   = 'data/publications.json';
-const CACHE_KEY  = 'pub_cache_v7';
+const CACHE_KEY  = 'pub_cache_v8';
 const CURRENT_YEAR = new Date().getFullYear();
+
+const OPENALEX_AUTHOR_URL = `https://api.openalex.org/authors?filter=orcid:${ORCID_ID}&mailto=rmata@gwdg.de`;
+const OPENALEX_WORKS = (authorId, cursor) =>
+  `https://api.openalex.org/works?filter=authorships.author.id:${authorId},type:journal-article&per_page=200&cursor=${encodeURIComponent(cursor)}&mailto=rmata@gwdg.de`;
 
 /* ── Utilities ─────────────────────────────────────────────── */
 
@@ -79,6 +83,25 @@ async function fetchORCID() {
 
   sessionSet(CACHE_KEY + '_orcid', unique);
   return unique;
+}
+
+/* ── OpenAlex fetch ─────────────────────────────────────────── */
+
+async function fetchOpenAlexAuthorId() {
+  const cacheKey = CACHE_KEY + '_oalex_id';
+  const cached = sessionGet(cacheKey);
+  if (cached) return cached;
+
+  const res = await fetch(OPENALEX_AUTHOR_URL);
+  if (!res.ok) throw new Error(`OpenAlex author lookup ${res.status}`);
+  const data = await res.json();
+  const author = (data.results || [])[0];
+  if (!author?.id) throw new Error('OpenAlex: author not found');
+
+  // Strip URL prefix: "https://openalex.org/A2345678901" -> "A2345678901"
+  const id = author.id.replace('https://openalex.org/', '');
+  sessionSet(cacheKey, id);
+  return id;
 }
 
 /* ── Crossref enrichment ────────────────────────────────────── */
