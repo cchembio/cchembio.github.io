@@ -12,7 +12,7 @@ const ORCID_ID   = '0000-0002-2720-3364';
 const ORCID_URL  = `https://pub.orcid.org/v3.0/${ORCID_ID}/works`;
 const CROSSREF   = doi => `https://api.crossref.org/works/${encodeURIComponent(doi)}?mailto=rmata@gwdg.de`;
 const FALLBACK   = 'data/publications.json';
-const CACHE_KEY  = 'pub_cache_v10';
+const CACHE_KEY  = 'pub_cache_v11';
 const CURRENT_YEAR = new Date().getFullYear();
 
 const OPENALEX_AUTHOR_URL = `https://api.openalex.org/authors?filter=orcid:${ORCID_ID}&mailto=rmata@gwdg.de`;
@@ -26,6 +26,18 @@ const DOI_BLOCKLIST = new Set([
   '10.31080/asop.2023.06.0639',
   '10.2478/srj-2025-0001',
 ]);
+
+/* ── TOC manifest ───────────────────────────────────────────── */
+
+// Populated at startup from data/tocs.json (maps doi -> local filename)
+let TOC_MAP = {};
+
+async function fetchTocManifest() {
+  try {
+    const res = await fetch('data/tocs.json');
+    if (res.ok) TOC_MAP = await res.json();
+  } catch { /* no manifest yet — fall back to Crossref images */ }
+}
 
 /* ── Utilities ─────────────────────────────────────────────── */
 
@@ -244,10 +256,13 @@ function renderEntry(pub) {
   const li = document.createElement('li');
   li.className = 'pub-entry';
 
-  const hasTOC = pub.toc_image;
-  if (hasTOC) {
+  // Prefer local static image from images/tocs/, fall back to Crossref API URL
+  const localFile = pub.doi && TOC_MAP[pub.doi];
+  const tocSrc = localFile ? `images/tocs/${localFile}` : (pub.toc_image || null);
+
+  if (tocSrc) {
     const img = document.createElement('img');
-    img.src = pub.toc_image;
+    img.src = tocSrc;
     img.alt = 'TOC figure';
     img.className = 'pub-toc';
     img.loading = 'lazy';
@@ -330,6 +345,8 @@ function scaffoldContainer(years, container) {
 async function initPublications() {
   const container = document.getElementById('publications-container');
   if (!container) return;
+
+  await fetchTocManifest();
 
   // Show global spinner
   container.innerHTML = '<div class="pub-spinner pub-spinner--global">Fetching publications…</div>';
