@@ -1,0 +1,1232 @@
+[
+  {
+    "doi": "10.1021/acs.jpca.4c01361",
+    "title": "The Fe-MAN Challenge: Ferrates\u2013Microkinetic Assessment of Numerical Quantum Chemistry",
+    "authors": "Rahrt, R., Hein-Janke, B., Amarasinghe, K.N., et al.",
+    "journal": "J. Phys. Chem. A",
+    "year": 2024,
+    "volume": "",
+    "pages": "",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/anie.202403826",
+    "title": "N-(Sulfonio)Sulfilimine Reagents: Non-Oxidizing Sources of Electrophilic Nitrogen Atom for Skeletal Editing",
+    "authors": "Heilmann, T., Lopez-Soria, J.M., Ulbrich, J., et al.",
+    "journal": "Angew. Chem. Int. Ed.",
+    "year": 2024,
+    "volume": "",
+    "pages": "",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.jpca.4c00096",
+    "title": "Optimization of Quantum Nuclei Positions with the Adaptive Nuclear-Electronic Orbital Approach",
+    "authors": "Hasecke, L., Mata, R.A.",
+    "journal": "J. Phys. Chem. A",
+    "year": 2024,
+    "volume": "128",
+    "pages": "3205\u20133211",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.accounts.3c00664",
+    "title": "Dispersion Control over Molecule Cohesion: Exploiting and Dissecting the Tipping Power of Aromatic Rings",
+    "authors": "Mata, R.A., Zhanabekova, T., Obenchain, D.A., Suhm, M.A.",
+    "journal": "Acc. Chem. Res.",
+    "year": 2024,
+    "volume": "57",
+    "pages": "1077\u20131086",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1038/s41467-023-44621-0",
+    "title": "Multiple redox switches of the SARS-CoV-2 main protease in vitro provide opportunities for drug design",
+    "authors": "Funk, L.-M., Poschmann, G., Rabe von Pappenheim, F., et al.",
+    "journal": "Nat. Commun.",
+    "year": 2024,
+    "volume": "15",
+    "pages": "",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.jpclett.4c00186",
+    "title": "From the Automated Calculation of Potential Energy Surfaces to Accurate Infrared Spectra",
+    "authors": "Schr\u00f6der, B., Rauhut, G.",
+    "journal": "J. Phys. Chem. Lett.",
+    "year": 2024,
+    "volume": "15",
+    "pages": "3159\u20133169",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.jctc.3c01055",
+    "title": "Nuclear Quantum Effects Made Accessible: Local Density Fitting in Multicomponent Methods",
+    "authors": "Hasecke, L., Mata, R.A.",
+    "journal": "J. Chem. Theory Comput.",
+    "year": 2023,
+    "volume": "19",
+    "pages": "8223\u20138233",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1039/D2CP05020J",
+    "title": "Revisiting the origin of the bending in group 2 metallocenes AeCp2 (Ae = Be\u2013Ba)",
+    "authors": "Sergeieva, T., Demirer, T.I., Wuttke, A., et al.",
+    "journal": "Phys. Chem. Chem. Phys.",
+    "year": 2023,
+    "volume": "25",
+    "pages": "20657\u201320667",
+    "toc_image": null
+  },
+  {
+    "doi": "10.3390/molecules28155700",
+    "title": "Ab Initio Rovibrational Spectroscopy of the Acetylide Anion",
+    "authors": "Schr\u00f6der, B.",
+    "journal": "Molecules",
+    "year": 2023,
+    "volume": "28",
+    "pages": "5700",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1016/j.saa.2023.123083",
+    "title": "Comprehensive quantum chemical analysis of the (ro)vibrational spectrum of thiirane and its deuterated isotopologue",
+    "authors": "De Vos, J., Rauhut, G., Schr\u00f6der, B.",
+    "journal": "Spectrochim. Acta A",
+    "year": 2023,
+    "volume": "302",
+    "pages": "123083",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1039/D3CP90186F",
+    "title": "Benchmark experiments for numerical quantum chemistry",
+    "authors": "Mata, R.A., Zehnacker-Rentien, A., Suhm, M.A.",
+    "journal": "Phys. Chem. Chem. Phys.",
+    "year": 2023,
+    "volume": "25",
+    "pages": "26415\u201326416",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.jpcb.3c03137",
+    "title": "Dynamic Protonation States Underlie Carbene Formation in ThDP-Dependent Enzymes: A Theoretical Study",
+    "authors": "Uranga, J., Rabe von Pappenheim, F., Tittmann, K., Mata, R.A.",
+    "journal": "J. Phys. Chem. B",
+    "year": 2023,
+    "volume": "",
+    "pages": "",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1039/D3CP01216F",
+    "title": "The first HyDRA challenge for computational vibrational spectroscopy",
+    "authors": "Fischer, T.L., B\u00f6decker, M., Schweer, S.M., et al.",
+    "journal": "Phys. Chem. Chem. Phys.",
+    "year": 2023,
+    "volume": "25",
+    "pages": "22089\u201322102",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/cbic.202300270",
+    "title": "Modulating Secondary Structure Motifs Through Photo-Labile Peptide Staples",
+    "authors": "L\u0101ce, I., Bazzi, S., Uranga, J., et al.",
+    "journal": "ChemBioChem",
+    "year": 2023,
+    "volume": "24",
+    "pages": "e202300270",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/anie.202304163",
+    "title": "Mechanisms of Cysteine-Lysine Covalent Linkage\u2014The Role of Reactive Oxygen Species and Competition with Disulfide Bonds",
+    "authors": "Ye, J., Bazzi, S., Fritz, T., et al.",
+    "journal": "Angew. Chem. Int. Ed.",
+    "year": 2023,
+    "volume": "62",
+    "pages": "e202304163",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/anie.202306764",
+    "title": "Pentafluorocyclopropanation of (Hetero)arenes Using Sulfonium Salts: Applications in Late-Stage Functionalization",
+    "authors": "Feng, Z., Riemann, L., Guo, Z., et al.",
+    "journal": "Angew. Chem. Int. Ed.",
+    "year": 2023,
+    "volume": "62",
+    "pages": "e202306764",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.jcim.3c00241",
+    "title": "The Catalytic Mechanism of Acetoacetate Decarboxylase: A Detailed Study of Schiff Base Formation, Protonation States, and Their Impact on Catalysis",
+    "authors": "Uranga, J., Mata, R.A.",
+    "journal": "J. Chem. Inf. Model.",
+    "year": 2023,
+    "volume": "63",
+    "pages": "3118\u20133127",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/chem.202203966",
+    "title": "5-(Trifluorovinyl)dibenzothiophenium Triflate: Introducing the 1,1,2-Trifluoroethylene Tether in Drug-Like Structures",
+    "authors": "Feng, Z., Marset, X., Tostado, J., et al.",
+    "journal": "Chem. Eur. J.",
+    "year": 2023,
+    "volume": "29",
+    "pages": "e202203966",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1039/D2SC06629G",
+    "title": "Maximized axial helicity in a Pd2L4 cage: inverse guest size-dependent compression and mesocate isomerism",
+    "authors": "Bloch, W.M., Horiuchi, S., Holstein, J.J., et al.",
+    "journal": "Chem. Sci.",
+    "year": 2023,
+    "volume": "14",
+    "pages": "1524\u20131531",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/jcc.27029",
+    "title": "Automated handling of complex chemical structures in Z-matrix coordinates \u2014 the chemcoord library",
+    "authors": "Weser, O., Hein-Janke, B., Mata, R.A.",
+    "journal": "J. Comput. Chem.",
+    "year": 2023,
+    "volume": "44",
+    "pages": "710\u2013726",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1063/5.0116018",
+    "title": "Determination of spectroscopic constants from rovibrational configuration interaction calculations",
+    "authors": "Dinu, D.F., Tsch\u00f6pe, M., Schr\u00f6der, B., Liedl, K.R., Rauhut, G.",
+    "journal": "J. Chem. Phys.",
+    "year": 2022,
+    "volume": "157",
+    "pages": "154107",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/anie.202207450",
+    "title": "Ligand-Enabled Disproportionation of 1,2-Diphenylhydrazine at a P-V-Center",
+    "authors": "Karnbrock, S.B.H., Golz, C., Mata, R.A., Alcarazo, M.",
+    "journal": "Angew. Chem. Int. Ed.",
+    "year": 2022,
+    "volume": "61",
+    "pages": "e202207450",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/chem.202200648",
+    "title": "Anomeric Stereoauxiliary Cleavage of the C-N Bond of d-Glucosamine for the Preparation of Imidazo[1,5-a]pyridines",
+    "authors": "Zeng, K., Ye, J., Meng, X., et al.",
+    "journal": "Chem. Eur. J.",
+    "year": 2022,
+    "volume": "28",
+    "pages": "e202200648",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1039/D2CP01119K",
+    "title": "Setting up the HyDRA blind challenge for the microhydration of organic molecules",
+    "authors": "Fischer, T.L., B\u00f6decker, M., Zehnacker-Rentien, A., Mata, R.A., Suhm, M.A.",
+    "journal": "Phys. Chem. Chem. Phys.",
+    "year": 2022,
+    "volume": "24",
+    "pages": "11442\u201311454",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/anie.202203665",
+    "title": "Trapping X-ray Radiation Damage from Homolytic Se\u2212C Bond Cleavage in BnSeSeBn Crystals",
+    "authors": "Sch\u00fcrmann, C.J., Teuteberg, T.L., St\u00fcckl, A.C., et al.",
+    "journal": "Angew. Chem. Int. Ed.",
+    "year": 2022,
+    "volume": "61",
+    "pages": "e202206537",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1038/s41929-022-00771-w",
+    "title": "Ground-state destabilization by electrostatic repulsion is not a driving force in orotidine-5\u2032-monophosphate decarboxylase catalysis",
+    "authors": "Rindfleisch, S., Krull, M., Uranga, J., et al.",
+    "journal": "Nature Catalysis",
+    "year": 2022,
+    "volume": "5",
+    "pages": "332\u2013341",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1016/j.jms.2022.111628",
+    "title": "Variational rovibrational calculations for tetra atomic linear molecules using Watson\u2019s isomorphic Hamiltonian: II. The B11244 story retold",
+    "authors": "Schr\u00f6der, B., Sebald, P.",
+    "journal": "J. Mol. Spectrosc.",
+    "year": 2022,
+    "volume": "386",
+    "pages": "111628",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/cphc.202200195",
+    "title": "Uncertainty Quantification of Reactivity Scales",
+    "authors": "Proppe, J., Kircher, J.",
+    "journal": "ChemPhysChem",
+    "year": 2022,
+    "volume": "23",
+    "pages": "e202200061",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1016/j.jms.2022.111613",
+    "title": "Variational rovibrational calculations for tetra atomic linear molecules using Watson\u2019s isomorphic Hamiltonian, I: The C8v4 approach",
+    "authors": "Schr\u00f6der, B.",
+    "journal": "J. Mol. Spectrosc.",
+    "year": 2022,
+    "volume": "385",
+    "pages": "111613",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1038/s41589-021-00966-5",
+    "title": "Widespread occurrence of covalent lysine\u2013cysteine redox switches in proteins",
+    "authors": "Rabe von Pappenheim, F., Wensien, M., Ye, J., et al.",
+    "journal": "Nat. Chem. Biol.",
+    "year": 2022,
+    "volume": "18",
+    "pages": "368\u2013375",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/chem.202102585",
+    "title": "In-Fjord Substitution in Expanded Helicenes: Effects of the Insert on the Inversion Barrier and Helical Pitch",
+    "authors": "Suarez-Pantiga, S., Redero, P., Aniban, X., et al.",
+    "journal": "Chem. Eur. J.",
+    "year": 2021,
+    "volume": "27",
+    "pages": "13358\u201313366",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/celc.202100318",
+    "title": "Electrosynthetic Screening and Modern Optimization Strategies for Electrosynthesis of Highly Value-added Products",
+    "authors": "Doerr, M., Hielscher, M.M., Proppe, J., Waldvogel, S.R.",
+    "journal": "ChemElectroChem",
+    "year": 2021,
+    "volume": "8",
+    "pages": "2621\u20132629",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1038/s41563-020-0777-6",
+    "title": "Machine-learned potentials for next-generation matter simulations",
+    "authors": "Friederich, P., Hase, F., Proppe, J., Aspuru-Guzik, A.",
+    "journal": "Nature Materials",
+    "year": 2021,
+    "volume": "20",
+    "pages": "750\u2013761",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1039/d1cp01225h",
+    "title": "Dispersion forces in chirality recognition \u2014 a density functional and wave function theory study of diols",
+    "authors": "Aniban, X., Hartwig, B., Wuttke, A., Mata, R.A.",
+    "journal": "Phys. Chem. Chem. Phys.",
+    "year": 2021,
+    "volume": "23",
+    "pages": "12093\u201312104",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1038/s41586-021-03513-3",
+    "title": "A lysine-cysteine redox switch with an NOS bridge regulates enzyme function",
+    "authors": "Wensien, M., Rabe von Pappenheim, F., Funk, L.-M., et al.",
+    "journal": "Nature",
+    "year": 2021,
+    "volume": "593",
+    "pages": "460\u2013464",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.jcim.0c01459",
+    "title": "Theoretical Studies of the Acid-Base Equilibria in a Model Active Site of the Human 20S Proteasome",
+    "authors": "Uranga, J., Hasecke, L., Proppe, J., Fingerhut, J., Mata, R.A.",
+    "journal": "J. Chem. Inf. Model.",
+    "year": 2021,
+    "volume": "61",
+    "pages": "1942\u20131953",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/qua.26394",
+    "title": "Calibration of computational M\u00f6ssbauer spectroscopy to unravel active sites in FeNC catalysts for the oxygen reduction reaction",
+    "authors": "Gallenkamp, C., Kramm, U., Proppe, J., Krewald, V.",
+    "journal": "Int. J. Quantum Chem.",
+    "year": 2021,
+    "volume": "121",
+    "pages": "",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.inorgchem.0c03249",
+    "title": "Time-Resolved Spectroscopy of Photoinduced Electron Transfer in Dinuclear and Tetranuclear Fe/Co Prussian Blue Analogues",
+    "authors": "Zimara, J., Stevens, H., Oswald, R., et al.",
+    "journal": "Inorg. Chem.",
+    "year": 2021,
+    "volume": "60",
+    "pages": "449\u2013459",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/ange.202011494",
+    "title": "Ligand Protonation Triggers H2 Release from a Dinickel Dihydride Complex to Give a Doubly \u201cT\u201d-Shaped Dinickel(I) Metallodiradical",
+    "authors": "Duan, P.-C., Schulz, R.A., R\u00f6mer, A., et al.",
+    "journal": "Angew. Chem. Int. Ed.",
+    "year": 2021,
+    "volume": "133",
+    "pages": "1919\u20131924",
+    "toc_image": null
+  },
+  {
+    "doi": "10.3390/molecules25215176",
+    "title": "A Review of Density Functional Models for the Description of Fe(II) Spin-Crossover Complexes",
+    "authors": "R\u00f6mer, A., Hasecke, L., Bl\u00f6chl, P., Mata, R.A.",
+    "journal": "Molecules",
+    "year": 2020,
+    "volume": "25",
+    "pages": "5176",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.organomet.0c00240",
+    "title": "Photochemical Properties of Re(CO)3 Complexes with and without a Local Proton Source and Implications for CO2 Reduction Catalysis",
+    "authors": "Paul, L.A., R\u00f6ttcher, N.C., Zimara, J., et al.",
+    "journal": "Organometallics",
+    "year": 2020,
+    "volume": "39",
+    "pages": "2405\u20132415",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.orglett.0c01204",
+    "title": "Electrophilic Cyanative Alkenylation of Arenes",
+    "authors": "Zhao, M., Barrado, A.G., Sprenger, K., et al.",
+    "journal": "Org. Lett.",
+    "year": 2020,
+    "volume": "22",
+    "pages": "4932\u20134937",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.jpca.0c05983",
+    "title": "Exchange Spin Coupling from Gaussian Process Regression",
+    "authors": "Bahlke, M.P., Mogos, N., Proppe, J., Herrmann, C.",
+    "journal": "J. Phys. Chem. A",
+    "year": 2020,
+    "volume": "124",
+    "pages": "8708\u20138723",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/mats.202000022",
+    "title": "Critical Assessment of RAFT Equilibrium Constants: Theory Meets Experiment",
+    "authors": "Werner, M., Oliveira, J.C.A., Meiser, W., Buback, M., Mata, R.A.",
+    "journal": "Macromol. Theory Simul.",
+    "year": 2020,
+    "volume": "29",
+    "pages": "2000022",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1063/5.0004465",
+    "title": "The first microsolvation step for furans: New experiments and benchmarking strategies",
+    "authors": "Gottschalk, H.C., Poblotzki, A., Fatima, M., et al.",
+    "journal": "J. Chem. Phys.",
+    "year": 2020,
+    "volume": "152",
+    "pages": "164303",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1038/s41586-019-1581-9",
+    "title": "Low-barrier hydrogen bonds in enzyme cooperativity",
+    "authors": "Dai, S., Funk, L.-M., Rabe von Pappenheim, F., et al.",
+    "journal": "Nature",
+    "year": 2019,
+    "volume": "573",
+    "pages": "609\u2013613",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1039/C9CP03908B",
+    "title": "A high-throughput computational approach to UV-Vis spectra in protein mutants",
+    "authors": "Paulikat, M., Mata, R.A., Gelabert, R.",
+    "journal": "Phys. Chem. Chem. Phys.",
+    "year": 2019,
+    "volume": "21",
+    "pages": "20678\u201320692",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1063/1.5080427",
+    "title": "A full additive QM/MM scheme for the computation of molecular crystals with extension to many-body expansions",
+    "authors": "Teuteberg, T., Eckhoff, M., Mata, R.A.",
+    "journal": "J. Chem. Phys.",
+    "year": 2019,
+    "volume": "150",
+    "pages": "154118",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1039/C9CP00399A",
+    "title": "Strained hydrogen bonding in imidazole trimer: a combined infrared, Raman, and theory study",
+    "authors": "Forsting, T., Zischang, J., Suhm, M.A., et al.",
+    "journal": "Phys. Chem. Chem. Phys.",
+    "year": 2019,
+    "volume": "21",
+    "pages": "5989\u20135998",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.jctc.8b00963",
+    "title": "Limits of Coupled-Cluster Calculations for Non-Heme Iron Complexes",
+    "authors": "Feldt, M., Phung, Q.M., Pierloot, K., Mata, R.A., Harvey, J.N.",
+    "journal": "J. Chem. Theory Comput.",
+    "year": 2019,
+    "volume": "15",
+    "pages": "922\u2013937",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.jctc.8b00727",
+    "title": "Hybrid Local Molecular Orbital: Molecular Orbital Calculations for Open Shell Systems",
+    "authors": "Feldt, M., Mata, R.A.",
+    "journal": "J. Chem. Theory Comput.",
+    "year": 2018,
+    "volume": "14",
+    "pages": "5192\u20135202",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1515/zkri-2018-2061",
+    "title": "Experimental charge density study on FLPs and a FLP reaction product",
+    "authors": "Sch\u00fcrmann, C.J., Herbst-Irmer, R., Teuteberg, T.L., et al.",
+    "journal": "Z. Kristallogr.",
+    "year": 2018,
+    "volume": "233",
+    "pages": "723\u2013731",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.jpca.8b06546",
+    "title": "All That Binds Is Not Gold \u2014 The Relative Weight of Aurophilic Interactions in Complex Formation",
+    "authors": "Wuttke, A., Feldt, M., Mata, R.A.",
+    "journal": "J. Phys. Chem. A",
+    "year": 2018,
+    "volume": "122",
+    "pages": "6918\u20136925",
+    "toc_image": null
+  },
+  {
+    "doi": "10.3762/bjoc.14.140",
+    "title": "The phenyl vinyl ether\u2013methanol complex: a model system for quantum chemistry benchmarking",
+    "authors": "Bernhard, D., Dietrich, F., Fatima, M., et al.",
+    "journal": "Beilstein J. Org. Chem.",
+    "year": 2018,
+    "volume": "14",
+    "pages": "1642\u20131654",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1038/s41598-018-22751-6",
+    "title": "QM/MM study of the reaction mechanism of sulfite oxidase",
+    "authors": "Caldararu, O., Feldt, M., Cioloboc, D., et al.",
+    "journal": "Sci. Rep.",
+    "year": 2018,
+    "volume": "8",
+    "pages": "4684",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1063/1.5009011",
+    "title": "The furan microsolvation blind challenge for quantum chemical methods: First steps",
+    "authors": "Gottschalk, H.C., Poblotzki, A., Suhm, M.A., et al.",
+    "journal": "J. Chem. Phys.",
+    "year": 2018,
+    "volume": "148",
+    "pages": "014301",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1063/1.5009820",
+    "title": "Optimization and benchmarking of a perturbative Metropolis Monte Carlo quantum mechanics/molecular mechanics program",
+    "authors": "Feldt, J., Miranda, S., Pratas, F., Roma, N., Tomas, P., Mata, R.A.",
+    "journal": "J. Chem. Phys.",
+    "year": 2017,
+    "volume": "147",
+    "pages": "244105",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/jacs.7b08629",
+    "title": "Pairwise H2/D2 Exchange and H2 Substitution at a Bimetallic Dinickel(II) Complex Featuring Two Terminal Hydrides",
+    "authors": "Manz, D.-H., Duan, P.-C., Dechert, S., et al.",
+    "journal": "J. Am. Chem. Soc.",
+    "year": 2017,
+    "volume": "139",
+    "pages": "16720\u201316731",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1039/C7CC04855F",
+    "title": "Influence of size, shape, heteroatom content and dispersive contributions on guest binding in a coordination cage",
+    "authors": "Loeffler, S., Wuttke, A., Zhang, B., Holstein, J.J., Mata, R.A., Clever, G.H.",
+    "journal": "Chem. Commun.",
+    "year": 2017,
+    "volume": "53",
+    "pages": "11933\u201311936",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1177/1094342016649420",
+    "title": "Efficient parallelization of perturbative Monte Carlo QM/MM simulations in heterogeneous platforms",
+    "authors": "Miranda, S., Feldt, J., Pratas, F., et al.",
+    "journal": "Int. J. High Perform. Comput. Appl.",
+    "year": 2017,
+    "volume": "31",
+    "pages": "499\u2013516",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/ejoc.201700873",
+    "title": "Temperature-Dependent Dynamics of Push-Pull Rotor Systems Based on Acridinylidene Cyanoacetic Esters",
+    "authors": "Krick, M., Holstein, J.J., Wuttke, A., Mata, R.A., Clever, G.H.",
+    "journal": "Eur. J. Org. Chem.",
+    "year": 2017,
+    "volume": "34",
+    "pages": "5141\u20135146",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/anie.201611308",
+    "title": "Benchmarking Quantum Chemical Methods: Are We Heading in the Right Direction?",
+    "authors": "Mata, R.A., Suhm, M.A.",
+    "journal": "Angew. Chem. Int. Ed.",
+    "year": 2017,
+    "volume": "56",
+    "pages": "11011\u201311018",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1038/s41598-017-02153-w",
+    "title": "Lipoxygenase 2 from Cyanothece sp controls dioxygen insertion by steric shielding and substrate fixation",
+    "authors": "Newie, J., Neumann, P., Werner, M., Mata, R.A., Ficner, R., Feussner, I.",
+    "journal": "Sci. Rep.",
+    "year": 2017,
+    "volume": "7",
+    "pages": "2069",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/chem.201701191",
+    "title": "Manganese(I)-Catalyzed Dispersion-Enabled C-H/C-C Activation",
+    "authors": "Meyer, T.H., Liu, W., Feldt, M., Wuttke, A., Mata, R.A., Ackermann, L.",
+    "journal": "Chem. Eur. J.",
+    "year": 2017,
+    "volume": "23",
+    "pages": "5443\u20135447",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1039/C7CP00809K",
+    "title": "High level potential energy surface and mechanism of Al(CH3)2OCH3-promoted lactone polymerization: initiation and propagation",
+    "authors": "Vogt-Geisse, S., Mata, R.A., Toro-Labbe, A.",
+    "journal": "Phys. Chem. Chem. Phys.",
+    "year": 2017,
+    "volume": "19",
+    "pages": "8989\u20138999",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.biochem.6b00984",
+    "title": "Theoretical Studies of the Electronic Absorption Spectra of Thiamin Diphosphate in Pyruvate Decarboxylase",
+    "authors": "Paulikat, M., Wechsler, C., Tittmann, K., Mata, R.A.",
+    "journal": "Biochemistry",
+    "year": 2017,
+    "volume": "56",
+    "pages": "1854\u20131864",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1002/jcc.24508",
+    "title": "Visualizing dispersion interactions through the use of local orbital spaces",
+    "authors": "Wuttke, A., Mata, R.A.",
+    "journal": "J. Comput. Chem.",
+    "year": 2017,
+    "volume": "38",
+    "pages": "15\u201323",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/acs.inorgchem.7b00178",
+    "title": "Dinuclear Rhenium Complex with a Proton Responsive Ligand as a Redox Catalyst for the Electrochemical CO2 Reduction",
+    "authors": "Wilting, A., Stolper, T., Mata, R.A., Siewert, I.",
+    "journal": "Inorg. Chem.",
+    "year": 2017,
+    "volume": "56",
+    "pages": "4176\u20134185",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1126/science.aaf8993",
+    "title": "The inhibition mechanism of human 20S proteasomes enables next-generation inhibitor design",
+    "authors": "Schrader, J., Henneberg, F., Mata, R.A., et al.",
+    "journal": "Science",
+    "year": 2016,
+    "volume": "353",
+    "pages": "594\u2013598",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1039/C6SC00985A",
+    "title": "Internal Dynamics and Guest Binding of a Sterically Overcrowded Host",
+    "authors": "L\u00f6ffler, S., L\u00fcbben, J., Wuttke, A., Mata, R.A., John, M., Dittrich, B., Clever, G.H.",
+    "journal": "Chem. Sci.",
+    "year": 2016,
+    "volume": "7",
+    "pages": "4676\u20134684",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/jacs.6b00345",
+    "title": "Solution Structures of Hauser Base iPr2NMgCl and Turbo-Hauser Base iPr2NMgCl\u00b7LiCl in THF and the Influence of LiCl on the Schlenk-Equilibrium",
+    "authors": "Neufeld, R., Teuteberg, T.L., Herbst-Irmer, R., Mata, R.A., Stalke, D.",
+    "journal": "J. Am. Chem. Soc.",
+    "year": 2016,
+    "volume": "138",
+    "pages": "4796\u20134806",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1039/C6DT00557H",
+    "title": "Highly Selective and Sensitive Fluorescence Detection of Zn2+ and Cd2+ Ions by an Acridine Sensor",
+    "authors": "Visscher, A., Bachmann, S., Schnegelsberg, C., Teuteberg, T., Mata, R.A., Stalke, D.",
+    "journal": "Dalton Trans.",
+    "year": 2016,
+    "volume": "45",
+    "pages": "5689\u20135699",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "A Computational Comparison of Oxygen Atom Transfer Catalyzed by Dimethyl Sulfoxide Reductase with Mo and W",
+    "authors": "Li, J., Andrejic, M., Mata, R.A., Ryde, U.",
+    "journal": "Eur. J. Inorg. Chem.",
+    "year": 2015,
+    "volume": "21",
+    "pages": "3580\u20133589",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Soft hydrogen bonds to alkenes: the methanol-ethene prototype under experimental and theoretical scrutiny",
+    "authors": "Heger, M., Mata, R.A., Suhm, M.",
+    "journal": "Chem. Sci.",
+    "year": 2015,
+    "volume": "6",
+    "pages": "3738\u20133745",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Bracketing subtle conformational energy differences between self-solvated and stretched trifluoropropanol",
+    "authors": "Heger, M., Otto, K.E., Mata, R.A., Suhm, M.",
+    "journal": "Phys. Chem. Chem. Phys.",
+    "year": 2015,
+    "volume": "17",
+    "pages": "9899\u20139909",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Helium Nanodroplet Study of the Hydrogen-Bonded OH Vibrations in HCl-H2O Clusters",
+    "authors": "Zischang, J., Skvortsov, D., Choi, M.Y., Mata, R.A., Suhm, M., Vilesov, A.F.",
+    "journal": "J. Phys. Chem. A",
+    "year": 2015,
+    "volume": "119",
+    "pages": "2636\u20132643",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Local Hybrid QM/QM Calculations of Reaction Pathways in Metallobiosites",
+    "authors": "Andrejic, M., Mata, R.A.",
+    "journal": "J. Chem. Theory Comput.",
+    "year": 2014,
+    "volume": "10",
+    "pages": "5397\u20135404",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Functional Model for the [Fe] Hydrogenase Inspired by the Frustrated Lewis Pair Concept",
+    "authors": "Kalz, K.F., Brinkmeier, A., Dechert, S., Mata, R.A., Meyer, F.",
+    "journal": "J. Am. Chem. Soc.",
+    "year": 2014,
+    "volume": "136",
+    "pages": "16626\u201316634",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Characterization of a multicomponent lithium lithiate from a combined x-ray diffraction, NMR spectroscopy, and computational approach",
+    "authors": "P\u00f6ppler, A.-C., Granitzka, M., Herbst-Irmer, R., et al.",
+    "journal": "Angew. Chem. Int. Ed.",
+    "year": 2014,
+    "volume": "53",
+    "pages": "13282\u201313287",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Coupled-cluster interaction energies for 200-atom host-guest systems",
+    "authors": "Andrejic, M., Ryde, U., Mata, R.A., S\u00f6derhjelm, P.",
+    "journal": "ChemPhysChem",
+    "year": 2014,
+    "volume": "15",
+    "pages": "3270\u20133281",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "A quantum-mechanical study of the reaction mechanism of sulfite oxidase",
+    "authors": "van Severen, M.-C., Andrejic, M., Li, J.L., Starke, K., Mata, R.A., Nordlander, E., Ryde, U.",
+    "journal": "J. Biol. Inorg. Chem.",
+    "year": 2014,
+    "volume": "19",
+    "pages": "1165\u20131179",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Towards the binding energy and vibrational red shift of the simplest organic hydrogen bond: Harmonic constraints for methanol dimer",
+    "authors": "Heger, M., Suhm, M.A., Mata, R.A.",
+    "journal": "J. Chem. Phys.",
+    "year": 2014,
+    "volume": "141",
+    "pages": "101105",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Free-energy perturbation and quantum mechanical study of SAMPL4 octa-acid host-guest binding energies",
+    "authors": "Mikulskis, P., Cioloboc, D., Andrejic, M., et al.",
+    "journal": "J. Comput. Aided Mol. Des.",
+    "year": 2014,
+    "volume": "28",
+    "pages": "375\u2013400",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Relative anion binding affinity in a series of interpenetrated coordination cages",
+    "authors": "Frank, M., Dieterich, J.M., Freye, S., Mata, R.A., Clever, G.H.",
+    "journal": "Dalton Trans.",
+    "year": 2013,
+    "volume": "42",
+    "pages": "15906\u201315910",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Strong Intermolecular Interactions Shaping a Small Piano-Stool Complex",
+    "authors": "Hey, J., Andrada, D.M., Michel, R., Mata, R.A., Stalke, D.",
+    "journal": "Angew. Chem. Int. Ed.",
+    "year": 2013,
+    "volume": "52",
+    "pages": "10365\u201310369",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Preorganized anion traps for exploiting anion-\u03c0 interactions \u2014 an experimental and computational study",
+    "authors": "Bretschneider, A., Andrada, D.M., Dechert, S., Meyer, S., Mata, R.A., Meyer, F.",
+    "journal": "Chem. Eur. J.",
+    "year": 2013,
+    "volume": "19",
+    "pages": "16988\u201317000",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Heteroaromaticity approached by charge density investigations and wave function calculations",
+    "authors": "Hey, J., Leusser, D., Kratzert, D., Fliegl, H., Dieterich, J.M., Mata, R.A., Stalke, D.",
+    "journal": "Phys. Chem. Chem. Phys.",
+    "year": 2013,
+    "volume": "15",
+    "pages": "20600\u201320610",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Study of ligand effects in aurophilic interactions using local correlation methods",
+    "authors": "Andrejic, M., Mata, R.A.",
+    "journal": "Phys. Chem. Chem. Phys.",
+    "year": 2013,
+    "volume": "15",
+    "pages": "18115\u201318122",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Effects of Metal Coordination on the \u03c0-System of the 2,5-Bis-{(pyrrolidino)-methyl}-pyrrole Pincer Ligand",
+    "authors": "Maass, C., Andrada, D.M., Mata, R.A., Herbst-Irmer, R., Stalke, D.",
+    "journal": "Inorg. Chem.",
+    "year": 2013,
+    "volume": "52",
+    "pages": "9539\u20139548",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Large Density-Functional and Basis-Set Effects for the DMSO Reductase Catalyzed Oxo-Transfer Reaction",
+    "authors": "Li, J.-L., Mata, R.A., Ryde, U.",
+    "journal": "J. Chem. Theory Comput.",
+    "year": 2013,
+    "volume": "9",
+    "pages": "1799\u20131807",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Reaction of N-Heterocyclic Silylenes with Thioketone: Formation of Silicon-Sulfur Three- and Five-Membered Ring Systems",
+    "authors": "Azhakar, R., Ghadwal, R.S., Roesky, H.W., Mata, R.A., Wolf, H., Herbst-Irmer, R., Stalke, D.",
+    "journal": "Chem. Eur. J.",
+    "year": 2013,
+    "volume": "19",
+    "pages": "3715\u20133720",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "The Layered Structure of [Na(NH3)4][Indenide] Containing a Square-Planar Na(NH3)4+ Cation",
+    "authors": "Michel, R., Nack, T., Neufeld, R., Dieterich, J.M., Mata, R.A., Stalke, D.",
+    "journal": "Angew. Chem. Int. Ed.",
+    "year": 2013,
+    "volume": "52",
+    "pages": "734\u2013738",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "The Last Globally Stable Extended Alkane",
+    "authors": "L\u00fcttschwager, N.O.B., Wassermann, T.N., Mata, R.A., Suhm, M.A.",
+    "journal": "Angew. Chem. Int. Ed.",
+    "year": 2013,
+    "volume": "52",
+    "pages": "463\u2013466",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "A push-and-pull model for allosteric anion binding in cage complexes",
+    "authors": "Dieterich, J.M., Clever, G.H., Mata, R.A.",
+    "journal": "Phys. Chem. Chem. Phys.",
+    "year": 2012,
+    "volume": "14",
+    "pages": "12746\u201312749",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Application of Local Second-Order M\u00f8ller-Plesset Perturbation Theory to the Study of Structures in Solution",
+    "authors": "Dieterich, J.M., Oliveira, J.C.A., Mata, R.A.",
+    "journal": "J. Chem. Theory Comput.",
+    "year": 2012,
+    "volume": "8",
+    "pages": "3053\u20133060",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Study of Specific Ion-Amino Acid Interactions through the Use of Local Correlation Methods",
+    "authors": "Oliveira, J.C.A., Feldt, J., Galamba, N., Mata, R.A.",
+    "journal": "J. Phys. Chem. A",
+    "year": 2012,
+    "volume": "116",
+    "pages": "5464\u20135471",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Structural diversity in sodium doped water trimers",
+    "authors": "Forck, R.M., Dieterich, J.M., Pradzynski, C.C., Hutching, A.L., Mata, R.A., Zeuch, T.",
+    "journal": "Phys. Chem. Chem. Phys.",
+    "year": 2012,
+    "volume": "14",
+    "pages": "9054\u20139057",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Computation of induced dipoles in molecular mechanics simulations using Graphics Processors",
+    "authors": "Pratas, F., Dieterich, J.M., Sousa, L., Mata, R.A.",
+    "journal": "J. Chem. Inf. Model.",
+    "year": 2012,
+    "volume": "52",
+    "pages": "1159\u20131166",
+    "toc_image": null
+  },
+  {
+    "doi": "10.1021/ci3000197",
+    "title": "Atomdroid: A computational chemistry tool for mobile platforms",
+    "authors": "Feldt, J., Mata, R.A., Dieterich, J.M.",
+    "journal": "J. Chem. Inf. Model.",
+    "year": 2012,
+    "volume": "52",
+    "pages": "1072\u20131078",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Monomeric Sn(II) and Ge(II) Hydrides Supported by Tridentate Pincer-based Ligand",
+    "authors": "Khan, S., Samuel, P.P., Michel, R., Dieterich, J.M., Mata, R.A., Demers, J.-P., Lange, A., Roesky, H.W., Stalke, D.",
+    "journal": "Chem. Commun.",
+    "year": 2012,
+    "volume": "48",
+    "pages": "4890\u20134892",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "A first-principles based potential for the description of alkaline-earth metals",
+    "authors": "Dieterich, J.M., Gerke, S., Mata, R.A.",
+    "journal": "J. At. Mol. Opt. Phys.",
+    "year": 2012,
+    "volume": "2012",
+    "pages": "ID 648386",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Preparation of RSn(I)-Sn(I)R with Two Unsymmetrically Coordinated Sn(I) Atoms and Subsequent Gentle Activation of P4",
+    "authors": "Khan, S., Michel, R., Dieterich, J.M., Mata, R.A., Roesky, H.W., Demers, J.-P., Lange, A., Stalke, D.",
+    "journal": "J. Am. Chem. Soc.",
+    "year": 2011,
+    "volume": "133",
+    "pages": "17889\u201317994",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Stable Cation of a CSi3P Five-Membered Ring with a Weakly Coordinate Chloride Anion",
+    "authors": "Sen, S.S., Hey, J., Herbst-Irmer, R., Eckhardt, M., Mata, R.A., Roesky, H.W., Scheer, M., Stalke, D.",
+    "journal": "Angew. Chem. Int. Ed.",
+    "year": 2011,
+    "volume": "50",
+    "pages": "12510\u201312513",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Synthesis and Structural Characterization of Homochiral Homooligomers of Parent cis- and trans-Furanoid-\u03b2-amino acids",
+    "authors": "Pandey, S.K., Jogdand, G.F., Oliveira, J.C.A., Mata, R.A., Rajamohanan, P.R., Ramana, C.V.",
+    "journal": "Chem. Eur. J.",
+    "year": 2011,
+    "volume": "17",
+    "pages": "12946\u201312954",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Does DFT-D estimate accurate energies for the binding of ligands to metal complexes?",
+    "authors": "Ryde, U., Mata, R.A., Grimme, S.",
+    "journal": "Dalton Trans.",
+    "year": 2011,
+    "volume": "40",
+    "pages": "11176\u201311183",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Photoionization of CH3N3 produces 3B2 N3-: A theoretical and experimental study of the ion-pair channel",
+    "authors": "Quinto-Hernandez, A., Lee, Y.Y., Huang, T.-P., Pan, W.-C., Min-Lin, J., Mata, R.A., Wodtke, A.M.",
+    "journal": "J. Phys. Chem. Lett.",
+    "year": 2011,
+    "volume": "2",
+    "pages": "2311\u20132315",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "An incremental correlation approach to excited state energies based on natural transition/localized orbitals",
+    "authors": "Mata, R.A., Stoll, H.",
+    "journal": "J. Chem. Phys.",
+    "year": 2011,
+    "volume": "134",
+    "pages": "034122",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Application of high level wavefunction methods in quantum mechanics/molecular mechanics hybrid schemes",
+    "authors": "Mata, R.A.",
+    "journal": "Phys. Chem. Chem. Phys.",
+    "year": 2010,
+    "volume": "12",
+    "pages": "5041\u20135052",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Assessing the accuracy of many-body expansions for the computation of solvatochromic shifts",
+    "authors": "Mata, R.A.",
+    "journal": "Mol. Phys.",
+    "year": 2010,
+    "volume": "108",
+    "pages": "381\u2013392",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "QM/MM approaches to the electronic spectra of hydrogen bonding systems with connection to many-body decomposition schemes",
+    "authors": "Mata, R.A., Costa Cabral, B.J.",
+    "journal": "Adv. Quantum Chem.",
+    "year": 2010,
+    "volume": "59",
+    "pages": "Ch. 4, 99\u2013144",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Reductive half-reaction of Aldehyde Oxidoreductase toward acetaldehyde: ab initio and free energy QM/MM calculations",
+    "authors": "Dieterich, J.M., Werner, H.-J., Mata, R.A., Metz, S., Thiel, W.",
+    "journal": "J. Chem. Phys.",
+    "year": 2010,
+    "volume": "132",
+    "pages": "035101",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Electronic Excitation of Cl\u2212 in Liquid Water and at the Surface of a Cluster: A Sequential Born-Oppenheimer Molecular Dynamics/Quantum Mechanics Approach",
+    "authors": "Galamba, N., Mata, R.A., Costa Cabral, B.J.",
+    "journal": "J. Phys. Chem. A",
+    "year": 2009,
+    "volume": "113",
+    "pages": "14684",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "A simple one-body approach to the calculation of the first electronic absorption band of water",
+    "authors": "Mata, R.A., Stoll, H., Costa Cabral, B.J.",
+    "journal": "J. Chem. Theory Comput.",
+    "year": 2009,
+    "volume": "5",
+    "pages": "1829",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Dynamic polarizability, Cauchy moments, and the optical absorption spectrum of liquid water: A sequential molecular dynamics/quantum mechanical approach",
+    "authors": "Mata, R.A., Costa Cabral, B.J., Millot, C., Coutinho, K., Canuto, S.",
+    "journal": "J. Chem. Phys.",
+    "year": 2009,
+    "volume": "130",
+    "pages": "014505",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Incremental expansions for SCF interaction energies: A comparison for hydrogen-bonded clusters",
+    "authors": "Mata, R.A., Stoll, H.",
+    "journal": "Chem. Phys. Lett.",
+    "year": 2008,
+    "volume": "465",
+    "pages": "136",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "The accuracy of local MP2 methods for conformational energies",
+    "authors": "Kaminsky, J., Mata, R.A., Werner, H.-J., Jensen, F.",
+    "journal": "Mol. Phys.",
+    "year": 2008,
+    "volume": "106",
+    "pages": "1899",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Correlation regions within a localized molecular orbital approach",
+    "authors": "Mata, R.A., Sch\u00fctz, M., Werner, H.-J.",
+    "journal": "J. Chem. Phys.",
+    "year": 2008,
+    "volume": "128",
+    "pages": "144106",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Toward accurate barriers for enzymatic reactions: QM/MM case study on p-hydroxybenzoate hydroxylase",
+    "authors": "Mata, R.A., Werner, H.-J., Thiel, S., Thiel, W.",
+    "journal": "J. Chem. Phys.",
+    "year": 2008,
+    "volume": "128",
+    "pages": "025104",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Local correlation methods with a natural localized molecular orbital basis",
+    "authors": "Mata, R.A., Werner, H.-J.",
+    "journal": "Mol. Phys.",
+    "year": 2007,
+    "volume": "105",
+    "pages": "2753",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Computation of smooth Potential Surfaces using Local Correlation Methods",
+    "authors": "Mata, R.A., Werner, H.-J.",
+    "journal": "J. Chem. Phys.",
+    "year": 2006,
+    "volume": "125",
+    "pages": "184110",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "High accuracy computation of reaction barriers in enzymes",
+    "authors": "Claeyssens, F., Harvey, J.N., Manby, F.R., Mata, R.A., Mulholland, A.J., Ranaghan, K.E., Sch\u00fctz, M., Thiel, S., Thiel, W., Werner, H.-J.",
+    "journal": "Angew. Chem. Int. Ed.",
+    "year": 2006,
+    "volume": "45",
+    "pages": "6856\u20136859",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Comparative calculations for the A-frame molecules [S(MPH3)2] (M = Cu, Ag, Au) at levels up to CCSD(T)",
+    "authors": "Riedel, S., Pyykkö, P., Mata, R.A., Werner, H.-J.",
+    "journal": "Chem. Phys. Lett.",
+    "year": 2005,
+    "volume": "405",
+    "pages": "148",
+    "toc_image": null
+  },
+  {
+    "doi": null,
+    "title": "Structural, energetic, and electronic properties of (CH3CN)2\u20138 clusters by density functional theory",
+    "authors": "Mata, R.A., Costa Cabral, B.J.",
+    "journal": "J. Mol. Struct. (THEOCHEM)",
+    "year": 2004,
+    "volume": "673",
+    "pages": "155\u2013164",
+    "toc_image": null
+  }
+]
