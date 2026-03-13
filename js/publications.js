@@ -154,6 +154,14 @@ function esc(str) {
     .replace(/"/g, '&quot;');
 }
 
+// Like esc() but allows safe inline formatting tags for titles
+function escTitle(str) {
+  return esc(str).replace(
+    /&lt;(\/?(?:sub|sup|i|em|b|strong))&gt;/g,
+    '<$1>'
+  );
+}
+
 function renderEntry(pub) {
   const li = document.createElement('li');
   li.className = 'pub-entry';
@@ -183,7 +191,7 @@ function renderEntry(pub) {
     : '';
 
   body.innerHTML =
-    `${authors ? `${esc(authors)}, ` : ''}"<span class="pub-title">${esc(title)}</span>,"` +
+    `${authors ? `${esc(authors)}, ` : ''}"<span class="pub-title">${escTitle(title)}</span>,"` +
     (journal ? ` <em>${esc(journal)}</em>${esc(vol)}${esc(pages)}${esc(year)}.` : '') +
     doiLink;
 
