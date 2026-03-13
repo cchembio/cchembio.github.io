@@ -113,8 +113,11 @@ async function fetchOpenAlex() {
 
   const allWorks = [];
   let cursor = '*';
+  let page = 0;
+  const MAX_PAGES = 50; // 50 × 200 = 10 000 papers — far beyond any realistic count
 
-  while (cursor) {
+  while (cursor && page < MAX_PAGES) {
+    page++;
     const res = await fetch(OPENALEX_WORKS(authorId, cursor));
     if (!res.ok) throw new Error(`OpenAlex works ${res.status}`);
     const data = await res.json();
