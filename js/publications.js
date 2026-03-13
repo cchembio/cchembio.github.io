@@ -326,14 +326,19 @@ async function initPublications() {
 
   let allWorks;
   try {
-    allWorks = await fetchORCID();
+    allWorks = await fetchOpenAlex();
   } catch (e) {
-    console.warn('ORCID failed, using fallback:', e);
+    console.warn('OpenAlex failed, trying ORCID:', e);
     try {
-      allWorks = await fetchFallback();
+      allWorks = await fetchORCID();
     } catch (e2) {
-      container.innerHTML = '<p class="pub-error">Could not load publications. Please try again later.</p>';
-      return;
+      console.warn('ORCID failed, using fallback:', e2);
+      try {
+        allWorks = await fetchFallback();
+      } catch (e3) {
+        container.innerHTML = '<p class="pub-error">Could not load publications. Please try again later.</p>';
+        return;
+      }
     }
   }
 
