@@ -11,7 +11,7 @@ const ORCID_ID   = '0000-0002-2720-3364';
 const ORCID_URL  = `https://pub.orcid.org/v3.0/${ORCID_ID}/works`;
 const CROSSREF   = doi => `https://api.crossref.org/works/${encodeURIComponent(doi)}?mailto=rmata@gwdg.de`;
 const FALLBACK   = 'data/publications.json';
-const CACHE_KEY  = 'pub_cache_v5';
+const CACHE_KEY  = 'pub_cache_v6';
 const CURRENT_YEAR = new Date().getFullYear();
 
 /* ── Utilities ─────────────────────────────────────────────── */
@@ -49,12 +49,17 @@ async function fetchORCID() {
   // Exclude DOI prefixes from institutional repositories not indexed by Crossref
   const REPO_PREFIXES = ['10.3204/', '10.25625/', '10.17877/', '10.5281/'];
 
-  // Each group may have multiple external-ids; grab the first DOI per group
+  // Each group may have multiple DOIs; prefer one not from a repo prefix
   const works = (data.group || []).map(group => {
     const summary = group['work-summary']?.[0];
     const type    = summary?.type || '';
     const extIds  = summary?.['external-ids']?.['external-id'] || [];
-    const doiObj  = extIds.find(e => e['external-id-type'] === 'doi');
+    const doiObjs = extIds.filter(e => e['external-id-type'] === 'doi');
+    const preferred = doiObjs.find(e => {
+      const v = e['external-id-value']?.toLowerCase().trim() || '';
+      return v && !REPO_PREFIXES.some(p => v.startsWith(p));
+    });
+    const doiObj  = preferred || doiObjs[0];
     const doi     = doiObj?.['external-id-value']?.toLowerCase().trim() || null;
     const year    = parseInt(summary?.['publication-date']?.year?.value) || null;
     const title   = summary?.title?.title?.value || '';
