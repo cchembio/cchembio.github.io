@@ -444,7 +444,7 @@ footer strong { color: #fff; }
   width: 90px;
   min-width: 90px;
   height: auto;
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   border-radius: var(--radius);
   object-fit: contain;
   background: #f9f9f9;

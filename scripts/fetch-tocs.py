@@ -5,21 +5,47 @@ Download TOC (graphical abstract) images for all publications.
 Writes images to images/tocs/ and a manifest to data/tocs.json.
 The manifest maps DOI -> filename so publications.js can find local images.
 
-Strategy: resolve each DOI to the publisher landing page and extract the
-og:image meta tag, which most publishers use for their TOC/graphical abstract.
+Strategy
+--------
+Only fetch from publishers known to expose the graphical abstract reliably
+via the og:image meta tag.  All other publishers are skipped to avoid
+downloading unrelated article figures.
+
+Trusted publishers (DOI prefix → strategy):
+  10.1039/  Royal Society of Chemistry  — og:image IS the graphical abstract
+  10.3762/  Beilstein Journals          — og:image IS the graphical abstract
+
+Skipped publishers (og:image is NOT the graphical abstract):
+  10.1038/  Nature Portfolio    — og:image is a random article figure
+  10.1021/  ACS Publications   — graphical abstract behind authentication
+  10.1002/  Wiley              — inconsistent og:image usage
+  10.1007/  Springer           — og:image is first-page PDF rendering
+  10.3897/  Pensoft / RIO      — og:image is a journal logo or icon
+
+Validation rules applied to every downloaded image:
+  • Aspect ratio: skip if height > 1.3 × width (portrait → not a TOC)
+  • Minimum dimensions: skip if width < 100 px or height < 50 px
+  • Maximum dimensions: skip if width > 1500 px or height > 1500 px
+  • Minimum file size: skip if < 5 KB (icon / placeholder)
+  • Content type: skip if text/html (login page / error page)
 
 Usage (from repo root):
     python3 scripts/fetch-tocs.py
 
+Dependencies:
+    pip install requests Pillow
+
 Re-runnable: already-downloaded images are skipped.
 """
 
+import io
 import json
 import os
 import re
 import time
 
 import requests
+from PIL import Image
 
 # ── Config ────────────────────────────────────────────────────────────────────
 
@@ -27,6 +53,13 @@ ORCID_ID   = '0000-0002-2720-3364'
 MAILTO     = 'rmata@gwdg.de'
 OUTPUT_DIR = 'images/tocs'
 MANIFEST   = 'data/tocs.json'
+
+# Publishers whose og:image reliably contains the graphical abstract.
+# Keys are DOI prefixes; values describe the evidence for trustworthiness.
+TRUSTED_PREFIXES = {
+    '10.1039/': 'RSC — og:image is graphical abstract (small GIF, ~189 px tall)',
+    '10.3762/': 'Beilstein — og:image is graphical abstract (landscape PNG)',
+}
 
 REPO_PREFIXES = ('10.3204/', '10.25625/', '10.17877/', '10.5281/')
 
@@ -44,6 +77,17 @@ HEADERS = {
     'Accept': 'text/html,application/xhtml+xml,*/*',
     'Accept-Language': 'en-US,en;q=0.9',
 }
+
+# Validation thresholds
+MIN_WIDTH_PX   = 100
+MIN_HEIGHT_PX  = 50
+MAX_WIDTH_PX   = 1500
+MAX_HEIGHT_PX  = 1500
+MAX_PORTRAIT_RATIO = 1.3   # skip if height / width > this
+MIN_FILE_BYTES = 5 * 1024  # 5 KB
+
+# Target display width for saved images (2× the CSS display width for Retina)
+RESIZE_WIDTH = 200
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -82,9 +126,18 @@ def get_dois():
     return dois
 
 
+def is_trusted(doi):
+    """Return (True, description) if this DOI's publisher is in the allowlist."""
+    for prefix, desc in TRUSTED_PREFIXES.items():
+        if doi.startswith(prefix):
+            return True, desc
+    return False, None
+
+
 def get_og_image(doi):
     """
     Resolve DOI to publisher landing page and extract og:image URL.
+    Only called for trusted publishers.
     Returns an image URL or None.
     """
     try:
@@ -99,8 +152,7 @@ def get_og_image(doi):
 
         html = r.text
 
-        # og:image (standard Open Graph — used by ACS, RSC, Wiley, Springer, Nature…)
-        # Try both attribute orderings
+        # Try both attribute orderings of og:image
         for pat in (
             r'<meta\s[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']',
             r'<meta\s[^>]*content=["\']([^"\']+)["\'][^>]*property=["\']og:image["\']',
@@ -108,8 +160,8 @@ def get_og_image(doi):
             m = re.search(pat, html, re.I)
             if m:
                 url = m.group(1).strip()
-                # Skip generic publisher logos / favicons
-                if re.search(r'logo|favicon|icon|banner|placeholder', url, re.I):
+                # Skip obvious non-TOC images
+                if re.search(r'logo|favicon|icon|banner|placeholder|cover', url, re.I):
                     continue
                 return url
 
@@ -118,41 +170,94 @@ def get_og_image(doi):
     return None
 
 
+def validate_and_resize(content):
+    """
+    Validate image content against TOC criteria.
+    Returns (PIL.Image, ext) on success, or (None, None) on rejection.
+    Resizes to RESIZE_WIDTH px wide (preserving aspect ratio).
+    """
+    try:
+        img = Image.open(io.BytesIO(content))
+        w, h = img.size
+
+        # Dimension bounds
+        if w < MIN_WIDTH_PX or h < MIN_HEIGHT_PX:
+            return None, None
+        if w > MAX_WIDTH_PX or h > MAX_HEIGHT_PX:
+            return None, None
+
+        # Aspect ratio: TOC figures are landscape or square
+        if h > w * MAX_PORTRAIT_RATIO:
+            return None, None
+
+        # Resize to target width
+        if w > RESIZE_WIDTH:
+            new_h = round(h * RESIZE_WIDTH / w)
+            img = img.resize((RESIZE_WIDTH, new_h), Image.LANCZOS)
+
+        # Determine output format
+        fmt = img.format or 'PNG'
+        ext_map = {'JPEG': '.jpg', 'PNG': '.png', 'GIF': '.gif', 'WEBP': '.webp'}
+        ext = ext_map.get(fmt, '.png')
+
+        return img, ext
+
+    except Exception:
+        return None, None
+
+
 def doi_to_stem(doi):
     """Convert a DOI to a safe filename stem (no extension)."""
     return re.sub(r'[^a-z0-9._-]', '_', doi.lower())
 
 
 def download_image(url, doi):
-    """Download url and save to OUTPUT_DIR. Returns filename or None."""
+    """
+    Download url, validate it as a TOC image, resize, and save to OUTPUT_DIR.
+    Returns filename on success, or None.
+    """
     try:
         r = requests.get(url, headers=HEADERS, timeout=20, allow_redirects=True)
         if not r.ok or not r.content:
             return None
 
-        # Reject HTML responses (login pages, error pages, etc.)
+        # Reject HTML responses (login pages, error pages)
         ct = r.headers.get('content-type', '').split(';')[0].strip()
         if 'html' in ct or 'text' in ct:
             return None
 
-        ext_map = {
-            'image/jpeg': '.jpg', 'image/png': '.png',
-            'image/gif': '.gif',  'image/webp': '.webp',
-        }
-        ext = ext_map.get(ct)
-        if not ext:
-            m = re.search(r'\.(jpe?g|png|gif|webp)', url, re.I)
-            ext = ('.' + m.group(1).lower()) if m else '.jpg'
-        ext = ext.replace('.jpeg', '.jpg')
+        # Reject tiny files (icons, placeholders)
+        if len(r.content) < MIN_FILE_BYTES:
+            return None
 
-        # Sanity check: file should be at least 1 KB
-        if len(r.content) < 1024:
+        img, ext = validate_and_resize(r.content)
+        if img is None:
             return None
 
         filename = doi_to_stem(doi) + ext
-        with open(os.path.join(OUTPUT_DIR, filename), 'wb') as f:
-            f.write(r.content)
+        out_path = os.path.join(OUTPUT_DIR, filename)
+
+        # Save (convert palette/RGBA GIFs to RGBA PNG if needed)
+        save_fmt = ext.lstrip('.').upper()
+        if save_fmt == 'JPG':
+            save_fmt = 'JPEG'
+        if save_fmt == 'GIF':
+            # Preserve GIF as-is by writing raw bytes
+            with open(out_path, 'wb') as f:
+                f.write(r.content)
+            # But re-save as PNG if image was resized
+            orig_w = Image.open(io.BytesIO(r.content)).size[0]
+            if orig_w > RESIZE_WIDTH:
+                filename = doi_to_stem(doi) + '.png'
+                out_path = os.path.join(OUTPUT_DIR, filename)
+                img.save(out_path, 'PNG')
+        else:
+            if img.mode in ('RGBA', 'P') and save_fmt == 'JPEG':
+                img = img.convert('RGB')
+            img.save(out_path, save_fmt)
+
         return filename
+
     except Exception:
         return None
 
@@ -170,20 +275,27 @@ def main():
     dois = get_dois()
     print(f'Found {len(dois)} DOIs.\n')
 
-    found = skipped = missing = 0
+    trusted_dois = [(doi, desc) for doi in dois
+                    for ok, desc in [is_trusted(doi)] if ok]
+    skipped_untrusted = len(dois) - len(trusted_dois)
 
-    for i, doi in enumerate(dois, 1):
+    print(f'Trusted publishers: {len(trusted_dois)} DOIs')
+    print(f'Skipped (untrusted publisher): {skipped_untrusted} DOIs\n')
+
+    found = skipped = missing = rejected = 0
+
+    for i, (doi, pub_desc) in enumerate(trusted_dois, 1):
         existing = manifest.get(doi)
         if existing and os.path.exists(os.path.join(OUTPUT_DIR, existing)):
             skipped += 1
             continue
 
-        print(f'[{i}/{len(dois)}] {doi}', end='  ', flush=True)
+        print(f'[{i}/{len(trusted_dois)}] {doi}', end='  ', flush=True)
 
         url = get_og_image(doi)
         if not url:
             missing += 1
-            print('NONE')
+            print('NO og:image')
             time.sleep(1)
             continue
 
@@ -193,15 +305,16 @@ def main():
             found += 1
             print(f'OK → {filename}')
         else:
-            missing += 1
-            print(f'FAIL  ({url[:60]}…)')
+            rejected += 1
+            print(f'REJECTED  ({url[:60]}…)')
 
         time.sleep(1)   # polite: 1 req/s to publisher sites
 
     with open(MANIFEST, 'w') as f:
         json.dump(manifest, f, indent=2, sort_keys=True)
 
-    print(f'\nDone: {found} downloaded, {skipped} already present, {missing} not found.')
+    print(f'\nDone: {found} downloaded, {skipped} already present, '
+          f'{missing} no image found, {rejected} rejected by validation.')
     print(f'Manifest written to {MANIFEST}.')
 
 
