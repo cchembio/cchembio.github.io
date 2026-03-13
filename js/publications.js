@@ -11,7 +11,7 @@ const ORCID_ID   = '0000-0002-2720-3364';
 const ORCID_URL  = `https://pub.orcid.org/v3.0/${ORCID_ID}/works`;
 const CROSSREF   = doi => `https://api.crossref.org/works/${encodeURIComponent(doi)}?mailto=rmata@gwdg.de`;
 const FALLBACK   = 'data/publications.json';
-const CACHE_KEY  = 'pub_cache_v4';
+const CACHE_KEY  = 'pub_cache_v5';
 const CURRENT_YEAR = new Date().getFullYear();
 
 /* ── Utilities ─────────────────────────────────────────────── */
@@ -46,6 +46,9 @@ async function fetchORCID() {
   // Only include peer-reviewed journal articles
   const PUB_TYPES = new Set(['journal-article']);
 
+  // Exclude DOI prefixes from institutional repositories not indexed by Crossref
+  const REPO_PREFIXES = ['10.3204/', '10.25625/', '10.17877/', '10.5281/'];
+
   // Each group may have multiple external-ids; grab the first DOI per group
   const works = (data.group || []).map(group => {
     const summary = group['work-summary']?.[0];
@@ -56,7 +59,11 @@ async function fetchORCID() {
     const year    = parseInt(summary?.['publication-date']?.year?.value) || null;
     const title   = summary?.title?.title?.value || '';
     return { doi, year, title, type };
-  }).filter(w => w.doi && w.year && PUB_TYPES.has(w.type));
+  }).filter(w =>
+    w.doi && w.year &&
+    PUB_TYPES.has(w.type) &&
+    !REPO_PREFIXES.some(p => w.doi.startsWith(p))
+  );
 
   // Deduplicate by DOI
   const seen = new Set();
