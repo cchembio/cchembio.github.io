@@ -19,6 +19,8 @@ const OPENALEX_AUTHOR_URL = `https://api.openalex.org/authors?filter=orcid:${ORC
 const OPENALEX_WORKS = (authorId, cursor) =>
   `https://api.openalex.org/works?filter=authorships.author.id:${authorId},type:journal-article&per_page=200&cursor=${encodeURIComponent(cursor)}&mailto=rmata@gwdg.de`;
 
+const REPO_PREFIXES = ['10.3204/', '10.25625/', '10.17877/', '10.5281/'];
+
 /* ── Utilities ─────────────────────────────────────────────── */
 
 function sessionGet(key) {
@@ -50,9 +52,6 @@ async function fetchORCID() {
 
   // Only include peer-reviewed journal articles
   const PUB_TYPES = new Set(['journal-article']);
-
-  // Exclude DOI prefixes from institutional repositories not indexed by Crossref
-  const REPO_PREFIXES = ['10.3204/', '10.25625/', '10.17877/', '10.5281/'];
 
   // Each group may have multiple DOIs; prefer one not from a repo prefix
   const works = (data.group || []).map(group => {
@@ -109,8 +108,6 @@ async function fetchOpenAlex() {
   const cacheKey = CACHE_KEY + '_oalex';
   const cached = sessionGet(cacheKey);
   if (cached) return cached;
-
-  const REPO_PREFIXES = ['10.3204/', '10.25625/', '10.17877/', '10.5281/'];
 
   const authorId = await fetchOpenAlexAuthorId();
 
