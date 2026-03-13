@@ -105,6 +105,53 @@ async function fetchOpenAlexAuthorId() {
   return id;
 }
 
+async function fetchOpenAlex() {
+  const cacheKey = CACHE_KEY + '_oalex';
+  const cached = sessionGet(cacheKey);
+  if (cached) return cached;
+
+  const REPO_PREFIXES = ['10.3204/', '10.25625/', '10.17877/', '10.5281/'];
+
+  const authorId = await fetchOpenAlexAuthorId();
+
+  const allWorks = [];
+  let cursor = '*';
+
+  while (cursor) {
+    const res = await fetch(OPENALEX_WORKS(authorId, cursor));
+    if (!res.ok) throw new Error(`OpenAlex works ${res.status}`);
+    const data = await res.json();
+
+    const works = (data.results || []).map(w => {
+      // DOI in OpenAlex is a full URL: "https://doi.org/10.xxx/..." — strip the prefix
+      const rawDoi = w.doi || '';
+      const doi = rawDoi.replace(/^https?:\/\/doi\.org\//i, '').toLowerCase().trim() || null;
+      const year  = w.publication_year || null;
+      const title = w.title || '';
+      return { doi, year, title };
+    }).filter(w =>
+      w.doi && w.year &&
+      !REPO_PREFIXES.some(p => w.doi.startsWith(p))
+    );
+
+    allWorks.push(...works);
+
+    // OpenAlex cursor pagination: null next_cursor means last page
+    cursor = data.meta?.next_cursor ?? null;
+  }
+
+  // Deduplicate by DOI
+  const seen = new Set();
+  const unique = allWorks.filter(w => {
+    if (seen.has(w.doi)) return false;
+    seen.add(w.doi);
+    return true;
+  });
+
+  sessionSet(cacheKey, unique);
+  return unique;
+}
+
 /* ── Crossref enrichment ────────────────────────────────────── */
 
 async function enrichOne(work) {
