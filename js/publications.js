@@ -130,6 +130,14 @@ async function fetchFallback() {
 
 /* ── Rendering ──────────────────────────────────────────────── */
 
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function renderEntry(pub) {
   const li = document.createElement('li');
   li.className = 'pub-entry';
@@ -155,12 +163,12 @@ function renderEntry(pub) {
   const pages   = pub.pages   ? `, ${pub.pages}` : '';
   const year    = pub.year    ? ` (${pub.year})` : '';
   const doiLink = pub.doi
-    ? ` <a class="pub-doi" href="https://doi.org/${pub.doi}" target="_blank" rel="noopener">[DOI]</a>`
+    ? ` <a class="pub-doi" href="https://doi.org/${esc(pub.doi)}" target="_blank" rel="noopener">[DOI]</a>`
     : '';
 
   body.innerHTML =
-    `${authors ? `${authors}, ` : ''}"<span class="pub-title">${title}</span>,"` +
-    (journal ? ` <em>${journal}</em>${vol}${pages}${year}.` : '') +
+    `${authors ? `${esc(authors)}, ` : ''}"<span class="pub-title">${esc(title)}</span>,"` +
+    (journal ? ` <em>${esc(journal)}</em>${esc(vol)}${esc(pages)}${esc(year)}.` : '') +
     doiLink;
 
   li.appendChild(body);
