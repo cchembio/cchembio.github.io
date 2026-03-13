@@ -43,16 +43,23 @@ async function fetchORCID() {
   if (!res.ok) throw new Error(`ORCID ${res.status}`);
   const data = await res.json();
 
+  // Publication work types to include (exclude data-set, other, etc.)
+  const PUB_TYPES = new Set([
+    'journal-article', 'conference-paper', 'book-chapter', 'book',
+    'edited-book', 'report', 'dissertation', 'preprint'
+  ]);
+
   // Each group may have multiple external-ids; grab the first DOI per group
   const works = (data.group || []).map(group => {
     const summary = group['work-summary']?.[0];
+    const type    = summary?.type || '';
     const extIds  = summary?.['external-ids']?.['external-id'] || [];
     const doiObj  = extIds.find(e => e['external-id-type'] === 'doi');
     const doi     = doiObj?.['external-id-value']?.toLowerCase().trim() || null;
     const year    = parseInt(summary?.['publication-date']?.year?.value) || null;
     const title   = summary?.title?.title?.value || '';
-    return { doi, year, title };
-  }).filter(w => w.doi && w.year);
+    return { doi, year, title, type };
+  }).filter(w => w.doi && w.year && PUB_TYPES.has(w.type));
 
   // Deduplicate by DOI
   const seen = new Set();
