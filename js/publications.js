@@ -12,7 +12,7 @@ const ORCID_ID   = '0000-0002-2720-3364';
 const ORCID_URL  = `https://pub.orcid.org/v3.0/${ORCID_ID}/works`;
 const CROSSREF   = doi => `https://api.crossref.org/works/${encodeURIComponent(doi)}?mailto=rmata@gwdg.de`;
 const FALLBACK   = 'data/publications.json';
-const CACHE_KEY  = 'pub_cache_v11';
+const CACHE_KEY  = 'pub_cache_v12';
 const CURRENT_YEAR = new Date().getFullYear();
 
 const OPENALEX_AUTHOR_URL = `https://api.openalex.org/authors?filter=orcid:${ORCID_ID}&mailto=rmata@gwdg.de`;
@@ -261,13 +261,16 @@ function renderEntry(pub) {
   const tocSrc = localFile ? `images/tocs/${localFile}` : (pub.toc_image || null);
 
   if (tocSrc) {
+    const wrap = document.createElement('div');
+    wrap.className = 'pub-toc-wrap';
     const img = document.createElement('img');
     img.src = tocSrc;
     img.alt = 'TOC figure';
     img.className = 'pub-toc';
     img.loading = 'lazy';
-    img.onerror = () => img.remove();
-    li.appendChild(img);
+    img.onerror = () => wrap.remove();
+    wrap.appendChild(img);
+    li.appendChild(wrap);
   }
 
   const body = document.createElement('div');
