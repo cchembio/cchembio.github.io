@@ -430,20 +430,26 @@ footer strong { color: #fff; }
 
 /* Each entry — supports optional TOC thumbnail */
 .pub-entry {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
   padding: 0.7rem 0;
   border-bottom: 1px solid var(--border-light);
   font-size: 0.92rem;
   line-height: 1.6;
+  list-style: none;
 }
 .pub-entry:last-child { border-bottom: none; }
 
+/* Inner flex row (plain div, not li, avoids li quirks) */
+.pub-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
 .pub-toc-wrap {
+  flex: 0 0 180px;
   width: 180px;
-  min-width: 180px;
-  flex-shrink: 0;
+  overflow: hidden;
 }
 .pub-toc {
   display: block;
@@ -626,6 +632,6 @@ main.container.has-hero { padding-top: 0; }
 @media (max-width: 768px) {
   .hero h1  { font-size: 1.8rem; }
   .hero p   { font-size: 1rem; }
-  .pub-toc-wrap { width: 120px; min-width: 120px; }
+  .pub-toc-wrap { flex: 0 0 120px; width: 120px; }
   .group-gallery { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
 }
