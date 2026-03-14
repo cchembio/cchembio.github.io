@@ -246,10 +246,10 @@ function esc(str) {
 
 // Like esc() but allows safe inline formatting tags for titles
 function escTitle(str) {
-  return esc(str).replace(
-    /&lt;(\/?(?:sub|sup|i|em|b|strong|scp))&gt;/g,
-    '<$1>'
-  );
+  return esc(str)
+    .replace(/&lt;(\/?(?:sub|sup|i|em|b|strong))&gt;/g, '<$1>')
+    .replace(/&lt;scp&gt;/g, '<span class="small-caps">')
+    .replace(/&lt;\/scp&gt;/g, '</span>');
 }
 
 function renderEntry(pub) {

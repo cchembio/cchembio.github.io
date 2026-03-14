@@ -459,7 +459,7 @@ footer strong { color: #fff; }
 .pub-body { flex: 1; min-width: 0; }
 .pub-title { font-style: italic; }
 .pub-doi   { font-size: 0.82rem; margin-left: 0.25rem; }
-scp        { font-variant: small-caps; }
+.small-caps { font-variant: small-caps; }
 .pub-error { color: #c0392b; padding: 1rem 0; }
 
 /* ============================================================
