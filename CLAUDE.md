@@ -20,11 +20,15 @@ Institut für Physikalische Chemie.
 - teaching.html     — Teaching information
 - links.html        — Useful links
 - css/style.css     — All styles
-- js/main.js        — Nav toggle, publication accordion, dynamic fetching logic
-- js/publications.js — Publication fetch/render engine (ORCID + Crossref + TOC figures)
+- js/main.js        — Nav toggle and general UI
+- js/publications.js — Publication fetch/render engine (OpenAlex → ORCID → Crossref + TOC figures)
+- scripts/fetch-tocs.py — Maintenance script: downloads TOC images locally (run from repo root)
+- data/tocs.json    — Manifest mapping DOI → local image filename (produced by fetch-tocs.py)
+- data/publications.json — Static fallback publication list (keep up to date)
 - images/           — Group photos, member portraits, research figures
 - images/members/   — Individual member portrait photos
 - images/group/     — Group photos (lab events, outings, conferences)
+- images/tocs/      — Locally cached TOC/graphical abstract images (produced by fetch-tocs.py)
 
 ## Design Principles
 - Responsive (mobile-friendly)
@@ -55,21 +59,23 @@ The content mirrors https://cchembio.uni-goettingen.de with the following pages:
 Publications are fetched client-side at page load using public APIs. No server required.
 
 ### Data source (in priority order)
-1. **ORCID public API** — `https://pub.orcid.org/v3.0/{ORCID_ID}/works` (JSON, no auth needed)
+1. **OpenAlex API** (primary) — retrieves all works attributed to Prof. Mata's ORCID via cursor pagination
+   - Author lookup: `https://api.openalex.org/authors?filter=orcid:0000-0002-2720-3364`
+   - Works: `https://api.openalex.org/works?filter=authorships.author.id:{id},type:article`
+2. **ORCID public API** (fallback if OpenAlex fails) — `https://pub.orcid.org/v3.0/0000-0002-2720-3364/works`
    - Prof. Mata's ORCID: `0000-0002-2720-3364`
-   - API endpoint: `https://pub.orcid.org/v3.0/0000-0002-2720-3364/works`
-2. **Crossref API** — used to enrich each entry with full metadata (title, journal, volume, pages, year)
+3. **Crossref API** — enriches each entry with full metadata (title, journal, volume, pages, year, TOC image URL)
    - `https://api.crossref.org/works/{DOI}`
-3. **Static fallback** — `data/publications.json` committed in the repo, used if APIs are unavailable
-   - This file should always be kept up to date as a reliable offline baseline
+4. **Static fallback** — `data/publications.json` committed in the repo, used if all APIs are unavailable
+   - Keep this file up to date as a reliable offline baseline
 
 ### TOC (Table of Contents) figures
-- After fetching a DOI, attempt to retrieve the TOC/graphical abstract image from the publisher.
-- **Unpaywall / Open Access Button** can sometimes provide open-access landing page URLs.
-- **Crossref** returns a `link` array; check for entries with `content-type: image/*` or `intended-application: syndication`.
-- If a TOC image URL is found, display it as a small thumbnail (max 120px wide) beside the citation.
-- If no image is available, render the entry without a thumbnail — never show a broken image.
-- Cache fetched image URLs in `sessionStorage` to avoid re-fetching on the same visit.
+- TOC/graphical abstract images are pre-downloaded locally by `scripts/fetch-tocs.py` (run manually as needed).
+  - Images are saved to `images/tocs/` and indexed in `data/tocs.json` (maps DOI → filename).
+  - Run: `pip install requests cloudscraper Pillow && python3 scripts/fetch-tocs.py` from repo root.
+  - The script is re-runnable; already-downloaded images are skipped.
+- At render time, `publications.js` checks `data/tocs.json` first; if no local image exists, it falls back to a Crossref-provided image URL.
+- If no image is available at all, the entry renders without a thumbnail — never show a broken image.
 
 ### Accordion behaviour
 - On page load, **only the current year's section is expanded**; all other years are collapsed.
@@ -79,10 +85,30 @@ Publications are fetched client-side at page load using public APIs. No server r
 - The current year section loads immediately; other years fetch/render lazily when first opened.
 
 ### Performance
-- Fetch calls are batched: first load the ORCID list, then enrich only the visible (current year) entries immediately; enrich hidden years lazily on expand.
-- Use `sessionStorage` to cache API responses within a single visit.
+- Fetch calls are batched: first load the OpenAlex list, then enrich only the visible (current year) entries immediately; enrich hidden years lazily on expand.
+- Use `sessionStorage` to cache API responses within a single visit. The cache key is versioned (`pub_cache_vN` in `publications.js`). **Bump the version number** whenever you change the data schema or title rendering logic, and also update the `?v=N` query string on the `<script>` tag in `publications.html` to bust browser cache.
 - Show a loading spinner per year section while fetching.
 - Graceful degradation: if all APIs fail, render from `data/publications.json` silently.
+
+## Pages to Extend
+
+### research.html
+The research page currently lists topics (Enzymatic Systems, Reactivity, Local Correlation Methods) but should be expanded with richer content:
+- Each research area should have a dedicated section with a short descriptive paragraph and at least one figure or schematic illustrating the topic.
+- Figures live in `images/research/` (create directory if absent); use descriptive filenames like `enzymatic-qmmm.png`.
+- Consider adding a short "highlights" or "recent results" block linking to key publications.
+- The page should feel visually engaging — not just a bulleted list. Use cards, section dividers, or side-by-side image+text layouts consistent with the rest of the site.
+
+### teaching.html
+The teaching page should go beyond a bare list of courses:
+- Each course entry should include: course name, level (BSc/MSc/PhD), a one-sentence description, and ideally a link to course materials or the university course catalog.
+- Consider grouping by type (lectures, seminars, practical courses).
+- A short section on thesis opportunities (BSc, MSc, PhD) would add value.
+
+### Visuals and imagery
+- Prefer actual figures, schematics, or photos over placeholder text.
+- Research figures should be publication-quality or close to it (PNG or SVG preferred).
+- Do not use stock photos or generic icons; all imagery should reflect the group's actual work or environment.
 
 ## Member Photos
 - Each member card on members.html should display a portrait photo.
