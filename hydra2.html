@@ -65,6 +65,8 @@
       width: 100%;
       height: 520px;
     }
+    #shifts-chart .nsewdrag { cursor: default !important; }
+    #shifts-chart .points path { cursor: pointer !important; }
 
     /* 3Dmol viewer */
     .viewer-controls {
@@ -366,7 +368,7 @@
       const nBonus = keys.length - nTest;
 
       /* All-participants trace (grey) */
-      const xAll = [], yAll = [], errAll = [], txtAll = [];
+      const xAll = [], yAll = [], errAll = [], txtAll = [], codeAll = [];
       for (const [i, k] of keys.entries()) {
         for (const pt of series[k].points) {
           xAll.push(xlabs[i]);
@@ -375,8 +377,10 @@
           txtAll.push(
             `Code: ${pt.code}<br>` +
             `Shift: ${pt.shift} cm⁻¹` +
-            (pt.uncertainty ? `<br>Uncertainty: ±${pt.uncertainty} cm⁻¹` : '')
+            (pt.uncertainty ? `<br>Uncertainty: ±${pt.uncertainty} cm⁻¹` : '') +
+            '<br><i>Click to select</i>'
           );
+          codeAll.push(pt.code);
         }
       }
       const traceAll = {
@@ -389,6 +393,7 @@
         },
         hovertemplate: '%{text}<extra></extra>',
         text: txtAll,
+        customdata: codeAll,
       };
 
       /* Median trace */
@@ -481,6 +486,16 @@
       /* Store for updates */
       window._chartKeys  = keys;
       window._chartXlabs = xlabs;
+
+      /* Click on a point to select/deselect that participant */
+      document.getElementById('shifts-chart').on('plotly_click', data => {
+        const pt = data.points[0];
+        if (pt.data.customdata === undefined) return;  // median or highlight trace
+        const code = pt.customdata;
+        const sel  = document.getElementById('code-select');
+        sel.value  = (selectedCode === code) ? '' : code;  // toggle if same
+        sel.dispatchEvent(new Event('change'));
+      });
     }
 
     function updateChartHighlight() {
