@@ -457,6 +457,7 @@
         });
       }
 
+      /* Await newPlot so the chart element has .on() attached before we use it */
       Plotly.newPlot(
         'shifts-chart',
         [traceAll, traceMed, traceHL],
@@ -477,25 +478,27 @@
           },
           plot_bgcolor: '#fff', paper_bgcolor: '#fff',
           hovermode: 'closest',
+          clickmode: 'event',
           shapes, annotations,
         },
         { responsive: true, displayModeBar: true,
           modeBarButtonsToRemove: ['select2d', 'lasso2d'] }
-      );
+      ).then(chartEl => {
+        /* Click on a point to select/deselect that participant */
+        chartEl.on('plotly_click', data => {
+          if (!data.points || !data.points.length) return;
+          const pt = data.points[0];
+          if (pt.customdata == null) return;   // median or highlight trace
+          const code = pt.customdata;
+          const sel  = document.getElementById('code-select');
+          sel.value  = (selectedCode === code) ? '' : code;
+          onCodeChange();
+        });
+      });
 
       /* Store for updates */
       window._chartKeys  = keys;
       window._chartXlabs = xlabs;
-
-      /* Click on a point to select/deselect that participant */
-      document.getElementById('shifts-chart').on('plotly_click', data => {
-        const pt = data.points[0];
-        if (pt.data.customdata === undefined) return;  // median or highlight trace
-        const code = pt.customdata;
-        const sel  = document.getElementById('code-select');
-        sel.value  = (selectedCode === code) ? '' : code;  // toggle if same
-        sel.dispatchEvent(new Event('change'));
-      });
     }
 
     function updateChartHighlight() {
