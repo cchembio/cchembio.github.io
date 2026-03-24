@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="HyDRA II blind prediction challenge — interactive results showing OH-stretch red-shift predictions and aligned optimised geometries for water–acceptor complexes.">
+  <title>HyDRA II Results — Computerchemie und Biochemie</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- CDN libraries: Plotly for the shifts chart, 3Dmol for molecular viewer -->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="https://3dmol.org/build/3Dmol-min.js"></script>
+  <style>
+    /* ── HyDRA II page-specific styles ────────────────────────────────── */
+
+    .hydra-section {
+      margin-bottom: 3.5rem;
+    }
+
+    /* Participant code selector bar */
+    .selector-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.85rem 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+    .selector-bar label {
+      font-weight: 600;
+      color: var(--blue);
+      white-space: nowrap;
+    }
+    .selector-bar select {
+      padding: 0.35rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+      min-width: 160px;
+    }
+    .selector-bar select:focus {
+      outline: 2px solid var(--blue);
+      outline-offset: 1px;
+    }
+
+    /* Info banner */
+    .info-banner {
+      background: var(--bg-subtle);
+      border-left: 4px solid var(--gold);
+      padding: 0.9rem 1.3rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+    .info-banner strong { color: var(--text); }
+
+    /* Plotly chart wrapper */
+    #shifts-chart {
+      width: 100%;
+      height: 520px;
+    }
+
+    /* 3Dmol viewer */
+    .viewer-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.9rem;
+    }
+    .viewer-controls label {
+      font-weight: 600;
+      color: var(--blue);
+    }
+    .viewer-controls select {
+      padding: 0.35rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+      min-width: 220px;
+    }
+    .btn {
+      padding: 0.35rem 0.9rem;
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+    .btn:hover  { background: var(--blue-dark); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #mol-viewer-wrap {
+      position: relative;
+      width: 100%;
+      height: 580px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #f4f6f8;
+    }
+    #mol-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+      pointer-events: none;
+    }
+
+    .viewer-legend {
+      display: flex;
+      gap: 1.4rem;
+      margin-top: 0.65rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+    .swatch-grey  { width: 22px; height: 2px; background: #888; border-radius: 1px; }
+    .swatch-red   { width: 22px; height: 4px; background: #e63946; border-radius: 2px; }
+
+    .viewer-note {
+      margin-top: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-style: italic;
+      min-height: 1.2em;
+    }
+
+    /* Inline error messages */
+    .err-msg {
+      padding: 0.7rem 1rem;
+      background: #fff3f3;
+      border: 1px solid #fcc;
+      border-radius: var(--radius);
+      color: #c0392b;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav class="navbar" aria-label="Main">
+      <a href="index.html" class="nav-brand">Computerchemie und Biochemie</a>
+      <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="research.html">Research</a></li>
+        <li><a href="members.html">Members</a></li>
+        <li><a href="publications.html">Publications</a></li>
+        <li><a href="software.html">Software</a></li>
+        <li><a href="teaching.html">Teaching</a></li>
+        <li><a href="links.html">Links</a></li>
+        <li><a href="hydra2.html" class="active">HyDRA II</a></li>
+        <li><a href="https://github.com/cchembio" target="_blank" rel="noopener">GitHub ↗</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <div class="page-header">
+      <h1>HyDRA II — Blind Prediction Results</h1>
+      <p>OH-stretch red-shifts and optimised geometries for water–acceptor hydrogen-bonded complexes</p>
+    </div>
+
+    <div class="info-banner">
+      <strong>How to use this page:</strong> Select your anonymous participant code from the
+      dropdown below to highlight your predictions in both visualisations. The code is the
+      6-character identifier you received at registration.
+    </div>
+
+    <!-- Global code selector (controls both sections) -->
+    <div class="selector-bar">
+      <label for="code-select">Your participant code:</label>
+      <select id="code-select">
+        <option value="">— show all —</option>
+      </select>
+    </div>
+
+    <!-- ── Section 1: Frequency shifts ─────────────────────────────────── -->
+    <section class="hydra-section">
+      <h2>Predicted Frequency Shifts</h2>
+      <p>
+        OH-stretch red-shifts (cm<sup>−1</sup>) relative to the isolated water monomer.
+        Each dot is one participant's prediction for that system; horizontal bars mark the
+        median. Error bars show reported uncertainties where available.
+        Test molecules are on the left; bonus molecules on the right of the dashed separator.
+      </p>
+      <div id="shifts-chart"></div>
+    </section>
+
+    <!-- ── Section 2: Molecular structures ──────────────────────────────── -->
+    <section class="hydra-section">
+      <h2>Aligned Molecular Structures</h2>
+      <p>
+        Optimised geometries of the water–acceptor complexes from all participating groups,
+        superimposed by Kabsch alignment on the three water atoms. Select a molecule to
+        display all submitted structures simultaneously as wireframes.
+      </p>
+
+      <div class="viewer-controls">
+        <label for="mol-select">Molecule:</label>
+        <select id="mol-select">
+          <option value="">— select molecule —</option>
+        </select>
+        <button class="btn" id="btn-reset" disabled>Reset view</button>
+      </div>
+
+      <div id="mol-viewer-wrap">
+        <div id="mol-placeholder">Select a molecule above to display structures</div>
+      </div>
+
+      <div class="viewer-legend">
+        <div class="legend-item">
+          <div class="swatch-grey"></div>
+          <span>All submissions</span>
+        </div>
+        <div class="legend-item" id="legend-highlight" style="display:none">
+          <div class="swatch-red"></div>
+          <span>Your structure</span>
+        </div>
+      </div>
+      <p class="viewer-note" id="viewer-note"></p>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div>
+        <strong>Prof. Dr. Ricardo Mata</strong><br>
+        Institut für Physikalische Chemie<br>
+        Georg-August-Universität Göttingen<br>
+        Tammannstraße 6, 37077 Göttingen, Germany<br>
+        Phone: +49-(551) 39-23149 &nbsp;|&nbsp;
+        Email: <a href="mailto:rmata@gwdg.de">rmata@gwdg.de</a>
+      </div>
+      <div>
+        <a href="https://www.uni-goettingen.de/de/123987.html" target="_blank" rel="noopener">
+          University page ↗
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    /* ================================================================
+       HyDRA II — Interactive Results  (hydra2.html)
+       Data:     data/hydraii/shifts_data.json
+                 data/hydraii/structures_{ACR}.json
+       Libraries: Plotly.js 2.35.2 (CDN), 3Dmol.js (CDN)
+       ================================================================ */
+
+    const DATA_BASE   = 'data/hydraii/';
+    const COL_HIGHLIGHT = '#e63946';   // warm red — same in chart + viewer
+    const COL_GREY      = '#999999';
+    const COL_MEDIAN    = '#003d73';   // site --blue
+
+    /* ── State ────────────────────────────────────────────────────── */
+    let shiftsData   = null;   // parsed shifts_data.json
+    let selectedCode = '';     // currently chosen participant code
+    let molViewer    = null;   // $3Dmol viewer instance
+    let currentMol   = null;   // acronym of the loaded molecule
+    let molModels    = [];     // [{code, entry_id}] parallel to addModel() order
+
+    /* ── Bootstrap ────────────────────────────────────────────────── */
+    async function init() {
+      try {
+        const r = await fetch(DATA_BASE + 'shifts_data.json');
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        shiftsData = await r.json();
+      } catch (e) {
+        showErr('shifts-chart', 'Could not load shifts data: ' + e.message);
+        return;
+      }
+
+      buildCodeDropdown();
+      buildMolDropdown();
+      buildChart();
+
+      document.getElementById('code-select')
+        .addEventListener('change', onCodeChange);
+      document.getElementById('mol-select')
+        .addEventListener('change', onMolChange);
+      document.getElementById('btn-reset')
+        .addEventListener('click', () => {
+          if (molViewer) { molViewer.zoomTo(); molViewer.render(); }
+        });
+
+      window.addEventListener('resize', () =>
+        Plotly.relayout('shifts-chart', { autosize: true })
+      );
+    }
+
+    /* ── Dropdowns ────────────────────────────────────────────────── */
+    function buildCodeDropdown() {
+      const codes = new Set();
+      for (const s of Object.values(shiftsData.series))
+        for (const pt of s.points) codes.add(pt.code);
+
+      const sel = document.getElementById('code-select');
+      for (const c of [...codes].sort()) {
+        const o = document.createElement('option');
+        o.value = o.textContent = c;
+        sel.appendChild(o);
+      }
+    }
+
+    function buildMolDropdown() {
+      const sel = document.getElementById('mol-select');
+      for (const acr of shiftsData.systems) {
+        const o = document.createElement('option');
+        o.value = acr;
+        o.textContent = shiftsData.system_labels[acr] || acr;
+        sel.appendChild(o);
+      }
+    }
+
+    /* ── Event handlers ───────────────────────────────────────────── */
+    function onCodeChange() {
+      selectedCode = document.getElementById('code-select').value;
+      document.getElementById('legend-highlight').style.display =
+        selectedCode ? '' : 'none';
+      updateChartHighlight();
+      updateViewerHighlight();
+    }
+
+    function onMolChange() {
+      const acr = document.getElementById('mol-select').value;
+      if (acr) loadMolecule(acr);
+    }
+
+    /* ── Chart ────────────────────────────────────────────────────── */
+    function seriesShortLabel(key) {
+      const s = shiftsData.series[key];
+      const h = s.hydrate_type
+        .replace('monohydrate_OHb',  'mono')
+        .replace('dihydrate_2d_OHb', 'di-2d')
+        .replace('dihydrate_2i_OHb', 'di-2i');
+      return `${s.molecule} ${h}`;
+    }
+
+    function buildChart() {
+      const series = shiftsData.series;
+      const keys   = Object.keys(series);   // already ordered Test → Bonus
+      const xlabs  = keys.map(seriesShortLabel);
+
+      const nTest  = keys.filter(k => series[k].category === 'Test').length;
+      const nBonus = keys.length - nTest;
+
+      /* All-participants trace (grey) */
+      const xAll = [], yAll = [], errAll = [], txtAll = [];
+      for (const [i, k] of keys.entries()) {
+        for (const pt of series[k].points) {
+          xAll.push(xlabs[i]);
+          yAll.push(pt.shift);
+          errAll.push(pt.uncertainty ?? null);
+          txtAll.push(
+            `Code: ${pt.code}<br>` +
+            `Shift: ${pt.shift} cm⁻¹` +
+            (pt.uncertainty ? `<br>Uncertainty: ±${pt.uncertainty} cm⁻¹` : '')
+          );
+        }
+      }
+      const traceAll = {
+        x: xAll, y: yAll, type: 'scatter', mode: 'markers',
+        name: 'All submissions',
+        marker: { color: COL_GREY, size: 8, opacity: 0.5 },
+        error_y: {
+          type: 'data', array: errAll, visible: true,
+          color: COL_GREY, thickness: 1, width: 4, opacity: 0.4,
+        },
+        hovertemplate: '%{text}<extra></extra>',
+        text: txtAll,
+      };
+
+      /* Median trace */
+      const xMed = [], yMed = [], txtMed = [];
+      for (const [i, k] of keys.entries()) {
+        xMed.push(xlabs[i]);
+        yMed.push(series[k].median);
+        txtMed.push(`Median: ${series[k].median} cm⁻¹`);
+      }
+      const traceMed = {
+        x: xMed, y: yMed, type: 'scatter', mode: 'markers',
+        name: 'Median',
+        marker: {
+          symbol: 'line-ew', size: 28, color: COL_MEDIAN,
+          line: { color: COL_MEDIAN, width: 3 },
+        },
+        hovertemplate: '%{text}<extra></extra>',
+        text: txtMed,
+      };
+
+      /* Highlight trace — populated on code selection */
+      const traceHL = {
+        x: [], y: [], type: 'scatter', mode: 'markers',
+        name: 'Your submission',
+        marker: { color: COL_HIGHLIGHT, size: 12, opacity: 1 },
+        error_y: {
+          type: 'data', array: [], visible: true,
+          color: COL_HIGHLIGHT, thickness: 2, width: 5,
+        },
+        hovertemplate: '%{text}<extra></extra>',
+        text: [],
+      };
+
+      /* Vertical dashed separator between Test and Bonus */
+      const shapes = [];
+      if (nTest > 0 && nBonus > 0) {
+        shapes.push({
+          type: 'line', xref: 'paper', yref: 'paper',
+          x0: nTest / keys.length, x1: nTest / keys.length,
+          y0: 0, y1: 1,
+          line: { color: '#cccccc', width: 1, dash: 'dot' },
+        });
+      }
+
+      /* Category labels above the axis */
+      const annotations = [];
+      if (nTest > 0) {
+        annotations.push({
+          xref: 'paper', yref: 'paper',
+          x: (nTest / 2) / keys.length, y: 1.07,
+          showarrow: false, text: 'Test molecules',
+          font: { size: 11, color: '#666' },
+        });
+      }
+      if (nBonus > 0) {
+        annotations.push({
+          xref: 'paper', yref: 'paper',
+          x: (nTest + nBonus / 2) / keys.length, y: 1.07,
+          showarrow: false, text: 'Bonus molecules',
+          font: { size: 11, color: '#666' },
+        });
+      }
+
+      Plotly.newPlot(
+        'shifts-chart',
+        [traceAll, traceMed, traceHL],
+        {
+          autosize: true, height: 520,
+          margin: { l: 65, r: 20, t: 55, b: 130 },
+          xaxis: {
+            type: 'category', tickangle: -35,
+            tickfont: { size: 11 }, showgrid: false,
+          },
+          yaxis: {
+            title: { text: 'OH-stretch red-shift (cm⁻¹)', font: { size: 12 } },
+            zeroline: false, gridcolor: '#eeeeee',
+          },
+          legend: {
+            orientation: 'h', x: 0, y: 1.13,
+            bgcolor: 'rgba(255,255,255,0)',
+          },
+          plot_bgcolor: '#fff', paper_bgcolor: '#fff',
+          hovermode: 'closest',
+          shapes, annotations,
+        },
+        { responsive: true, displayModeBar: true,
+          modeBarButtonsToRemove: ['select2d', 'lasso2d'] }
+      );
+
+      /* Store for updates */
+      window._chartKeys  = keys;
+      window._chartXlabs = xlabs;
+    }
+
+    function updateChartHighlight() {
+      const series = shiftsData.series;
+      const xHL = [], yHL = [], errHL = [], txtHL = [];
+
+      if (selectedCode) {
+        for (const [i, k] of window._chartKeys.entries()) {
+          const pt = series[k].points.find(p => p.code === selectedCode);
+          if (!pt) continue;
+          xHL.push(window._chartXlabs[i]);
+          yHL.push(pt.shift);
+          errHL.push(pt.uncertainty ?? null);
+          txtHL.push(
+            `Code: ${pt.code}<br>` +
+            `Shift: ${pt.shift} cm⁻¹` +
+            (pt.uncertainty ? `<br>Uncertainty: ±${pt.uncertainty} cm⁻¹` : '')
+          );
+        }
+      }
+
+      Plotly.restyle('shifts-chart', {
+        x: [xHL], y: [yHL],
+        'error_y.array': [errHL],
+        text: [txtHL],
+      }, 2);   /* trace index 2 = highlight trace */
+    }
+
+    /* ── Molecular viewer ─────────────────────────────────────────── */
+    function ensureViewer() {
+      if (molViewer) return;
+      const wrap = document.getElementById('mol-viewer-wrap');
+      document.getElementById('mol-placeholder').style.display = 'none';
+      molViewer = $3Dmol.createViewer(wrap, { backgroundColor: '#f4f6f8' });
+      document.getElementById('btn-reset').disabled = false;
+    }
+
+    async function loadMolecule(acr) {
+      if (currentMol === acr) return;
+      currentMol = acr;
+      const noteEl = document.getElementById('viewer-note');
+      noteEl.textContent = 'Loading structures…';
+
+      let data;
+      try {
+        const r = await fetch(`${DATA_BASE}structures_${acr}.json`);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        data = await r.json();
+      } catch (e) {
+        noteEl.textContent = '';
+        showErr('mol-viewer-wrap', 'Could not load structures: ' + e.message);
+        return;
+      }
+
+      ensureViewer();
+      molViewer.clear();
+      molModels = [];
+
+      for (const struct of data.structures) {
+        molViewer.addModel(struct.xyz, 'xyz');
+        /* Store metadata at same index */
+        molModels.push({ code: struct.code, entry_id: struct.entry_id });
+      }
+
+      applyViewerStyles();
+      molViewer.zoomTo();
+      molViewer.render();
+
+      const n = data.structures.length;
+      noteEl.textContent =
+        `${n} structure${n !== 1 ? 's' : ''} loaded for ${data.label}.`;
+    }
+
+    function applyViewerStyles() {
+      if (!molViewer || molModels.length === 0) return;
+      const hiIdx = selectedCode
+        ? molModels.findIndex(m => m.code === selectedCode)
+        : -1;
+
+      for (let i = 0; i < molModels.length; i++) {
+        molViewer.setStyle(
+          { model: i },
+          i === hiIdx
+            ? { line: { linewidth: 5, color: COL_HIGHLIGHT } }
+            : { line: { linewidth: 1.5, color: COL_GREY } }
+        );
+      }
+    }
+
+    function updateViewerHighlight() {
+      if (!molViewer || molModels.length === 0) return;
+      applyViewerStyles();
+      molViewer.render();
+
+      const noteEl = document.getElementById('viewer-note');
+      if (selectedCode && currentMol) {
+        const found = molModels.some(m => m.code === selectedCode);
+        const n     = molModels.length;
+        noteEl.textContent = found
+          ? `${n} structure${n !== 1 ? 's' : ''} loaded — your structure highlighted in red.`
+          : `No structure found for code "${selectedCode}" in this molecule — showing all ${n} in grey.`;
+      }
+    }
+
+    /* ── Utilities ────────────────────────────────────────────────── */
+    function showErr(id, msg) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = `<div class="err-msg">⚠ ${msg}</div>`;
+    }
+
+    /* ── Start ────────────────────────────────────────────────────── */
+    init();
+  </script>
+</body>
+</html>

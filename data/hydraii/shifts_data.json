@@ -1,0 +1,1651 @@
+{
+  "systems": [
+    "DPA",
+    "EUC",
+    "FBA",
+    "PYE",
+    "IMP",
+    "MOP",
+    "DFB",
+    "OTM",
+    "DHA"
+  ],
+  "system_labels": {
+    "DFB": "2,6-Difluorobenzonitrile (DFB)",
+    "DHA": "Diethylhydroxylamine (DHA)",
+    "DPA": "Diisopropylethylamine (DPA)",
+    "EUC": "Eucalyptol (EUC)",
+    "FBA": "2,6-Difluorobenzoic acid (FBA)",
+    "IMP": "1-Methyl-4-iodo-1H-pyrazole (IMP)",
+    "MOP": "2-Methoxypyridine (MOP)",
+    "OTM": "TEMPONE (OTM)",
+    "PYE": "1-Pyrrolidineethanol (PYE)"
+  },
+  "hydrate_types": {
+    "DPA": [
+      "monohydrate_OHb",
+      "dihydrate_2i_OHb"
+    ],
+    "EUC": [
+      "monohydrate_OHb"
+    ],
+    "FBA": [
+      "monohydrate_OHb"
+    ],
+    "PYE": [
+      "monohydrate_OHb"
+    ],
+    "IMP": [
+      "monohydrate_OHb",
+      "dihydrate_2d_OHb",
+      "dihydrate_2i_OHb"
+    ],
+    "MOP": [
+      "monohydrate_OHb"
+    ],
+    "DFB": [
+      "monohydrate_OHb"
+    ],
+    "OTM": [
+      "monohydrate_OHb"
+    ],
+    "DHA": [
+      "monohydrate_OHb"
+    ]
+  },
+  "series": {
+    "DPA_monohydrate_OHb": {
+      "molecule": "DPA",
+      "hydrate_type": "monohydrate_OHb",
+      "category": "Test",
+      "label": "Diisopropylethylamine (DPA) — monohydrate OHb",
+      "points": [
+        {
+          "code": "td1FyY",
+          "shift": 211.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "Kv2DDD",
+          "shift": 230.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "VkZgv8",
+          "shift": 233.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "L5laul",
+          "shift": 284.0,
+          "uncertainty": 19
+        },
+        {
+          "code": "FFWr0c",
+          "shift": 318.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "R9OZDl",
+          "shift": 326.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "VtZxT4",
+          "shift": 334.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "tkEVTi",
+          "shift": 338.0,
+          "uncertainty": 26
+        },
+        {
+          "code": "mRQlmw",
+          "shift": 355.0,
+          "uncertainty": 34
+        },
+        {
+          "code": "w5aKdl",
+          "shift": 356.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "MMSGFF",
+          "shift": 364.0,
+          "uncertainty": 34
+        },
+        {
+          "code": "TwcWo6",
+          "shift": 370.0,
+          "uncertainty": 31
+        },
+        {
+          "code": "NWbWdJ",
+          "shift": 380.0,
+          "uncertainty": 4
+        },
+        {
+          "code": "elpt1E",
+          "shift": 413.0,
+          "uncertainty": 12
+        },
+        {
+          "code": "rmpkmQ",
+          "shift": 425.0,
+          "uncertainty": 13
+        },
+        {
+          "code": "t0AKXT",
+          "shift": 434.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "kDbcwm",
+          "shift": 438.0,
+          "uncertainty": 118
+        },
+        {
+          "code": "JLQOOi",
+          "shift": 496.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "imB2w7",
+          "shift": 521.0,
+          "uncertainty": 60
+        },
+        {
+          "code": "uQhK5E",
+          "shift": 543.0,
+          "uncertainty": 47
+        },
+        {
+          "code": "Y0RC7v",
+          "shift": 554.0,
+          "uncertainty": 60
+        },
+        {
+          "code": "H0y7m5",
+          "shift": 585.0,
+          "uncertainty": 90
+        },
+        {
+          "code": "TbJDzS",
+          "shift": 591.0,
+          "uncertainty": 16
+        }
+      ],
+      "median": 370.0
+    },
+    "DPA_dihydrate_2i_OHb": {
+      "molecule": "DPA",
+      "hydrate_type": "dihydrate_2i_OHb",
+      "category": "Test",
+      "label": "Diisopropylethylamine (DPA) — dihydrate 2i OHb",
+      "points": [
+        {
+          "code": "VkZgv8",
+          "shift": 79.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "td1FyY",
+          "shift": 121.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "L5laul",
+          "shift": 154.0,
+          "uncertainty": 19
+        },
+        {
+          "code": "NWbWdJ",
+          "shift": 160.0,
+          "uncertainty": 3
+        },
+        {
+          "code": "elpt1E",
+          "shift": 162.0,
+          "uncertainty": 3
+        },
+        {
+          "code": "MMSGFF",
+          "shift": 171.0,
+          "uncertainty": 22
+        },
+        {
+          "code": "rmpkmQ",
+          "shift": 171.0,
+          "uncertainty": 13
+        },
+        {
+          "code": "R9OZDl",
+          "shift": 173.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "TbJDzS",
+          "shift": 177.0,
+          "uncertainty": 16
+        },
+        {
+          "code": "tkEVTi",
+          "shift": 182.0,
+          "uncertainty": 26
+        },
+        {
+          "code": "w5aKdl",
+          "shift": 185.0,
+          "uncertainty": null
+        },
+        {
+          "code": "t0AKXT",
+          "shift": 187.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "Kv2DDD",
+          "shift": 196.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "imB2w7",
+          "shift": 251.0,
+          "uncertainty": 50
+        },
+        {
+          "code": "H0y7m5",
+          "shift": 257.0,
+          "uncertainty": 100
+        },
+        {
+          "code": "Y0RC7v",
+          "shift": 295.0,
+          "uncertainty": 50
+        }
+      ],
+      "median": 175.0
+    },
+    "EUC_monohydrate_OHb": {
+      "molecule": "EUC",
+      "hydrate_type": "monohydrate_OHb",
+      "category": "Test",
+      "label": "Eucalyptol (EUC) — monohydrate OHb",
+      "points": [
+        {
+          "code": "0Frkma",
+          "shift": 58.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "VkZgv8",
+          "shift": 68.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "Kv2DDD",
+          "shift": 103.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "R9OZDl",
+          "shift": 122.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "tkEVTi",
+          "shift": 129.0,
+          "uncertainty": 26
+        },
+        {
+          "code": "MMSGFF",
+          "shift": 147.0,
+          "uncertainty": 21
+        },
+        {
+          "code": "L5laul",
+          "shift": 151.0,
+          "uncertainty": 19
+        },
+        {
+          "code": "NWbWdJ",
+          "shift": 155.0,
+          "uncertainty": 5
+        },
+        {
+          "code": "FFWr0c",
+          "shift": 157.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "VtZxT4",
+          "shift": 159.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "TbJDzS",
+          "shift": 160.0,
+          "uncertainty": 16
+        },
+        {
+          "code": "t0AKXT",
+          "shift": 162.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "mRQlmw",
+          "shift": 165.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "rmpkmQ",
+          "shift": 168.0,
+          "uncertainty": 13
+        },
+        {
+          "code": "TwcWo6",
+          "shift": 172.0,
+          "uncertainty": 8
+        },
+        {
+          "code": "3XH8ml",
+          "shift": 175.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "w5aKdl",
+          "shift": 178.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "td1FyY",
+          "shift": 179.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "uQhK5E",
+          "shift": 181.0,
+          "uncertainty": 52
+        },
+        {
+          "code": "yN0rOV",
+          "shift": 183.0,
+          "uncertainty": 45
+        },
+        {
+          "code": "kDbcwm",
+          "shift": 184.0,
+          "uncertainty": 127
+        },
+        {
+          "code": "elpt1E",
+          "shift": 185.0,
+          "uncertainty": 12
+        },
+        {
+          "code": "DjYwx0",
+          "shift": 202.0,
+          "uncertainty": 45
+        },
+        {
+          "code": "imB2w7",
+          "shift": 206.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "6VZbuy",
+          "shift": 222.3,
+          "uncertainty": 25
+        },
+        {
+          "code": "JLQOOi",
+          "shift": 227.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "H0y7m5",
+          "shift": 232.0,
+          "uncertainty": 101
+        },
+        {
+          "code": "Y0RC7v",
+          "shift": 240.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "flXNLd",
+          "shift": 250.0,
+          "uncertainty": 40
+        }
+      ],
+      "median": 172.0
+    },
+    "FBA_monohydrate_OHb": {
+      "molecule": "FBA",
+      "hydrate_type": "monohydrate_OHb",
+      "category": "Test",
+      "label": "2,6-Difluorobenzoic acid (FBA) — monohydrate OHb",
+      "points": [
+        {
+          "code": "VtZxT4",
+          "shift": 57.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "0Frkma",
+          "shift": 60.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "flXNLd",
+          "shift": 65.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "rmpkmQ",
+          "shift": 72.0,
+          "uncertainty": 13
+        },
+        {
+          "code": "FFWr0c",
+          "shift": 98.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "t0AKXT",
+          "shift": 107.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "mRQlmw",
+          "shift": 118.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "TwcWo6",
+          "shift": 124.0,
+          "uncertainty": 8
+        },
+        {
+          "code": "TbJDzS",
+          "shift": 124.0,
+          "uncertainty": 16
+        },
+        {
+          "code": "td1FyY",
+          "shift": 127.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "3XH8ml",
+          "shift": 135.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "NWbWdJ",
+          "shift": 135.0,
+          "uncertainty": 5
+        },
+        {
+          "code": "yN0rOV",
+          "shift": 136.0,
+          "uncertainty": 45
+        },
+        {
+          "code": "MMSGFF",
+          "shift": 142.0,
+          "uncertainty": 21
+        },
+        {
+          "code": "kDbcwm",
+          "shift": 144.0,
+          "uncertainty": 128
+        },
+        {
+          "code": "elpt1E",
+          "shift": 145.0,
+          "uncertainty": 12
+        },
+        {
+          "code": "86tbOt",
+          "shift": 145.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "VkZgv8",
+          "shift": 146.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "5bc3RS",
+          "shift": 148.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "6VZbuy",
+          "shift": 151.3,
+          "uncertainty": 25
+        },
+        {
+          "code": "R9OZDl",
+          "shift": 156.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "w5aKdl",
+          "shift": 157.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "aaEFvY",
+          "shift": 164.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "JLQOOi",
+          "shift": 168.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "DjYwx0",
+          "shift": 176.0,
+          "uncertainty": 45
+        },
+        {
+          "code": "rZRIW4",
+          "shift": 188.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "L5laul",
+          "shift": 188.0,
+          "uncertainty": 19
+        },
+        {
+          "code": "uQhK5E",
+          "shift": 189.0,
+          "uncertainty": 52
+        },
+        {
+          "code": "imB2w7",
+          "shift": 194.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "Kv2DDD",
+          "shift": 195.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "H0y7m5",
+          "shift": 224.0,
+          "uncertainty": 101
+        },
+        {
+          "code": "Y0RC7v",
+          "shift": 238.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "GHE5KB",
+          "shift": 251.0,
+          "uncertainty": 35
+        },
+        {
+          "code": "tkEVTi",
+          "shift": 258.0,
+          "uncertainty": 26
+        }
+      ],
+      "median": 145.5
+    },
+    "PYE_monohydrate_OHb": {
+      "molecule": "PYE",
+      "hydrate_type": "monohydrate_OHb",
+      "category": "Test",
+      "label": "1-Pyrrolidineethanol (PYE) — monohydrate OHb",
+      "points": [
+        {
+          "code": "R9OZDl",
+          "shift": 129.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "tkEVTi",
+          "shift": 137.0,
+          "uncertainty": 26
+        },
+        {
+          "code": "VkZgv8",
+          "shift": 210.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "rZRIW4",
+          "shift": 214.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "imB2w7",
+          "shift": 214.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "6VZbuy",
+          "shift": 230.3,
+          "uncertainty": 30
+        },
+        {
+          "code": "Y0RC7v",
+          "shift": 249.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "L5laul",
+          "shift": 272.0,
+          "uncertainty": 19
+        },
+        {
+          "code": "td1FyY",
+          "shift": 323.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "Kv2DDD",
+          "shift": 347.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "elpt1E",
+          "shift": 357.0,
+          "uncertainty": 12
+        },
+        {
+          "code": "w5aKdl",
+          "shift": 361.0,
+          "uncertainty": 10
+        },
+        {
+          "code": "rmpkmQ",
+          "shift": 361.0,
+          "uncertainty": 13
+        },
+        {
+          "code": "t0AKXT",
+          "shift": 365.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "TbJDzS",
+          "shift": 373.0,
+          "uncertainty": 16
+        },
+        {
+          "code": "kDbcwm",
+          "shift": 508.0,
+          "uncertainty": 116
+        },
+        {
+          "code": "MMSGFF",
+          "shift": 537.0,
+          "uncertainty": 44
+        },
+        {
+          "code": "FFWr0c",
+          "shift": 545.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "NWbWdJ",
+          "shift": 574.0,
+          "uncertainty": 9
+        },
+        {
+          "code": "0Frkma",
+          "shift": 601.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "VtZxT4",
+          "shift": 610.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "uQhK5E",
+          "shift": 616.0,
+          "uncertainty": 45
+        },
+        {
+          "code": "GHE5KB",
+          "shift": 634.0,
+          "uncertainty": 35
+        },
+        {
+          "code": "JLQOOi",
+          "shift": 634.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "H0y7m5",
+          "shift": 695.0,
+          "uncertainty": 87
+        },
+        {
+          "code": "flXNLd",
+          "shift": 783.0,
+          "uncertainty": 40
+        }
+      ],
+      "median": 363.0
+    },
+    "IMP_monohydrate_OHb": {
+      "molecule": "IMP",
+      "hydrate_type": "monohydrate_OHb",
+      "category": "Test",
+      "label": "1-Methyl-4-iodo-1H-pyrazole (IMP) — monohydrate OHb",
+      "points": [
+        {
+          "code": "L5laul",
+          "shift": 123.0,
+          "uncertainty": 19
+        },
+        {
+          "code": "VkZgv8",
+          "shift": 133.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "tkEVTi",
+          "shift": 140.0,
+          "uncertainty": 26
+        },
+        {
+          "code": "NWbWdJ",
+          "shift": 166.0,
+          "uncertainty": 5
+        },
+        {
+          "code": "TwcWo6",
+          "shift": 168.0,
+          "uncertainty": 8
+        },
+        {
+          "code": "TbJDzS",
+          "shift": 169.0,
+          "uncertainty": 16
+        },
+        {
+          "code": "mRQlmw",
+          "shift": 170.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "t0AKXT",
+          "shift": 171.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "MMSGFF",
+          "shift": 172.0,
+          "uncertainty": 22
+        },
+        {
+          "code": "td1FyY",
+          "shift": 175.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "elpt1E",
+          "shift": 180.0,
+          "uncertainty": 12
+        },
+        {
+          "code": "yN0rOV",
+          "shift": 180.0,
+          "uncertainty": 45
+        },
+        {
+          "code": "rmpkmQ",
+          "shift": 180.0,
+          "uncertainty": 13
+        },
+        {
+          "code": "aaEFvY",
+          "shift": 181.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "5bc3RS",
+          "shift": 182.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "GHE5KB",
+          "shift": 184.0,
+          "uncertainty": 35
+        },
+        {
+          "code": "Kv2DDD",
+          "shift": 187.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "3XH8ml",
+          "shift": 190.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "w5aKdl",
+          "shift": 198.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "86tbOt",
+          "shift": 201.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "r0Ln61",
+          "shift": 221.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "JLQOOi",
+          "shift": 221.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "imB2w7",
+          "shift": 227.0,
+          "uncertainty": 50
+        },
+        {
+          "code": "DjYwx0",
+          "shift": 232.0,
+          "uncertainty": 45
+        },
+        {
+          "code": "Y0RC7v",
+          "shift": 273.0,
+          "uncertainty": 50
+        },
+        {
+          "code": "6VZbuy",
+          "shift": 273.3,
+          "uncertainty": 30
+        }
+      ],
+      "median": 180.5
+    },
+    "IMP_dihydrate_2d_OHb": {
+      "molecule": "IMP",
+      "hydrate_type": "dihydrate_2d_OHb",
+      "category": "Test",
+      "label": "1-Methyl-4-iodo-1H-pyrazole (IMP) — dihydrate 2d OHb",
+      "points": [
+        {
+          "code": "tkEVTi",
+          "shift": 172.0,
+          "uncertainty": 26
+        },
+        {
+          "code": "VkZgv8",
+          "shift": 205.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "L5laul",
+          "shift": 238.0,
+          "uncertainty": 19
+        },
+        {
+          "code": "td1FyY",
+          "shift": 245.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "rmpkmQ",
+          "shift": 291.0,
+          "uncertainty": 13
+        },
+        {
+          "code": "t0AKXT",
+          "shift": 293.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "aaEFvY",
+          "shift": 298.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "5bc3RS",
+          "shift": 306.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "Kv2DDD",
+          "shift": 320.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "MMSGFF",
+          "shift": 327.0,
+          "uncertainty": 32
+        },
+        {
+          "code": "w5aKdl",
+          "shift": 331.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "86tbOt",
+          "shift": 331.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "NWbWdJ",
+          "shift": 346.0,
+          "uncertainty": 8
+        },
+        {
+          "code": "TbJDzS",
+          "shift": 357.0,
+          "uncertainty": 16
+        },
+        {
+          "code": "imB2w7",
+          "shift": 364.0,
+          "uncertainty": 60
+        },
+        {
+          "code": "r0Ln61",
+          "shift": 374.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "elpt1E",
+          "shift": 386.0,
+          "uncertainty": 8
+        },
+        {
+          "code": "6VZbuy",
+          "shift": 402.3,
+          "uncertainty": 35
+        },
+        {
+          "code": "Y0RC7v",
+          "shift": 433.0,
+          "uncertainty": 60
+        }
+      ],
+      "median": 327.0
+    },
+    "IMP_dihydrate_2i_OHb": {
+      "molecule": "IMP",
+      "hydrate_type": "dihydrate_2i_OHb",
+      "category": "Test",
+      "label": "1-Methyl-4-iodo-1H-pyrazole (IMP) — dihydrate 2i OHb",
+      "points": [
+        {
+          "code": "td1FyY",
+          "shift": 87.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "VkZgv8",
+          "shift": 93.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "L5laul",
+          "shift": 164.0,
+          "uncertainty": 19
+        },
+        {
+          "code": "elpt1E",
+          "shift": 168.0,
+          "uncertainty": 3
+        },
+        {
+          "code": "rmpkmQ",
+          "shift": 172.0,
+          "uncertainty": 13
+        },
+        {
+          "code": "5bc3RS",
+          "shift": 173.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "NWbWdJ",
+          "shift": 175.0,
+          "uncertainty": 3
+        },
+        {
+          "code": "t0AKXT",
+          "shift": 183.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "aaEFvY",
+          "shift": 183.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "86tbOt",
+          "shift": 185.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "TbJDzS",
+          "shift": 193.0,
+          "uncertainty": 16
+        },
+        {
+          "code": "w5aKdl",
+          "shift": 206.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "MMSGFF",
+          "shift": 236.0,
+          "uncertainty": 26
+        },
+        {
+          "code": "Kv2DDD",
+          "shift": 251.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "r0Ln61",
+          "shift": 252.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "imB2w7",
+          "shift": 254.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "6VZbuy",
+          "shift": 266.3,
+          "uncertainty": 30
+        },
+        {
+          "code": "tkEVTi",
+          "shift": 302.0,
+          "uncertainty": 26
+        },
+        {
+          "code": "Y0RC7v",
+          "shift": 307.0,
+          "uncertainty": 30
+        }
+      ],
+      "median": 185.0
+    },
+    "MOP_monohydrate_OHb": {
+      "molecule": "MOP",
+      "hydrate_type": "monohydrate_OHb",
+      "category": "Test",
+      "label": "2-Methoxypyridine (MOP) — monohydrate OHb",
+      "points": [
+        {
+          "code": "6VZbuy",
+          "shift": 120.3,
+          "uncertainty": 25
+        },
+        {
+          "code": "0Frkma",
+          "shift": 142.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "VkZgv8",
+          "shift": 154.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "flXNLd",
+          "shift": 172.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "R9OZDl",
+          "shift": 175.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "td1FyY",
+          "shift": 176.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "tkEVTi",
+          "shift": 181.0,
+          "uncertainty": 26
+        },
+        {
+          "code": "NWbWdJ",
+          "shift": 193.0,
+          "uncertainty": 4
+        },
+        {
+          "code": "t0AKXT",
+          "shift": 199.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "Kv2DDD",
+          "shift": 201.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "MMSGFF",
+          "shift": 201.0,
+          "uncertainty": 24
+        },
+        {
+          "code": "VtZxT4",
+          "shift": 201.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "TwcWo6",
+          "shift": 202.0,
+          "uncertainty": 8
+        },
+        {
+          "code": "mRQlmw",
+          "shift": 203.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "TbJDzS",
+          "shift": 204.0,
+          "uncertainty": 16
+        },
+        {
+          "code": "rmpkmQ",
+          "shift": 204.0,
+          "uncertainty": 13
+        },
+        {
+          "code": "FFWr0c",
+          "shift": 207.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "5bc3RS",
+          "shift": 210.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "aaEFvY",
+          "shift": 212.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "elpt1E",
+          "shift": 214.0,
+          "uncertainty": 12
+        },
+        {
+          "code": "L5laul",
+          "shift": 215.0,
+          "uncertainty": 19
+        },
+        {
+          "code": "w5aKdl",
+          "shift": 216.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "3XH8ml",
+          "shift": 225.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "yN0rOV",
+          "shift": 227.0,
+          "uncertainty": 45
+        },
+        {
+          "code": "kDbcwm",
+          "shift": 234.0,
+          "uncertainty": 126
+        },
+        {
+          "code": "GHE5KB",
+          "shift": 239.0,
+          "uncertainty": 35
+        },
+        {
+          "code": "86tbOt",
+          "shift": 248.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "JLQOOi",
+          "shift": 253.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "rZRIW4",
+          "shift": 258.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "r0Ln61",
+          "shift": 258.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "uQhK5E",
+          "shift": 261.0,
+          "uncertainty": 51
+        },
+        {
+          "code": "imB2w7",
+          "shift": 264.0,
+          "uncertainty": 50
+        },
+        {
+          "code": "DjYwx0",
+          "shift": 265.0,
+          "uncertainty": 45
+        },
+        {
+          "code": "H0y7m5",
+          "shift": 295.0,
+          "uncertainty": 99
+        },
+        {
+          "code": "Y0RC7v",
+          "shift": 306.0,
+          "uncertainty": 50
+        }
+      ],
+      "median": 210.0
+    },
+    "DFB_monohydrate_OHb": {
+      "molecule": "DFB",
+      "hydrate_type": "monohydrate_OHb",
+      "category": "Test",
+      "label": "2,6-Difluorobenzonitrile (DFB) — monohydrate OHb",
+      "points": [
+        {
+          "code": "VkZgv8",
+          "shift": -12.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "td1FyY",
+          "shift": 4.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "w5aKdl",
+          "shift": 24.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "TbJDzS",
+          "shift": 28.0,
+          "uncertainty": 16
+        },
+        {
+          "code": "L5laul",
+          "shift": 28.0,
+          "uncertainty": 19
+        },
+        {
+          "code": "86tbOt",
+          "shift": 33.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "6VZbuy",
+          "shift": 34.3,
+          "uncertainty": 25
+        },
+        {
+          "code": "mRQlmw",
+          "shift": 36.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "JLQOOi",
+          "shift": 37.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "TwcWo6",
+          "shift": 38.0,
+          "uncertainty": 8
+        },
+        {
+          "code": "MMSGFF",
+          "shift": 42.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "VtZxT4",
+          "shift": 43.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "aaEFvY",
+          "shift": 43.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "elpt1E",
+          "shift": 45.0,
+          "uncertainty": 12
+        },
+        {
+          "code": "NWbWdJ",
+          "shift": 48.0,
+          "uncertainty": 5
+        },
+        {
+          "code": "Kv2DDD",
+          "shift": 49.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "rmpkmQ",
+          "shift": 49.0,
+          "uncertainty": 13
+        },
+        {
+          "code": "t0AKXT",
+          "shift": 51.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "yN0rOV",
+          "shift": 53.0,
+          "uncertainty": 45
+        },
+        {
+          "code": "5bc3RS",
+          "shift": 58.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "3XH8ml",
+          "shift": 60.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "uQhK5E",
+          "shift": 60.0,
+          "uncertainty": 54
+        },
+        {
+          "code": "kDbcwm",
+          "shift": 63.0,
+          "uncertainty": 132
+        },
+        {
+          "code": "R9OZDl",
+          "shift": 66.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "H0y7m5",
+          "shift": 66.0,
+          "uncertainty": 106
+        },
+        {
+          "code": "r0Ln61",
+          "shift": 73.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "DjYwx0",
+          "shift": 75.0,
+          "uncertainty": 45
+        },
+        {
+          "code": "rZRIW4",
+          "shift": 76.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "GHE5KB",
+          "shift": 79.0,
+          "uncertainty": 35
+        },
+        {
+          "code": "imB2w7",
+          "shift": 81.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "tkEVTi",
+          "shift": 87.0,
+          "uncertainty": 26
+        },
+        {
+          "code": "FFWr0c",
+          "shift": 88.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "Y0RC7v",
+          "shift": 99.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "0Frkma",
+          "shift": 105.0,
+          "uncertainty": 40
+        }
+      ],
+      "median": 50.0
+    },
+    "OTM_monohydrate_OHb": {
+      "molecule": "OTM",
+      "hydrate_type": "monohydrate_OHb",
+      "category": "Bonus",
+      "label": "TEMPONE (OTM) — monohydrate OHb",
+      "points": [
+        {
+          "code": "rmpkmQ",
+          "shift": 114.0,
+          "uncertainty": 13
+        },
+        {
+          "code": "TbJDzS",
+          "shift": 122.0,
+          "uncertainty": 16
+        },
+        {
+          "code": "NWbWdJ",
+          "shift": 122.0,
+          "uncertainty": 8
+        },
+        {
+          "code": "t0AKXT",
+          "shift": 123.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "td1FyY",
+          "shift": 157.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "Kv2DDD",
+          "shift": 158.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "L5laul",
+          "shift": 165.0,
+          "uncertainty": 19
+        },
+        {
+          "code": "w5aKdl",
+          "shift": 169.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "H0y7m5",
+          "shift": 252.0,
+          "uncertainty": 100
+        },
+        {
+          "code": "VkZgv8",
+          "shift": 263.0,
+          "uncertainty": 25
+        }
+      ],
+      "median": 157.5
+    },
+    "DHA_monohydrate_OHb": {
+      "molecule": "DHA",
+      "hydrate_type": "monohydrate_OHb",
+      "category": "Bonus",
+      "label": "Diethylhydroxylamine (DHA) — monohydrate OHb",
+      "points": [
+        {
+          "code": "0Frkma",
+          "shift": 215.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "L5laul",
+          "shift": 249.0,
+          "uncertainty": 19
+        },
+        {
+          "code": "rmpkmQ",
+          "shift": 262.0,
+          "uncertainty": 13
+        },
+        {
+          "code": "TbJDzS",
+          "shift": 263.0,
+          "uncertainty": 16
+        },
+        {
+          "code": "FFWr0c",
+          "shift": 266.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "td1FyY",
+          "shift": 269.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "VtZxT4",
+          "shift": 272.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "t0AKXT",
+          "shift": 274.0,
+          "uncertainty": 11
+        },
+        {
+          "code": "NWbWdJ",
+          "shift": 277.0,
+          "uncertainty": 9
+        },
+        {
+          "code": "w5aKdl",
+          "shift": 284.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "elpt1E",
+          "shift": 298.0,
+          "uncertainty": 12
+        },
+        {
+          "code": "tkEVTi",
+          "shift": 300.0,
+          "uncertainty": 26
+        },
+        {
+          "code": "aaEFvY",
+          "shift": 300.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "Kv2DDD",
+          "shift": 301.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "VkZgv8",
+          "shift": 301.0,
+          "uncertainty": 25
+        },
+        {
+          "code": "R9OZDl",
+          "shift": 301.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "5bc3RS",
+          "shift": 304.0,
+          "uncertainty": 15
+        },
+        {
+          "code": "flXNLd",
+          "shift": 305.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "kDbcwm",
+          "shift": 309.0,
+          "uncertainty": 123
+        },
+        {
+          "code": "86tbOt",
+          "shift": 309.0,
+          "uncertainty": 40
+        },
+        {
+          "code": "MMSGFF",
+          "shift": 315.0,
+          "uncertainty": 31
+        },
+        {
+          "code": "uQhK5E",
+          "shift": 347.0,
+          "uncertainty": 49
+        },
+        {
+          "code": "JLQOOi",
+          "shift": 351.0,
+          "uncertainty": 30
+        },
+        {
+          "code": "GHE5KB",
+          "shift": 398.0,
+          "uncertainty": 35
+        },
+        {
+          "code": "H0y7m5",
+          "shift": 407.0,
+          "uncertainty": 96
+        },
+        {
+          "code": "6VZbuy",
+          "shift": 407.3,
+          "uncertainty": 35
+        }
+      ],
+      "median": 300.5
+    }
+  }
+}
