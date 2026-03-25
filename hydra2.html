@@ -152,6 +152,22 @@
       color: #c0392b;
       font-size: 0.9rem;
     }
+
+    /* Evaluation scores table */
+    #eval-section table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    #eval-section th, #eval-section td {
+      padding: 0.45rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      text-align: right;
+    }
+    #eval-section th { background: var(--bg-subtle); font-weight: 600; text-align: right; }
+    #eval-section th:first-child, #eval-section td:first-child { text-align: left; }
+    #eval-section tr.highlighted { background: rgba(230, 57, 70, 0.08); font-weight: 600; }
+    #eval-section tr:hover { background: var(--bg-subtle); }
   </style>
 </head>
 <body>
@@ -205,6 +221,16 @@
         Test molecules are on the left; bonus molecules on the right of the dashed separator.
       </p>
       <div id="shifts-chart"></div>
+    </section>
+
+    <!-- ── Section: Evaluation scores ──────────────────────────────────── -->
+    <section class="hydra-section" id="eval-section" style="display:none">
+      <h2>Prediction Scores</h2>
+      <p>
+        Scores computed against the experimental median (± 2 cm<sup>−1</sup> uncertainty).
+        Select a participant code to highlight their row.
+      </p>
+      <div id="eval-table-wrap"></div>
     </section>
 
     <!-- ── Section 2: Molecular structures ──────────────────────────────── -->
@@ -304,6 +330,7 @@
       } catch (_) { /* silently degrade */ }
 
       buildChart(evalData);
+      buildEvalTable(evalData);
 
       document.getElementById('code-select')
         .addEventListener('change', onCodeChange);
@@ -350,6 +377,10 @@
         selectedCode ? '' : 'none';
       updateChartHighlight();
       updateViewerHighlight();
+      // Sync eval table row highlight with selected code
+      document.querySelectorAll('#eval-table-wrap tr[data-code]').forEach(row => {
+        row.classList.toggle('highlighted', row.dataset.code === selectedCode);
+      });
     }
 
     function onMolChange() {
@@ -628,6 +659,62 @@
           ? `${n} structure${n !== 1 ? 's' : ''} loaded — your structure highlighted in red.`
           : `No structure found for code "${selectedCode}" in this molecule — showing all ${n} in grey.`;
       }
+    }
+
+    /* ── Evaluation table ─────────────────────────────────────────── */
+    function buildEvalTable(evalData) {
+      if (!evalData || !evalData.scores) return;
+      const section = document.getElementById('eval-section');
+      const wrap    = document.getElementById('eval-table-wrap');
+      const scores  = evalData.scores;
+      const codes   = Object.keys(scores).sort();
+
+      // Sort by log-likelihood descending (best score first)
+      codes.sort((a, b) => (scores[b].log_likelihood ?? -Infinity)
+                          - (scores[a].log_likelihood ?? -Infinity));
+
+      const fmt    = (v, dec = 2) => v == null ? '—' : Number(v).toFixed(dec);
+      const fmtCov = v => v == null ? '—' : (v * 100).toFixed(0) + '%';
+
+      let html = `<table>
+        <thead><tr>
+          <th>Code</th>
+          <th title="Higher is better">Log-likelihood ↑</th>
+          <th title="Lower is better">CRPS ↓</th>
+          <th>Coverage 50%</th>
+          <th>Coverage 90%</th>
+          <th>Mean sharpness</th>
+          <th>N</th>
+        </tr></thead><tbody>`;
+
+      for (const code of codes) {
+        const s   = scores[code];
+        const cov = s.coverage ?? {};
+        const hl  = code === selectedCode ? ' class="highlighted"' : '';
+        html += `<tr${hl} data-code="${code}">
+          <td>${code}</td>
+          <td>${fmt(s.log_likelihood)}</td>
+          <td>${fmt(s.crps)}</td>
+          <td>${fmtCov(cov['50'])}</td>
+          <td>${fmtCov(cov['90'])}</td>
+          <td>${fmt(s.sharpness, 1)}</td>
+          <td>${s.n}</td>
+        </tr>`;
+      }
+      html += '</tbody></table>';
+      wrap.innerHTML = html;
+      section.style.display = '';
+
+      // Click a row to select/deselect that participant code
+      wrap.querySelectorAll('tr[data-code]').forEach(row => {
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', () => {
+          const code = row.dataset.code;
+          const sel  = document.getElementById('code-select');
+          sel.value  = (selectedCode === code) ? '' : code;
+          onCodeChange();
+        });
+      });
     }
 
     /* ── Utilities ────────────────────────────────────────────────── */
