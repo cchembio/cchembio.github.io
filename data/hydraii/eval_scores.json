@@ -1,0 +1,453 @@
+{
+  "series_keys": [
+    "DPA_monohydrate_OHb",
+    "DPA_dihydrate_2i_OHb",
+    "EUC_monohydrate_OHb",
+    "FBA_monohydrate_OHb",
+    "PYE_monohydrate_OHb",
+    "IMP_monohydrate_OHb",
+    "IMP_dihydrate_2d_OHb",
+    "IMP_dihydrate_2i_OHb",
+    "MOP_monohydrate_OHb",
+    "DFB_monohydrate_OHb",
+    "OTM_monohydrate_OHb",
+    "DHA_monohydrate_OHb"
+  ],
+  "experimental": {
+    "DPA_monohydrate_OHb": {
+      "value": 370.0,
+      "uncertainty": 2.0
+    },
+    "DPA_dihydrate_2i_OHb": {
+      "value": 175.0,
+      "uncertainty": 2.0
+    },
+    "EUC_monohydrate_OHb": {
+      "value": 172.0,
+      "uncertainty": 2.0
+    },
+    "FBA_monohydrate_OHb": {
+      "value": 145.5,
+      "uncertainty": 2.0
+    },
+    "PYE_monohydrate_OHb": {
+      "value": 363.0,
+      "uncertainty": 2.0
+    },
+    "IMP_monohydrate_OHb": {
+      "value": 180.5,
+      "uncertainty": 2.0
+    },
+    "IMP_dihydrate_2d_OHb": {
+      "value": 327.0,
+      "uncertainty": 2.0
+    },
+    "IMP_dihydrate_2i_OHb": {
+      "value": 185.0,
+      "uncertainty": 2.0
+    },
+    "MOP_monohydrate_OHb": {
+      "value": 210.0,
+      "uncertainty": 2.0
+    },
+    "DFB_monohydrate_OHb": {
+      "value": 50.0,
+      "uncertainty": 2.0
+    },
+    "OTM_monohydrate_OHb": {
+      "value": 157.5,
+      "uncertainty": 2.0
+    },
+    "DHA_monohydrate_OHb": {
+      "value": 300.5,
+      "uncertainty": 2.0
+    }
+  },
+  "scores": {
+    "0Frkma": {
+      "log_likelihood": -8.4651,
+      "crps": 86.0008,
+      "coverage": {
+        "50": 0.0,
+        "90": 0.1667,
+        "95": 0.3333
+      },
+      "sharpness": 156.9959,
+      "n": 6
+    },
+    "3XH8ml": {
+      "log_likelihood": -3.307,
+      "crps": 7.5283,
+      "coverage": {
+        "50": 1.0,
+        "90": 1.0,
+        "95": 1.0
+      },
+      "sharpness": 98.3131,
+      "n": 5
+    },
+    "5bc3RS": {
+      "log_likelihood": -2.9258,
+      "crps": 5.8035,
+      "coverage": {
+        "50": 0.7143,
+        "90": 1.0,
+        "95": 1.0
+      },
+      "sharpness": 59.3204,
+      "n": 7
+    },
+    "6VZbuy": {
+      "log_likelihood": -7.1054,
+      "crps": 58.5696,
+      "coverage": {
+        "50": 0.2222,
+        "90": 0.2222,
+        "95": 0.2222
+      },
+      "sharpness": 113.5204,
+      "n": 9
+    },
+    "86tbOt": {
+      "log_likelihood": -3.79,
+      "crps": 12.389,
+      "coverage": {
+        "50": 0.8571,
+        "90": 1.0,
+        "95": 1.0
+      },
+      "sharpness": 156.9959,
+      "n": 7
+    },
+    "DjYwx0": {
+      "log_likelihood": -4.2085,
+      "crps": 23.7576,
+      "coverage": {
+        "50": 0.4,
+        "90": 1.0,
+        "95": 1.0
+      },
+      "sharpness": 176.5741,
+      "n": 5
+    },
+    "FFWr0c": {
+      "log_likelihood": -5.5138,
+      "crps": 40.9011,
+      "coverage": {
+        "50": 0.2857,
+        "90": 0.8571,
+        "95": 0.8571
+      },
+      "sharpness": 156.9959,
+      "n": 7
+    },
+    "GHE5KB": {
+      "log_likelihood": -10.0509,
+      "crps": 76.2639,
+      "coverage": {
+        "50": 0.1667,
+        "90": 0.5,
+        "95": 0.5
+      },
+      "sharpness": 137.4238,
+      "n": 6
+    },
+    "H0y7m5": {
+      "log_likelihood": -5.9573,
+      "crps": 86.5304,
+      "coverage": {
+        "50": 0.2222,
+        "90": 0.7778,
+        "95": 0.7778
+      },
+      "sharpness": 383.3693,
+      "n": 9
+    },
+    "JLQOOi": {
+      "log_likelihood": -10.2519,
+      "crps": 64.1741,
+      "coverage": {
+        "50": 0.125,
+        "90": 0.5,
+        "95": 0.75
+      },
+      "sharpness": 117.861,
+      "n": 8
+    },
+    "Kv2DDD": {
+      "log_likelihood": -5.3443,
+      "crps": 27.3892,
+      "coverage": {
+        "50": 0.5833,
+        "90": 0.6667,
+        "95": 0.6667
+      },
+      "sharpness": 98.3131,
+      "n": 12
+    },
+    "L5laul": {
+      "log_likelihood": -6.7457,
+      "crps": 34.6495,
+      "coverage": {
+        "50": 0.1667,
+        "90": 0.5,
+        "95": 0.5
+      },
+      "sharpness": 74.8915,
+      "n": 12
+    },
+    "MMSGFF": {
+      "log_likelihood": -4.2292,
+      "crps": 23.3148,
+      "coverage": {
+        "50": 0.7273,
+        "90": 0.8182,
+        "95": 0.9091
+      },
+      "sharpness": 104.3772,
+      "n": 11
+    },
+    "NWbWdJ": {
+      "log_likelihood": -27.5681,
+      "crps": 28.9058,
+      "coverage": {
+        "50": 0.0833,
+        "90": 0.0833,
+        "95": 0.1667
+      },
+      "sharpness": 23.725,
+      "n": 12
+    },
+    "R9OZDl": {
+      "log_likelihood": -6.0587,
+      "crps": 41.4649,
+      "coverage": {
+        "50": 0.5,
+        "90": 0.875,
+        "95": 0.875
+      },
+      "sharpness": 156.9959,
+      "n": 8
+    },
+    "TbJDzS": {
+      "log_likelihood": -11.4076,
+      "crps": 29.1924,
+      "coverage": {
+        "50": 0.3333,
+        "90": 0.6667,
+        "95": 0.75
+      },
+      "sharpness": 63.2081,
+      "n": 12
+    },
+    "TwcWo6": {
+      "log_likelihood": -3.3437,
+      "crps": 7.8426,
+      "coverage": {
+        "50": 0.3333,
+        "90": 0.8333,
+        "95": 0.8333
+      },
+      "sharpness": 47.2331,
+      "n": 6
+    },
+    "VkZgv8": {
+      "log_likelihood": -10.2388,
+      "crps": 70.5109,
+      "coverage": {
+        "50": 0.1667,
+        "90": 0.1667,
+        "95": 0.25
+      },
+      "sharpness": 98.3131,
+      "n": 12
+    },
+    "VtZxT4": {
+      "log_likelihood": -6.8629,
+      "crps": 51.4739,
+      "coverage": {
+        "50": 0.4286,
+        "90": 0.7143,
+        "95": 0.7143
+      },
+      "sharpness": 156.9959,
+      "n": 7
+    },
+    "Y0RC7v": {
+      "log_likelihood": -6.8205,
+      "crps": 79.7458,
+      "coverage": {
+        "50": 0.0,
+        "90": 0.1,
+        "95": 0.5
+      },
+      "sharpness": 176.5841,
+      "n": 10
+    },
+    "aaEFvY": {
+      "log_likelihood": -3.1039,
+      "crps": 7.3631,
+      "coverage": {
+        "50": 0.7143,
+        "90": 0.8571,
+        "95": 1.0
+      },
+      "sharpness": 59.3204,
+      "n": 7
+    },
+    "elpt1E": {
+      "log_likelihood": -6.8159,
+      "crps": 13.0994,
+      "coverage": {
+        "50": 0.5455,
+        "90": 0.6364,
+        "95": 0.6364
+      },
+      "sharpness": 40.1912,
+      "n": 11
+    },
+    "flXNLd": {
+      "log_likelihood": -15.5622,
+      "crps": 108.8943,
+      "coverage": {
+        "50": 0.2,
+        "90": 0.4,
+        "95": 0.6
+      },
+      "sharpness": 156.9959,
+      "n": 5
+    },
+    "imB2w7": {
+      "log_likelihood": -5.4505,
+      "crps": 49.9453,
+      "coverage": {
+        "50": 0.1,
+        "90": 0.7,
+        "95": 0.7
+      },
+      "sharpness": 176.5841,
+      "n": 10
+    },
+    "kDbcwm": {
+      "log_likelihood": -4.9614,
+      "crps": 40.8213,
+      "coverage": {
+        "50": 0.8571,
+        "90": 1.0,
+        "95": 1.0
+      },
+      "sharpness": 487.2632,
+      "n": 7
+    },
+    "mRQlmw": {
+      "log_likelihood": -3.3896,
+      "crps": 9.2513,
+      "coverage": {
+        "50": 0.5,
+        "90": 0.8333,
+        "95": 0.8333
+      },
+      "sharpness": 58.7742,
+      "n": 6
+    },
+    "r0Ln61": {
+      "log_likelihood": -4.536,
+      "crps": 29.8203,
+      "coverage": {
+        "50": 0.0,
+        "90": 0.8,
+        "95": 0.8
+      },
+      "sharpness": 133.515,
+      "n": 5
+    },
+    "rZRIW4": {
+      "log_likelihood": -5.7997,
+      "crps": 49.8678,
+      "coverage": {
+        "50": 0.0,
+        "90": 0.75,
+        "95": 0.75
+      },
+      "sharpness": 137.4285,
+      "n": 4
+    },
+    "rmpkmQ": {
+      "log_likelihood": -5.7896,
+      "crps": 19.8246,
+      "coverage": {
+        "50": 0.5,
+        "90": 0.5833,
+        "95": 0.5833
+      },
+      "sharpness": 51.5596,
+      "n": 12
+    },
+    "t0AKXT": {
+      "log_likelihood": -5.4445,
+      "crps": 16.6448,
+      "coverage": {
+        "50": 0.25,
+        "90": 0.5833,
+        "95": 0.5833
+      },
+      "sharpness": 43.8269,
+      "n": 12
+    },
+    "td1FyY": {
+      "log_likelihood": -6.5879,
+      "crps": 38.9892,
+      "coverage": {
+        "50": 0.25,
+        "90": 0.5833,
+        "95": 0.6667
+      },
+      "sharpness": 98.3131,
+      "n": 12
+    },
+    "tkEVTi": {
+      "log_likelihood": -10.4949,
+      "crps": 62.0958,
+      "coverage": {
+        "50": 0.1818,
+        "90": 0.5455,
+        "95": 0.6364
+      },
+      "sharpness": 102.2211,
+      "n": 11
+    },
+    "uQhK5E": {
+      "log_likelihood": -7.3205,
+      "crps": 69.2336,
+      "coverage": {
+        "50": 0.2857,
+        "90": 0.7143,
+        "95": 0.7143
+      },
+      "sharpness": 196.1573,
+      "n": 7
+    },
+    "w5aKdl": {
+      "log_likelihood": -3.423,
+      "crps": 9.1568,
+      "coverage": {
+        "50": 0.8333,
+        "90": 1.0,
+        "95": 1.0
+      },
+      "sharpness": 111.3706,
+      "n": 12
+    },
+    "yN0rOV": {
+      "log_likelihood": -3.8328,
+      "crps": 11.4215,
+      "coverage": {
+        "50": 1.0,
+        "90": 1.0,
+        "95": 1.0
+      },
+      "sharpness": 176.5741,
+      "n": 5
+    }
+  }
+}

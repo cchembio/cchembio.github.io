@@ -1,0 +1,13 @@
+series_key,molecule,hydrate_type,value,uncertainty
+DPA_monohydrate_OHb,DPA,monohydrate_OHb,370.0,2.0
+DPA_dihydrate_2i_OHb,DPA,dihydrate_2i_OHb,175.0,2.0
+EUC_monohydrate_OHb,EUC,monohydrate_OHb,172.0,2.0
+FBA_monohydrate_OHb,FBA,monohydrate_OHb,145.5,2.0
+PYE_monohydrate_OHb,PYE,monohydrate_OHb,363.0,2.0
+IMP_monohydrate_OHb,IMP,monohydrate_OHb,180.5,2.0
+IMP_dihydrate_2d_OHb,IMP,dihydrate_2d_OHb,327.0,2.0
+IMP_dihydrate_2i_OHb,IMP,dihydrate_2i_OHb,185.0,2.0
+MOP_monohydrate_OHb,MOP,monohydrate_OHb,210.0,2.0
+DFB_monohydrate_OHb,DFB,monohydrate_OHb,50.0,2.0
+OTM_monohydrate_OHb,OTM,monohydrate_OHb,157.5,2.0
+DHA_monohydrate_OHb,DHA,monohydrate_OHb,300.5,2.0
