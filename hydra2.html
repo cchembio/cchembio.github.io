@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="css/style.css">
   <!-- CDN libraries: Plotly for the shifts chart, 3Dmol for molecular viewer -->
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
-  <script src="https://3dmol.org/build/3Dmol-min.js"></script>
+  <script src="https://unpkg.com/3dmol@2.1.0/build/3Dmol-min.js"></script>
   <style>
     /* ── HyDRA II page-specific styles ────────────────────────────────── */
 
@@ -530,9 +530,13 @@
     /* ── Molecular viewer ─────────────────────────────────────────── */
     function ensureViewer() {
       if (molViewer) return;
+      if (typeof $3Dmol === 'undefined') {
+        throw new Error('3Dmol.js did not load — check network or WebGL support');
+      }
       const wrap = document.getElementById('mol-viewer-wrap');
       document.getElementById('mol-placeholder').style.display = 'none';
       molViewer = $3Dmol.createViewer(wrap, { backgroundColor: '#f4f6f8' });
+      if (!molViewer) throw new Error('WebGL unavailable — cannot create 3D viewer');
       document.getElementById('btn-reset').disabled = false;
     }
 
@@ -553,7 +557,14 @@
         return;
       }
 
-      ensureViewer();
+      try {
+        ensureViewer();
+      } catch (e) {
+        noteEl.textContent = '';
+        showErr('mol-viewer-wrap', e.message);
+        return;
+      }
+
       molViewer.clear();
       molModels = [];
 
