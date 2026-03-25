@@ -489,9 +489,9 @@
             x0: i - 0.45, x1: i + 0.45,
             y0: exp.value - exp.uncertainty,
             y1: exp.value + exp.uncertainty,
-            fillcolor: 'rgba(200, 169, 81, 0.25)',  // site gold (#c8a951) at 25% opacity
+            fillcolor: 'rgba(255, 120, 0, 0.18)',  // saturated orange, light transparency
             line: { width: 0 },
-            layer: 'below',  // draw behind data points
+            layer: 'above',  // draw in front of data points
           });
         }
       }
