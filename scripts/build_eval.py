@@ -63,6 +63,10 @@ def score_log_likelihood(predictions: list, truth: tuple) -> float:
       sigma_eff = sqrt(sigma_pred_i² + sigma_truth²)
       ll_i = -0.5 * (2*log(sigma_eff) + (y - mu_i)² / sigma_eff²)
 
+    Note: the −0.5·log(2π) normalisation constant is omitted because it is the same for
+    all predictions and cancels when comparing scores. Absolute values will differ from
+    the standard Gaussian log-likelihood by +0.9189 per prediction.
+
     Predictions where shift or uncertainty is None are skipped.
     Returns mean ll (higher = better), or -inf for empty/all-invalid sets.
     """
@@ -192,6 +196,11 @@ def read_experimental_csv() -> dict:
 
 # ── Score aggregation ─────────────────────────────────────────────────────────
 
+def _mean(lst: list):
+    """Return the arithmetic mean of lst, or None if lst is empty."""
+    return sum(lst) / len(lst) if lst else None
+
+
 def compute_all_scores(data: dict, exp: dict) -> dict:
     """Compute all evaluation scores for every participant code across all series.
 
@@ -269,9 +278,6 @@ def compute_all_scores(data: dict, exp: dict) -> dict:
         if n == 0:
             continue
 
-        def _mean(lst):
-            return sum(lst) / len(lst) if lst else None
-
         result_scores[code] = {
             "log_likelihood": round(_mean(ll_vals), 4) if ll_vals else None,
             "crps":           round(_mean(crps_vals), 4) if crps_vals else None,
@@ -341,11 +347,13 @@ def run_synthetic_tests() -> None:
     # ── Test D: calibration on uniform spread ────────────────────────────────
     # 101 predictions at integer x from -50 to 50, each sigma=10; truth=(0, 1)
     # sigma_eff = sqrt(100+1) ≈ 10.05
-    # z_90 * sigma_eff ≈ 1.6449 * 10.05 ≈ 16.5 → should cover ~90% of [-50,50]
+    # z_90 * sigma_eff ≈ 1.6449 * 10.05 ≈ 16.5 → only predictions within ±16.5
+    # of truth (0) are covered, i.e. roughly 33 out of 101 → empirical ~0.33
     preds_d = [(float(i), 10.0) for i in range(-50, 51)]
     truth_d = (0.0, 1.0)
     cov_d   = score_coverage(preds_d, truth_d)
-    check("D coverage 90% (should be 0.25–0.45)", 0.25 <= cov_d["90"] <= 0.45,
+    check("D coverage at 90% CI (uniform spread, truth at centre; expected ~0.33 empirical)",
+          0.25 <= cov_d["90"] <= 0.45,
           f"cov90={cov_d['90']:.2f}")
     check("D coverage 50% ≤ coverage 90%", cov_d["50"] <= cov_d["90"],
           f"cov50={cov_d['50']:.2f} cov90={cov_d['90']:.2f}")
