@@ -450,7 +450,7 @@
       if (evalData && evalData.experimental) {
         for (const [i, k] of keys.entries()) {
           const exp = evalData.experimental[k];
-          if (!exp) continue;
+          if (!exp || exp.value == null || exp.uncertainty == null) continue;
           shapes.push({
             type: 'rect',
             xref: 'x', yref: 'y',
