@@ -691,14 +691,14 @@
         const s   = scores[code];
         const cov = s.coverage ?? {};
         const hl  = code === selectedCode ? ' class="highlighted"' : '';
-        html += `<tr${hl} data-code="${code}">
-          <td>${code}</td>
+        html += `<tr${hl} data-code="${escHtml(code)}">
+          <td>${escHtml(code)}</td>
           <td>${fmt(s.log_likelihood)}</td>
           <td>${fmt(s.crps)}</td>
           <td>${fmtCov(cov['50'])}</td>
           <td>${fmtCov(cov['90'])}</td>
           <td>${fmt(s.sharpness, 1)}</td>
-          <td>${s.n}</td>
+          <td>${escHtml(s.n)}</td>
         </tr>`;
       }
       html += '</tbody></table>';
@@ -718,6 +718,15 @@
     }
 
     /* ── Utilities ────────────────────────────────────────────────── */
+    function escHtml(s) {
+      /* Escape HTML special characters to prevent injection via JSON data. */
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
     function showErr(id, msg) {
       const el = document.getElementById(id);
       if (el) el.innerHTML = `<div class="err-msg">⚠ ${msg}</div>`;
