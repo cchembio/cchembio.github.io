@@ -281,6 +281,7 @@
     let molViewer    = null;   // $3Dmol viewer instance
     let currentMol   = null;   // acronym of the loaded molecule
     let molModels    = [];     // [{code, entry_id}] parallel to addModel() order
+    let evalData     = null;   // loaded from eval_scores.json; null if fetch fails
 
     /* ── Bootstrap ────────────────────────────────────────────────── */
     async function init() {
@@ -295,7 +296,14 @@
 
       buildCodeDropdown();
       buildMolDropdown();
-      buildChart();
+
+      // Fetch eval scores (non-fatal — chart and viewer work without it)
+      try {
+        const r = await fetch(DATA_BASE + 'eval_scores.json');
+        if (r.ok) evalData = await r.json();
+      } catch (_) { /* silently degrade */ }
+
+      buildChart(evalData);
 
       document.getElementById('code-select')
         .addEventListener('change', onCodeChange);
@@ -359,7 +367,7 @@
       return `${s.molecule} ${h}`;
     }
 
-    function buildChart() {
+    function buildChart(evalData = null) {
       const series = shiftsData.series;
       const keys   = Object.keys(series);   // already ordered Test → Bonus
       const xlabs  = keys.map(seriesShortLabel);
@@ -436,6 +444,25 @@
           y0: 0, y1: 1,
           line: { color: '#cccccc', width: 1, dash: 'dot' },
         });
+      }
+
+      // Experimental range bands — one semi-transparent gold rectangle per series
+      if (evalData && evalData.experimental) {
+        for (const [i, k] of keys.entries()) {
+          const exp = evalData.experimental[k];
+          if (!exp) continue;
+          shapes.push({
+            type: 'rect',
+            xref: 'x', yref: 'y',
+            // Plotly categorical axis: category index i maps to numeric position i
+            x0: i - 0.45, x1: i + 0.45,
+            y0: exp.value - exp.uncertainty,
+            y1: exp.value + exp.uncertainty,
+            fillcolor: 'rgba(200, 169, 81, 0.25)',  // site gold (#c8a951) at 25% opacity
+            line: { width: 0 },
+            layer: 'below',  // draw behind data points
+          });
+        }
       }
 
       /* Category labels above the axis */
