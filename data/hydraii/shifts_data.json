@@ -885,11 +885,6 @@
       "label": "1-Methyl-4-iodo-1H-pyrazole (IMP) — dihydrate 2d OHb",
       "points": [
         {
-          "code": "tkEVTi",
-          "shift": 172.0,
-          "uncertainty": 26
-        },
-        {
           "code": "VkZgv8",
           "shift": 205.0,
           "uncertainty": 25
@@ -918,6 +913,11 @@
           "code": "aaEFvY",
           "shift": 298.0,
           "uncertainty": 15
+        },
+        {
+          "code": "tkEVTi",
+          "shift": 302.0,
+          "uncertainty": 26
         },
         {
           "code": "5bc3RS",
@@ -1009,6 +1009,11 @@
           "uncertainty": 3
         },
         {
+          "code": "tkEVTi",
+          "shift": 172.0,
+          "uncertainty": 26
+        },
+        {
           "code": "rmpkmQ",
           "shift": 172.0,
           "uncertainty": 13
@@ -1074,17 +1079,12 @@
           "uncertainty": 30
         },
         {
-          "code": "tkEVTi",
-          "shift": 302.0,
-          "uncertainty": 26
-        },
-        {
           "code": "Y0RC7v",
           "shift": 307.0,
           "uncertainty": 30
         }
       ],
-      "median": 185.0
+      "median": 183.0
     },
     "MOP_monohydrate_OHb": {
       "molecule": "MOP",
@@ -1332,6 +1332,11 @@
           "uncertainty": 15
         },
         {
+          "code": "5bc3RS",
+          "shift": 43.0,
+          "uncertainty": 15
+        },
+        {
           "code": "VtZxT4",
           "shift": 43.0,
           "uncertainty": 40
@@ -1370,11 +1375,6 @@
           "code": "yN0rOV",
           "shift": 53.0,
           "uncertainty": 45
-        },
-        {
-          "code": "5bc3RS",
-          "shift": 58.0,
-          "uncertainty": 15
         },
         {
           "code": "3XH8ml",
@@ -1447,7 +1447,7 @@
           "uncertainty": 40
         }
       ],
-      "median": 50.0
+      "median": 49.0
     },
     "OTM_monohydrate_OHb": {
       "molecule": "OTM",
