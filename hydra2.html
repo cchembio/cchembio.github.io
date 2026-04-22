@@ -606,7 +606,7 @@
       if (nTest > 0) {
         annotations.push({
           xref: 'paper', yref: 'paper',
-          x: (nTest / 2) / keys.length, y: 1.07, yanchor: 'bottom',
+          x: (nTest / 2) / keys.length, y: 0.99, yanchor: 'top',
           showarrow: false, text: 'Test molecules',
           font: { size: 11, color: '#666' },
         });
@@ -614,7 +614,7 @@
       if (nBonus > 0) {
         annotations.push({
           xref: 'paper', yref: 'paper',
-          x: (nTest + nBonus / 2) / keys.length, y: 1.07, yanchor: 'bottom',
+          x: (nTest + nBonus / 2) / keys.length, y: 0.99, yanchor: 'top',
           showarrow: false, text: 'Bonus molecules',
           font: { size: 11, color: '#666' },
         });
@@ -625,7 +625,7 @@
         [traceAll, traceMed, traceHL, traceGDP],
         {
           autosize: true, height: 520,
-          margin: { l: 65, r: 20, t: 80, b: 130 },
+          margin: { l: 65, r: 20, t: 60, b: 130 },
           xaxis: {
             type: 'category', tickangle: -35,
             tickfont: { size: 11 }, showgrid: false,
@@ -635,7 +635,7 @@
             zeroline: false, gridcolor: '#eeeeee',
           },
           legend: {
-            orientation: 'h', x: 0, y: 1.18,
+            orientation: 'h', x: 0, y: 1.12,
             bgcolor: 'rgba(255,255,255,0)',
           },
           plot_bgcolor: '#fff', paper_bgcolor: '#fff',
