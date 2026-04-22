@@ -73,7 +73,10 @@
         "95": 0.3333
       },
       "sharpness": 156.9959,
-      "n": 6
+      "n": 6,
+      "rmsd": 68.4434,
+      "mae": 66.8333,
+      "compare_to": "dep"
     },
     "3XH8ml": {
       "log_likelihood": -3.3104,
@@ -84,7 +87,10 @@
         "95": 1.0
       },
       "sharpness": 98.3131,
-      "n": 5
+      "n": 5,
+      "rmsd": 19.9148,
+      "mae": 18.6,
+      "compare_to": "dep"
     },
     "5bc3RS": {
       "log_likelihood": -2.9033,
@@ -95,7 +101,10 @@
         "95": 1.0
       },
       "sharpness": 59.3204,
-      "n": 7
+      "n": 7,
+      "rmsd": 12.0238,
+      "mae": 10.2857,
+      "compare_to": "dep"
     },
     "6VZbuy": {
       "log_likelihood": -7.1229,
@@ -106,7 +115,10 @@
         "95": 0.2222
       },
       "sharpness": 113.5204,
-      "n": 9
+      "n": 9,
+      "rmsd": 134.8283,
+      "mae": 103.9889,
+      "compare_to": "dep"
     },
     "86tbOt": {
       "log_likelihood": -3.7887,
@@ -117,7 +129,10 @@
         "95": 1.0
       },
       "sharpness": 156.9959,
-      "n": 7
+      "n": 7,
+      "rmsd": 28.7303,
+      "mae": 25.4286,
+      "compare_to": "dep"
     },
     "DjYwx0": {
       "log_likelihood": -4.211,
@@ -128,7 +143,10 @@
         "95": 1.0
       },
       "sharpness": 176.5741,
-      "n": 5
+      "n": 5,
+      "rmsd": 52.8129,
+      "mae": 51.6,
+      "compare_to": "dep"
     },
     "FFWr0c": {
       "log_likelihood": -5.5172,
@@ -139,7 +157,10 @@
         "95": 0.8571
       },
       "sharpness": 156.9959,
-      "n": 7
+      "n": 7,
+      "rmsd": 36.4535,
+      "mae": 29.1429,
+      "compare_to": "dep"
     },
     "GHE5KB": {
       "log_likelihood": -10.0549,
@@ -150,7 +171,10 @@
         "95": 0.5
       },
       "sharpness": 137.4238,
-      "n": 6
+      "n": 6,
+      "rmsd": 76.4264,
+      "mae": 65.0,
+      "compare_to": "raw"
     },
     "H0y7m5": {
       "log_likelihood": -5.9575,
@@ -161,7 +185,10 @@
         "95": 0.7778
       },
       "sharpness": 383.3693,
-      "n": 9
+      "n": 9,
+      "rmsd": 111.8814,
+      "mae": 103.2222,
+      "compare_to": "dep"
     },
     "JLQOOi": {
       "log_likelihood": -10.2502,
@@ -172,7 +199,10 @@
         "95": 0.75
       },
       "sharpness": 117.861,
-      "n": 8
+      "n": 8,
+      "rmsd": 65.9109,
+      "mae": 59.0,
+      "compare_to": "raw"
     },
     "Kv2DDD": {
       "log_likelihood": -5.362,
@@ -183,7 +213,10 @@
         "95": 0.6667
       },
       "sharpness": 98.3131,
-      "n": 12
+      "n": 12,
+      "rmsd": 84.4354,
+      "mae": 54.5,
+      "compare_to": "dep"
     },
     "L5laul": {
       "log_likelihood": -6.7317,
@@ -194,7 +227,10 @@
         "95": 0.5
       },
       "sharpness": 74.8915,
-      "n": 12
+      "n": 12,
+      "rmsd": 93.1401,
+      "mae": 54.9167,
+      "compare_to": "dep"
     },
     "MMSGFF": {
       "log_likelihood": -4.2401,
@@ -205,7 +241,10 @@
         "95": 0.8182
       },
       "sharpness": 104.3772,
-      "n": 11
+      "n": 11,
+      "rmsd": 27.218,
+      "mae": 18.0909,
+      "compare_to": "dep"
     },
     "NWbWdJ": {
       "log_likelihood": -27.4484,
@@ -216,7 +255,10 @@
         "95": 0.1667
       },
       "sharpness": 23.725,
-      "n": 12
+      "n": 12,
+      "rmsd": 21.5039,
+      "mae": 15.9167,
+      "compare_to": "dep"
     },
     "R9OZDl": {
       "log_likelihood": -6.06,
@@ -227,7 +269,10 @@
         "95": 0.875
       },
       "sharpness": 156.9959,
-      "n": 8
+      "n": 8,
+      "rmsd": 153.8006,
+      "mae": 75.625,
+      "compare_to": "dep"
     },
     "TbJDzS": {
       "log_likelihood": -11.4065,
@@ -238,7 +283,10 @@
         "95": 0.75
       },
       "sharpness": 63.2081,
-      "n": 12
+      "n": 12,
+      "rmsd": 82.4272,
+      "mae": 49.5833,
+      "compare_to": "dep"
     },
     "TwcWo6": {
       "log_likelihood": -3.3155,
@@ -249,7 +297,10 @@
         "95": 0.8333
       },
       "sharpness": 47.2331,
-      "n": 6
+      "n": 6,
+      "rmsd": 13.5953,
+      "mae": 10.5,
+      "compare_to": "dep"
     },
     "VkZgv8": {
       "log_likelihood": -10.2066,
@@ -260,7 +311,10 @@
         "95": 0.25
       },
       "sharpness": 98.3131,
-      "n": 12
+      "n": 12,
+      "rmsd": 125.7832,
+      "mae": 91.9167,
+      "compare_to": "dep"
     },
     "VtZxT4": {
       "log_likelihood": -6.8624,
@@ -271,7 +325,10 @@
         "95": 0.7143
       },
       "sharpness": 156.9959,
-      "n": 7
+      "n": 7,
+      "rmsd": 40.9163,
+      "mae": 31.0,
+      "compare_to": "dep"
     },
     "Y0RC7v": {
       "log_likelihood": -6.8532,
@@ -282,7 +339,10 @@
         "95": 0.5
       },
       "sharpness": 176.5841,
-      "n": 10
+      "n": 10,
+      "rmsd": 149.955,
+      "mae": 135.3,
+      "compare_to": "raw"
     },
     "aaEFvY": {
       "log_likelihood": -3.0986,
@@ -293,7 +353,10 @@
         "95": 1.0
       },
       "sharpness": 59.3204,
-      "n": 7
+      "n": 7,
+      "rmsd": 16.8481,
+      "mae": 12.4286,
+      "compare_to": "dep"
     },
     "elpt1E": {
       "log_likelihood": -6.5894,
@@ -304,7 +367,10 @@
         "95": 0.6364
       },
       "sharpness": 40.1912,
-      "n": 11
+      "n": 11,
+      "rmsd": 68.2922,
+      "mae": 36.9091,
+      "compare_to": "dep"
     },
     "flXNLd": {
       "log_likelihood": -15.5622,
@@ -315,7 +381,10 @@
         "95": 0.6
       },
       "sharpness": 156.9959,
-      "n": 5
+      "n": 5,
+      "rmsd": 115.4175,
+      "mae": 85.6,
+      "compare_to": "dep"
     },
     "imB2w7": {
       "log_likelihood": -5.4695,
@@ -326,7 +395,10 @@
         "95": 0.7
       },
       "sharpness": 176.5841,
-      "n": 10
+      "n": 10,
+      "rmsd": 131.2421,
+      "mae": 100.5,
+      "compare_to": "raw"
     },
     "kDbcwm": {
       "log_likelihood": -4.9615,
@@ -337,7 +409,10 @@
         "95": 1.0
       },
       "sharpness": 487.2632,
-      "n": 7
+      "n": 7,
+      "rmsd": 33.6346,
+      "mae": 31.0,
+      "compare_to": "dep"
     },
     "mRQlmw": {
       "log_likelihood": -3.3716,
@@ -348,7 +423,10 @@
         "95": 0.8333
       },
       "sharpness": 58.7742,
-      "n": 6
+      "n": 6,
+      "rmsd": 17.1075,
+      "mae": 13.0,
+      "compare_to": "dep"
     },
     "r0Ln61": {
       "log_likelihood": -4.5713,
@@ -359,7 +437,10 @@
         "95": 0.8
       },
       "sharpness": 133.515,
-      "n": 5
+      "n": 5,
+      "rmsd": 64.9954,
+      "mae": 61.2,
+      "compare_to": "raw"
     },
     "rZRIW4": {
       "log_likelihood": -5.807,
@@ -370,7 +451,10 @@
         "95": 0.75
       },
       "sharpness": 137.4285,
-      "n": 4
+      "n": 4,
+      "rmsd": 176.9569,
+      "mae": 123.75,
+      "compare_to": "dep"
     },
     "rmpkmQ": {
       "log_likelihood": -5.7778,
@@ -381,7 +465,10 @@
         "95": 0.5833
       },
       "sharpness": 51.5596,
-      "n": 12
+      "n": 12,
+      "rmsd": 61.7043,
+      "mae": 33.9167,
+      "compare_to": "dep"
     },
     "t0AKXT": {
       "log_likelihood": -5.4442,
@@ -392,7 +479,10 @@
         "95": 0.5833
       },
       "sharpness": 43.8269,
-      "n": 12
+      "n": 12,
+      "rmsd": 58.6636,
+      "mae": 31.25,
+      "compare_to": "dep"
     },
     "td1FyY": {
       "log_likelihood": -6.5562,
@@ -403,7 +493,10 @@
         "95": 0.6667
       },
       "sharpness": 98.3131,
-      "n": 12
+      "n": 12,
+      "rmsd": 91.6033,
+      "mae": 58.5,
+      "compare_to": "dep"
     },
     "tkEVTi": {
       "log_likelihood": -8.0288,
@@ -414,7 +507,10 @@
         "95": 0.8182
       },
       "sharpness": 102.2211,
-      "n": 11
+      "n": 11,
+      "rmsd": 134.7695,
+      "mae": 68.8182,
+      "compare_to": "dep"
     },
     "uQhK5E": {
       "log_likelihood": -7.321,
@@ -425,7 +521,10 @@
         "95": 0.7143
       },
       "sharpness": 196.1573,
-      "n": 7
+      "n": 7,
+      "rmsd": 74.1369,
+      "mae": 62.5714,
+      "compare_to": "dep"
     },
     "w5aKdl": {
       "log_likelihood": -3.4216,
@@ -436,7 +535,10 @@
         "95": 1.0
       },
       "sharpness": 110.7806,
-      "n": 11
+      "n": 11,
+      "rmsd": 62.0114,
+      "mae": 39.25,
+      "compare_to": "dep"
     },
     "yN0rOV": {
       "log_likelihood": -3.8331,
@@ -447,7 +549,10 @@
         "95": 1.0
       },
       "sharpness": 176.5741,
-      "n": 5
+      "n": 5,
+      "rmsd": 21.0476,
+      "mae": 17.4,
+      "compare_to": "dep"
     }
   }
 }
