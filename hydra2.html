@@ -152,6 +152,29 @@
       color: #c0392b;
       font-size: 0.9rem;
     }
+
+    /* Evaluation scores table */
+    #eval-section h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--blue);
+      margin: 1.8rem 0 0.5rem;
+    }
+    #eval-section h3:first-child { margin-top: 0; }
+    #eval-section table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    #eval-section th, #eval-section td {
+      padding: 0.45rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      text-align: right;
+    }
+    #eval-section th { background: var(--bg-subtle); font-weight: 600; text-align: right; }
+    #eval-section th:first-child, #eval-section td:first-child { text-align: left; }
+    #eval-section tr.highlighted { background: rgba(230, 57, 70, 0.08); font-weight: 600; }
+    #eval-section tr:hover { background: var(--bg-subtle); }
   </style>
 </head>
 <body>
@@ -199,12 +222,27 @@
     <section class="hydra-section">
       <h2>Predicted Frequency Shifts</h2>
       <p>
-        OH-stretch red-shifts (cm<sup>−1</sup>) relative to the isolated water monomer.
-        Each dot is one participant's prediction for that system; horizontal bars mark the
-        median. Error bars show reported uncertainties where available.
-        Test molecules are on the left; bonus molecules on the right of the dashed separator.
+        Deviation of each predicted OH-stretch red-shift from the experimental reference
+        (cm<sup>−1</sup>). Participants compared to the deperturbed value use that as
+        their reference; those compared to the raw value use the raw frequency.
+        Both are computed relative to the 3657 cm<sup>−1</sup> water monomer.
+        The shaded bands show the global deperturbed uncertainty (asymmetric) around zero.
+        Horizontal bars mark the median deviation; error bars are reported prediction
+        uncertainties. Test molecules are on the left; bonus molecules on the right.
       </p>
       <div id="shifts-chart"></div>
+    </section>
+
+    <!-- ── Section: Evaluation scores ──────────────────────────────────── -->
+    <section class="hydra-section" id="eval-section" style="display:none">
+      <h2>Prediction Scores</h2>
+      <p>
+        RMSD and MAE are computed against the respective experimental reference
+        (raw or deperturbed) using 3657 cm<sup>−1</sup> as the monomer reference.
+        Log-likelihood and CRPS are probabilistic scores that account for reported
+        uncertainties. Select a participant code to highlight their row.
+      </p>
+      <div id="eval-table-wrap"></div>
     </section>
 
     <!-- ── Section 2: Molecular structures ──────────────────────────────── -->
@@ -266,21 +304,26 @@
     /* ================================================================
        HyDRA II — Interactive Results  (hydra2.html)
        Data:     data/hydraii/shifts_data.json
+                 data/hydraii/eval_scores.json
+                 data/hydraii/experimental_data.csv
                  data/hydraii/structures_{ACR}.json
        Libraries: Plotly.js 2.35.2 (CDN), 3Dmol.js (CDN)
        ================================================================ */
 
-    const DATA_BASE   = 'data/hydraii/';
-    const COL_HIGHLIGHT = '#e63946';   // warm red — same in chart + viewer
+    const DATA_BASE     = 'data/hydraii/';
+    const REF_FREQ      = 3657;          // cm⁻¹ reference for shift computation
+    const COL_HIGHLIGHT = '#e63946';     // warm red — same in chart + viewer
     const COL_GREY      = '#999999';
-    const COL_MEDIAN    = '#003d73';   // site --blue
+    const COL_MEDIAN    = '#003d73';     // site --blue
 
     /* ── State ────────────────────────────────────────────────────── */
     let shiftsData   = null;   // parsed shifts_data.json
+    let expData      = null;   // experimental reference shifts, keyed by series key
     let selectedCode = '';     // currently chosen participant code
     let molViewer    = null;   // $3Dmol viewer instance
     let currentMol   = null;   // acronym of the loaded molecule
     let molModels    = [];     // [{code, entry_id}] parallel to addModel() order
+    let evalData     = null;   // loaded from eval_scores.json; null if fetch fails
 
     /* ── Bootstrap ────────────────────────────────────────────────── */
     async function init() {
@@ -293,9 +336,27 @@
         return;
       }
 
+      // Load experimental CSV (needed for GDP bands and difference computation)
+      try {
+        const r = await fetch(DATA_BASE + 'experimental_data.csv');
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        expData = parseExpCsv(await r.text());
+      } catch (e) {
+        showErr('shifts-chart', 'Could not load experimental data: ' + e.message);
+        return;
+      }
+
       buildCodeDropdown();
       buildMolDropdown();
+
+      // Fetch eval scores (non-fatal — chart and viewer work without it)
+      try {
+        const r = await fetch(DATA_BASE + 'eval_scores.json?v=2');
+        if (r.ok) evalData = await r.json();
+      } catch (_) { /* silently degrade */ }
+
       buildChart();
+      buildEvalTable();
 
       document.getElementById('code-select')
         .addEventListener('change', onCodeChange);
@@ -309,6 +370,49 @@
       window.addEventListener('resize', () =>
         Plotly.relayout('shifts-chart', { autosize: true })
       );
+    }
+
+    /* ── CSV parser for experimental_data.csv ─────────────────────── */
+    function parseExpCsv(text) {
+      const lines   = text.trim().split('\n');
+      const headers = lines[0].split(',').map(h => h.trim());
+      const result  = {};
+      for (const line of lines.slice(1)) {
+        if (!line.trim()) continue;
+        const vals = line.split(',');
+        const row  = {};
+        headers.forEach((h, i) => { row[h] = vals[i]?.trim(); });
+        const key = row.system;
+        result[key] = {
+          raw_shift:     REF_FREQ - parseFloat(row.raw),
+          dep_shift:     REF_FREQ - parseFloat(row.dep),
+          gdp_shift:     REF_FREQ - parseFloat(row.gdp),
+          // frequency convention: upper freq → lower shift (negative in diff space)
+          gdp_unc_upper: parseFloat(row.gdp_unc_upper),
+          // lower freq → higher shift (positive in diff space)
+          gdp_unc_lower: parseFloat(row.gdp_unc_lower),
+        };
+      }
+      return result;
+    }
+
+    /* ── Helpers ──────────────────────────────────────────────────── */
+    function getCompareTo(code) {
+      return evalData?.scores?.[code]?.compare_to ?? 'dep';
+    }
+
+    function getExpShift(seriesKey, compareTo) {
+      if (!expData || !expData[seriesKey]) return null;
+      return compareTo === 'raw'
+        ? expData[seriesKey].raw_shift
+        : expData[seriesKey].dep_shift;
+    }
+
+    function computeMedian(arr) {
+      if (!arr.length) return null;
+      const s = [...arr].sort((a, b) => a - b);
+      const m = Math.floor(s.length / 2);
+      return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
     }
 
     /* ── Dropdowns ────────────────────────────────────────────────── */
@@ -342,6 +446,10 @@
         selectedCode ? '' : 'none';
       updateChartHighlight();
       updateViewerHighlight();
+      // Sync eval table row highlight with selected code
+      document.querySelectorAll('#eval-table-wrap tr[data-code]').forEach(row => {
+        row.classList.toggle('highlighted', row.dataset.code === selectedCode);
+      });
     }
 
     function onMolChange() {
@@ -367,16 +475,20 @@
       const nTest  = keys.filter(k => series[k].category === 'Test').length;
       const nBonus = keys.length - nTest;
 
-      /* All-participants trace (grey) */
+      /* All-participants trace — y = predicted − experimental (cm⁻¹) */
       const xAll = [], yAll = [], errAll = [], txtAll = [], codeAll = [];
       for (const [i, k] of keys.entries()) {
         for (const pt of series[k].points) {
+          const compareTo = getCompareTo(pt.code);
+          const expShift  = getExpShift(k, compareTo);
+          if (expShift == null) continue;
+          const diff = pt.shift - expShift;
           xAll.push(xlabs[i]);
-          yAll.push(pt.shift);
+          yAll.push(diff);
           errAll.push(pt.uncertainty ?? null);
           txtAll.push(
             `Code: ${pt.code}<br>` +
-            `Shift: ${pt.shift} cm⁻¹` +
+            `Deviation: ${diff > 0 ? '+' : ''}${diff.toFixed(1)} cm⁻¹` +
             (pt.uncertainty ? `<br>Uncertainty: ±${pt.uncertainty} cm⁻¹` : '') +
             '<br><i>Click to select</i>'
           );
@@ -396,12 +508,20 @@
         customdata: codeAll,
       };
 
-      /* Median trace */
+      /* Median trace — median deviation across all participants */
       const xMed = [], yMed = [], txtMed = [];
       for (const [i, k] of keys.entries()) {
+        const diffs = series[k].points
+          .map(pt => {
+            const exp = getExpShift(k, getCompareTo(pt.code));
+            return exp != null ? pt.shift - exp : null;
+          })
+          .filter(d => d != null);
+        const med = computeMedian(diffs);
+        if (med == null) continue;
         xMed.push(xlabs[i]);
-        yMed.push(series[k].median);
-        txtMed.push(`Median: ${series[k].median} cm⁻¹`);
+        yMed.push(med);
+        txtMed.push(`Median deviation: ${med > 0 ? '+' : ''}${med.toFixed(1)} cm⁻¹`);
       }
       const traceMed = {
         x: xMed, y: yMed, type: 'scatter', mode: 'markers',
@@ -427,8 +547,23 @@
         text: [],
       };
 
-      /* Vertical dashed separator between Test and Bonus */
+      /* Dummy legend entry for the GDP band */
+      const traceGDP = {
+        x: [null], y: [null], type: 'scatter', mode: 'markers',
+        name: 'Global deperturbed range',
+        marker: {
+          symbol: 'square', size: 12,
+          color: 'rgba(255, 120, 0, 0.18)',
+          line: { color: 'rgba(255, 120, 0, 0.7)', width: 1.5 },
+        },
+        showlegend: true,
+        hoverinfo: 'skip',
+      };
+
+      /* Shapes ─────────────────────────────────────────────────────── */
       const shapes = [];
+
+      // Vertical dashed separator between Test and Bonus
       if (nTest > 0 && nBonus > 0) {
         shapes.push({
           type: 'line', xref: 'paper', yref: 'paper',
@@ -438,12 +573,40 @@
         });
       }
 
-      /* Category labels above the axis */
+      // Global deperturbed range bands — asymmetric per series
+      // Band is relative to 0 (the experimental reference line):
+      //   y0 = −gdp_unc_upper  (frequency goes up → shift goes down)
+      //   y1 = +gdp_unc_lower  (frequency goes down → shift goes up)
+      if (expData) {
+        for (const [i, k] of keys.entries()) {
+          const ed = expData[k];
+          if (!ed) continue;
+          shapes.push({
+            type: 'rect',
+            xref: 'x', yref: 'y',
+            x0: i - 0.45, x1: i + 0.45,
+            y0: -ed.gdp_unc_upper,
+            y1: +ed.gdp_unc_lower,
+            fillcolor: 'rgba(255, 120, 0, 0.18)',
+            line: { width: 0 },
+            layer: 'above',
+          });
+        }
+      }
+
+      // Horizontal zero line (perfect prediction)
+      shapes.push({
+        type: 'line', xref: 'paper', yref: 'y',
+        x0: 0, x1: 1, y0: 0, y1: 0,
+        line: { color: '#aaaaaa', width: 1, dash: 'dash' },
+      });
+
+      /* Category labels */
       const annotations = [];
       if (nTest > 0) {
         annotations.push({
           xref: 'paper', yref: 'paper',
-          x: (nTest / 2) / keys.length, y: 1.07,
+          x: (nTest / 2) / keys.length, y: 1.07, yanchor: 'bottom',
           showarrow: false, text: 'Test molecules',
           font: { size: 11, color: '#666' },
         });
@@ -451,29 +614,28 @@
       if (nBonus > 0) {
         annotations.push({
           xref: 'paper', yref: 'paper',
-          x: (nTest + nBonus / 2) / keys.length, y: 1.07,
+          x: (nTest + nBonus / 2) / keys.length, y: 1.07, yanchor: 'bottom',
           showarrow: false, text: 'Bonus molecules',
           font: { size: 11, color: '#666' },
         });
       }
 
-      /* Await newPlot so the chart element has .on() attached before we use it */
       Plotly.newPlot(
         'shifts-chart',
-        [traceAll, traceMed, traceHL],
+        [traceAll, traceMed, traceHL, traceGDP],
         {
           autosize: true, height: 520,
-          margin: { l: 65, r: 20, t: 55, b: 130 },
+          margin: { l: 65, r: 20, t: 80, b: 130 },
           xaxis: {
             type: 'category', tickangle: -35,
             tickfont: { size: 11 }, showgrid: false,
           },
           yaxis: {
-            title: { text: 'OH-stretch red-shift (cm⁻¹)', font: { size: 12 } },
+            title: { text: 'Predicted − Experimental (cm⁻¹)', font: { size: 12 } },
             zeroline: false, gridcolor: '#eeeeee',
           },
           legend: {
-            orientation: 'h', x: 0, y: 1.13,
+            orientation: 'h', x: 0, y: 1.18,
             bgcolor: 'rgba(255,255,255,0)',
           },
           plot_bgcolor: '#fff', paper_bgcolor: '#fff',
@@ -484,11 +646,10 @@
         { responsive: true, displayModeBar: true,
           modeBarButtonsToRemove: ['select2d', 'lasso2d'] }
       ).then(chartEl => {
-        /* Click on a point to select/deselect that participant */
         chartEl.on('plotly_click', data => {
           if (!data.points || !data.points.length) return;
           const pt = data.points[0];
-          if (pt.customdata == null) return;   // median or highlight trace
+          if (pt.customdata == null) return;
           const code = pt.customdata;
           const sel  = document.getElementById('code-select');
           sel.value  = (selectedCode === code) ? '' : code;
@@ -496,7 +657,6 @@
         });
       });
 
-      /* Store for updates */
       window._chartKeys  = keys;
       window._chartXlabs = xlabs;
     }
@@ -506,15 +666,19 @@
       const xHL = [], yHL = [], errHL = [], txtHL = [];
 
       if (selectedCode) {
+        const compareTo = getCompareTo(selectedCode);
         for (const [i, k] of window._chartKeys.entries()) {
           const pt = series[k].points.find(p => p.code === selectedCode);
           if (!pt) continue;
+          const expShift = getExpShift(k, compareTo);
+          if (expShift == null) continue;
+          const diff = pt.shift - expShift;
           xHL.push(window._chartXlabs[i]);
-          yHL.push(pt.shift);
+          yHL.push(diff);
           errHL.push(pt.uncertainty ?? null);
           txtHL.push(
             `Code: ${pt.code}<br>` +
-            `Shift: ${pt.shift} cm⁻¹` +
+            `Deviation: ${diff > 0 ? '+' : ''}${diff.toFixed(1)} cm⁻¹` +
             (pt.uncertainty ? `<br>Uncertainty: ±${pt.uncertainty} cm⁻¹` : '')
           );
         }
@@ -570,7 +734,6 @@
 
       for (const struct of data.structures) {
         molViewer.addModel(struct.xyz, 'xyz');
-        /* Store metadata at same index */
         molModels.push({ code: struct.code, entry_id: struct.entry_id });
       }
 
@@ -614,7 +777,81 @@
       }
     }
 
+    /* ── Evaluation table ─────────────────────────────────────────── */
+    function buildEvalTable() {
+      if (!evalData || !evalData.scores) return;
+      const section = document.getElementById('eval-section');
+      const wrap    = document.getElementById('eval-table-wrap');
+      const scores  = evalData.scores;
+
+      const fmt = (v, dec = 2) => v == null ? '—' : Number(v).toFixed(dec);
+
+      // Separate codes by compare_to
+      const depCodes = [], rawCodes = [];
+      for (const code of Object.keys(scores)) {
+        const ct = scores[code].compare_to ?? 'dep';
+        (ct === 'raw' ? rawCodes : depCodes).push(code);
+      }
+
+      // Sort each group by RMSD ascending (lower = better)
+      const byRmsd = (a, b) =>
+        (scores[a].rmsd ?? Infinity) - (scores[b].rmsd ?? Infinity);
+      depCodes.sort(byRmsd);
+      rawCodes.sort(byRmsd);
+
+      function buildTableHtml(codes, caption) {
+        if (!codes.length) return '';
+        let h = `<h3>${escHtml(caption)}</h3><table>
+          <thead><tr>
+            <th>Code</th>
+            <th title="Lower is better">RMSD ↓</th>
+            <th title="Lower is better">MAE ↓</th>
+            <th title="Higher is better">Log-likelihood ↑</th>
+            <th title="Lower is better">CRPS ↓</th>
+            <th>N</th>
+          </tr></thead><tbody>`;
+        for (const code of codes) {
+          const s  = scores[code];
+          const hl = code === selectedCode ? ' class="highlighted"' : '';
+          h += `<tr${hl} data-code="${escHtml(code)}">
+            <td>${escHtml(code)}</td>
+            <td>${fmt(s.rmsd)}</td>
+            <td>${fmt(s.mae)}</td>
+            <td>${fmt(s.log_likelihood)}</td>
+            <td>${fmt(s.crps)}</td>
+            <td>${escHtml(s.n ?? '—')}</td>
+          </tr>`;
+        }
+        h += '</tbody></table>';
+        return h;
+      }
+
+      wrap.innerHTML =
+        buildTableHtml(depCodes, 'Compared to deperturbed values') +
+        buildTableHtml(rawCodes, 'Compared to raw values');
+
+      section.style.display = '';
+
+      wrap.querySelectorAll('tr[data-code]').forEach(row => {
+        row.style.cursor = 'pointer';
+        row.addEventListener('click', () => {
+          const code = row.dataset.code;
+          const sel  = document.getElementById('code-select');
+          sel.value  = (selectedCode === code) ? '' : code;
+          onCodeChange();
+        });
+      });
+    }
+
     /* ── Utilities ────────────────────────────────────────────────── */
+    function escHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
     function showErr(id, msg) {
       const el = document.getElementById(id);
       if (el) el.innerHTML = `<div class="err-msg">⚠ ${msg}</div>`;
