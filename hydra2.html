@@ -172,6 +172,7 @@
       text-align: right;
     }
     #eval-section th { background: var(--bg-subtle); font-weight: 600; text-align: right; }
+    #eval-section th[data-col]:hover { background: var(--border); }
     #eval-section th:first-child, #eval-section td:first-child { text-align: left; }
     #eval-section tr.highlighted { background: rgba(230, 57, 70, 0.08); font-weight: 600; }
     #eval-section tr:hover { background: var(--bg-subtle); }
@@ -324,6 +325,7 @@
     let currentMol   = null;   // acronym of the loaded molecule
     let molModels    = [];     // [{code, entry_id}] parallel to addModel() order
     let evalData     = null;   // loaded from eval_scores.json; null if fetch fails
+    let tableSort    = { col: 'rmsd', dir: 'asc' };  // current sort state for eval table
 
     /* ── Bootstrap ────────────────────────────────────────────────── */
     async function init() {
@@ -783,8 +785,14 @@
       const section = document.getElementById('eval-section');
       const wrap    = document.getElementById('eval-table-wrap');
       const scores  = evalData.scores;
+      const fmt     = (v, dec = 2) => v == null ? '—' : Number(v).toFixed(dec);
 
-      const fmt = (v, dec = 2) => v == null ? '—' : Number(v).toFixed(dec);
+      const COLS = [
+        { key: 'rmsd',           label: 'RMSD',           title: 'Lower is better',  defaultDir: 'asc'  },
+        { key: 'mae',            label: 'MAE',            title: 'Lower is better',  defaultDir: 'asc'  },
+        { key: 'log_likelihood', label: 'Log-likelihood', title: 'Higher is better', defaultDir: 'desc' },
+        { key: 'crps',           label: 'CRPS',           title: 'Lower is better',  defaultDir: 'asc'  },
+      ];
 
       // Separate codes by compare_to
       const depCodes = [], rawCodes = [];
@@ -793,23 +801,25 @@
         (ct === 'raw' ? rawCodes : depCodes).push(code);
       }
 
-      // Sort each group by RMSD ascending (lower = better)
-      const byRmsd = (a, b) =>
-        (scores[a].rmsd ?? Infinity) - (scores[b].rmsd ?? Infinity);
-      depCodes.sort(byRmsd);
-      rawCodes.sort(byRmsd);
+      // Sort by current tableSort state
+      const { col, dir } = tableSort;
+      const sorter = (a, b) => {
+        const va = scores[a][col] ?? (dir === 'asc' ? Infinity : -Infinity);
+        const vb = scores[b][col] ?? (dir === 'asc' ? Infinity : -Infinity);
+        return dir === 'asc' ? va - vb : vb - va;
+      };
+      depCodes.sort(sorter);
+      rawCodes.sort(sorter);
 
       function buildTableHtml(codes, caption) {
         if (!codes.length) return '';
-        let h = `<h3>${escHtml(caption)}</h3><table>
-          <thead><tr>
-            <th>Code</th>
-            <th title="Lower is better">RMSD ↓</th>
-            <th title="Lower is better">MAE ↓</th>
-            <th title="Higher is better">Log-likelihood ↑</th>
-            <th title="Lower is better">CRPS ↓</th>
-            <th>N</th>
-          </tr></thead><tbody>`;
+        let h = `<h3>${escHtml(caption)}</h3><table><thead><tr><th>Code</th>`;
+        for (const c of COLS) {
+          const active = tableSort.col === c.key;
+          const arrow  = active ? (tableSort.dir === 'asc' ? ' ▲' : ' ▼') : '';
+          h += `<th data-col="${c.key}" title="${c.title}">${c.label}${arrow}</th>`;
+        }
+        h += `<th>N</th></tr></thead><tbody>`;
         for (const code of codes) {
           const s  = scores[code];
           const hl = code === selectedCode ? ' class="highlighted"' : '';
@@ -832,6 +842,22 @@
 
       section.style.display = '';
 
+      // Column header click → change sort
+      wrap.querySelectorAll('th[data-col]').forEach(th => {
+        th.style.cursor = 'pointer';
+        th.addEventListener('click', () => {
+          const c = th.dataset.col;
+          if (tableSort.col === c) {
+            tableSort.dir = tableSort.dir === 'asc' ? 'desc' : 'asc';
+          } else {
+            tableSort.col = c;
+            tableSort.dir = COLS.find(x => x.key === c).defaultDir;
+          }
+          buildEvalTable();
+        });
+      });
+
+      // Row click → select/deselect participant
       wrap.querySelectorAll('tr[data-code]').forEach(row => {
         row.style.cursor = 'pointer';
         row.addEventListener('click', () => {
