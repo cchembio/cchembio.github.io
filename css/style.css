@@ -327,6 +327,33 @@ footer strong { color: #fff; }
 .app-card .links { margin-top: 1rem; font-size: 0.88rem; }
 .app-card .links a { margin-right: 1rem; font-weight: 600; }
 
+.app-card-preview-link { display: block; margin: -1.5rem -1.5rem 1rem; }
+.app-card-preview {
+  display: block;
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  object-position: top left;
+  border-radius: var(--radius) var(--radius) 0 0;
+  border-bottom: 1px solid var(--border);
+  transition: opacity 0.18s;
+}
+.app-card-preview-link:hover .app-card-preview { opacity: 0.85; }
+
+.app-card--empty {
+  border-top-color: var(--border);
+  box-shadow: none;
+  color: var(--muted);
+  font-size: 0.92rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+}
+.app-card--empty p { margin: 0; }
+
+.course-desc { color: var(--muted); margin-bottom: 0; font-size: 0.92rem; }
+
 /* ============================================================
    Page header strip
    ============================================================ */
