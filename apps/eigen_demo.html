@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Eigenvektoren &amp; Eigenwerte — geometrisch</title>
+<style>
+/* ── Reset & base ─────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  background: #0d1117;
+  color: #c9d1d9;
+}
+
+/* ── Left panel ───────────────────────────────────────────────── */
+#left {
+  width: 390px;
+  min-width: 330px;
+  height: 100vh;
+  overflow-y: auto;
+  background: #161b22;
+  border-right: 1px solid #21262d;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── Right panel ──────────────────────────────────────────────── */
+#right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0d1117;
+  overflow: hidden;
+}
+
+#svg-wrap {
+  flex: 1;
+  min-height: 0;
+}
+
+#svg-wrap svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+  user-select: none;
+}
+
+/* ── Typography ───────────────────────────────────────────────── */
+h1 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #79c0ff;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+/* ── Card ─────────────────────────────────────────────────────── */
+.card {
+  background: #1c2128;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.card-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #388bfd;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ── Matrix inputs ────────────────────────────────────────────── */
+.matrix-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 0 6px;
+}
+
+.matrix-bracket {
+  font-size: 46px;
+  color: #484f58;
+  font-weight: 100;
+  line-height: 1;
+  margin-top: -2px;
+}
+
+.matrix-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+.matrix-grid input[type=number] {
+  width: 58px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 5px;
+  color: #c9d1d9;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  padding: 5px 4px;
+  outline: none;
+  -moz-appearance: textfield;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.15s;
+}
+.matrix-grid input[type=number]::-webkit-inner-spin-button,
+.matrix-grid input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+.matrix-grid input[type=number]:focus { border-color: #388bfd; }
+
+.inp-a, .inp-c { color: #58a6ff; border-color: rgba(88,166,255,0.25) !important; }
+.inp-b, .inp-d { color: #f0883e; border-color: rgba(240,136,62,0.25) !important; }
+
+/* ── Preset buttons ───────────────────────────────────────────── */
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+}
+
+.preset-btn {
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 5px;
+  color: #6e7681;
+  font-size: 10.5px;
+  padding: 6px 7px;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.4;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.preset-btn:hover { border-color: #388bfd; background: #1c2128; color: #8b949e; }
+.preset-btn .pname { display: block; font-size: 12px; font-weight: 600; color: #c9d1d9; margin-bottom: 1px; }
+
+/* ── Toggle switch (exact inner_product_demo.html style) ─────── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.switch {
+  position: relative;
+  width: 38px;
+  height: 21px;
+  flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.knob {
+  position: absolute;
+  inset: 0;
+  background: #30363d;
+  border-radius: 21px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.knob::before {
+  content: '';
+  position: absolute;
+  width: 15px; height: 15px;
+  left: 3px; top: 3px;
+  background: #6e7681;
+  border-radius: 50%;
+  transition: transform 0.2s, background 0.2s;
+}
+.switch input:checked + .knob { background: #1a3a6b; }
+.switch input:checked + .knob::before {
+  transform: translateX(17px);
+  background: #388bfd;
+}
+
+.toggle-text { font-size: 12.5px; color: #8b949e; }
+
+/* ── Readout (exact inner_product_demo.html style) ────────────── */
+.r-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid #21262d;
+}
+.r-row:last-child { border-bottom: none; }
+
+.r-key { color: #6e7681; font-size: 11.5px; }
+.r-val {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+  font-size: 12px;
+  color: #e6edf3;
+  font-weight: 600;
+  text-align: right;
+  max-width: 58%;
+}
+.r-val.gold   { color: #e3b341; }
+.r-val.green  { color: #3fb950; }
+.r-val.red    { color: #f85149; }
+.r-val.blue   { color: #58a6ff; }
+.r-val.muted  { color: #6e7681; }
+
+/* ── Case badge ───────────────────────────────────────────────── */
+.case-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  margin-bottom: 7px;
+}
+.badge-real    { background: rgba(63,185,80,0.1);  color: #3fb950; border: 1px solid rgba(63,185,80,0.28); }
+.badge-complex { background: rgba(248,81,73,0.1);  color: #f85149; border: 1px solid rgba(248,81,73,0.28); }
+.badge-double  { background: rgba(227,179,65,0.1); color: #e3b341; border: 1px solid rgba(227,179,65,0.28); }
+.badge-scalar  { background: rgba(88,166,255,0.1); color: #58a6ff; border: 1px solid rgba(88,166,255,0.28); }
+
+/* ── Callout ──────────────────────────────────────────────────── */
+.callout {
+  background: rgba(56,139,253,0.07);
+  border: 1px solid rgba(56,139,253,0.2);
+  border-left: 3px solid #388bfd;
+  border-radius: 6px;
+  padding: 9px 11px;
+  font-size: 11.5px;
+  color: #8b949e;
+  line-height: 1.65;
+}
+.callout em { color: #79c0ff; font-style: normal; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LEFT PANEL
+═══════════════════════════════════════════════════════════════ -->
+<div id="left">
+
+  <h1>Eigenvektoren &amp; Eigenwerte — geometrisch</h1>
+
+  <!-- Matrix A -->
+  <div class="card">
+    <span class="card-label">Matrix A</span>
+    <div class="matrix-wrap">
+      <span class="matrix-bracket">[</span>
+      <div class="matrix-grid">
+        <input class="inp-a" type="number" id="ma" value="2"    step="0.1">
+        <input class="inp-b" type="number" id="mb" value="1"    step="0.1">
+        <input class="inp-c" type="number" id="mc" value="1"    step="0.1">
+        <input class="inp-d" type="number" id="md" value="2"    step="0.1">
+      </div>
+      <span class="matrix-bracket">]</span>
+    </div>
+  </div>
+
+  <!-- Presets -->
+  <div class="card">
+    <span class="card-label">Voreinstellungen</span>
+    <div class="preset-grid">
+      <button class="preset-btn" data-m="2,1,1,2">
+        <span class="pname">Symmetrisch</span>2 reelle Eigenwerte
+      </button>
+      <button class="preset-btn" data-m="0.866,-0.5,0.5,0.866">
+        <span class="pname">Drehung 30°</span>komplexe Eigenwerte
+      </button>
+      <button class="preset-btn" data-m="1,1,0,1">
+        <span class="pname">Scherung</span>doppelter Eigenwert
+      </button>
+      <button class="preset-btn" data-m="1,0,0,-1">
+        <span class="pname">Spiegelung</span>λ = +1, −1
+      </button>
+      <button class="preset-btn" data-m="2,0,0,2">
+        <span class="pname">Skalierung</span>jede Richtung
+      </button>
+      <button class="preset-btn" data-m="2,0,0,0.5">
+        <span class="pname">Diagonal</span>λ = 2, ½
+      </button>
+    </div>
+  </div>
+
+  <!-- Toggles -->
+  <div class="card">
+    <span class="card-label">Steuerung</span>
+    <div class="toggle-row">
+      <label class="switch">
+        <input type="checkbox" id="tog-sweep">
+        <span class="knob"></span>
+      </label>
+      <span class="toggle-text">Automatischer Umlauf</span>
+    </div>
+    <div class="toggle-row" style="margin-top:9px">
+      <label class="switch">
+        <input type="checkbox" id="tog-lines" checked>
+        <span class="knob"></span>
+      </label>
+      <span class="toggle-text">Eigenrichtungen anzeigen</span>
+    </div>
+  </div>
+
+  <!-- Numerische Auswertung -->
+  <div class="card">
+    <span class="card-label">Numerische Auswertung</span>
+    <div id="case-wrap" style="margin-bottom:2px"></div>
+    <div class="r-row">
+      <span class="r-key">v</span>
+      <span class="r-val" id="r-v">—</span>
+    </div>
+    <div class="r-row">
+      <span class="r-key">Av</span>
+      <span class="r-val" id="r-Av">—</span>
+    </div>
+    <div class="r-row">
+      <span class="r-key">Winkel v → Av</span>
+      <span class="r-val" id="r-angle">—</span>
+    </div>
+    <div class="r-row">
+      <span class="r-key">Streckfaktor ±|Av|/|v|</span>
+      <span class="r-val" id="r-stretch">—</span>
+    </div>
+    <div class="r-row">
+      <span class="r-key">λ₁</span>
+      <span class="r-val" id="r-l1">—</span>
+    </div>
+    <div class="r-row">
+      <span class="r-key">λ₂</span>
+      <span class="r-val" id="r-l2">—</span>
+    </div>
+    <div class="r-row" style="align-items:flex-start;padding-top:6px">
+      <span class="r-key" style="padding-top:1px">Eigenvektoren</span>
+      <span class="r-val" id="r-evec" style="font-size:11px;line-height:1.5">—</span>
+    </div>
+    <div class="r-row">
+      <span class="r-key">det A</span>
+      <span class="r-val" id="r-det">—</span>
+    </div>
+    <div class="r-row">
+      <span class="r-key">Spur A</span>
+      <span class="r-val" id="r-tr">—</span>
+    </div>
+  </div>
+
+  <!-- Callout -->
+  <div class="callout">
+    Ein <em>Eigenvektor</em> ist eine Richtung, die A nicht dreht, sondern nur streckt,
+    staucht oder spiegelt: <em>Av = λv</em>. Findet sich beim Umlauf keine solche reelle
+    Richtung, sind die Eigenwerte komplex — A wirkt dann wie eine Drehung.
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     RIGHT PANEL — SVG plot
+═══════════════════════════════════════════════════════════════ -->
+<div id="right">
+  <div id="svg-wrap">
+    <svg id="plot" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- v arrow — normal -->
+        <marker id="mk-v" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#58a6ff"/>
+        </marker>
+        <!-- Av arrow — normal -->
+        <marker id="mk-Av" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#f0883e"/>
+        </marker>
+        <!-- highlight λ>0 -->
+        <marker id="mk-hi-pos" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#3fb950"/>
+        </marker>
+        <!-- highlight λ<0 -->
+        <marker id="mk-hi-neg" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#f85149"/>
+        </marker>
+      </defs>
+
+      <!-- draw order: back → front -->
+      <g id="g-grid"></g>
+      <g id="g-circle"></g>
+      <g id="g-eigenlines"></g>
+      <g id="g-axes"></g>
+      <g id="g-Av"></g>
+      <g id="g-v"></g>
+      <g id="g-labels"></g>
+    </svg>
+  </div>
+</div>
+
+<script>
+// ─── globals ─────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+let A = { a:2, b:1, c:1, d:2 };
+let theta = Math.PI / 5;          // angle of v on unit circle
+let W = 0, H = 0, cx = 0, cy = 0, scale = 80;
+const GR = 4;                      // grid half-range in math units
+let eigen = {};
+let aligned = false, alignSign = 1;
+let animating = false, animId = null, sweepStart = null;
+const SWEEP_DUR = 7000;            // ms for one full revolution
+
+// ─── SVG helpers ─────────────────────────────────────────────────
+function ns(tag, attrs, txt) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  if (txt !== undefined) el.textContent = txt;
+  return el;
+}
+function clr(id) { const g=$(id); while(g.firstChild) g.removeChild(g.firstChild); }
+function toS(x, y) { return [cx + x*scale, cy - y*scale]; }
+function frS(sx, sy) { return [(sx-cx)/scale, (cy-sy)/scale]; }
+
+// ─── Eigenvalue / eigenvector math ───────────────────────────────
+const EPS = 1e-9;
+
+function computeEigen() {
+  const {a, b, c, d} = A;
+  const T = a + d, D = a*d - b*c;
+  const disc = T*T - 4*D;
+  eigen = { T, D, disc };
+
+  if (disc < -EPS) {
+    eigen.type = 'complex';
+    eigen.re = T/2;
+    eigen.im = Math.sqrt(-disc) / 2;
+    eigen.dirs = [];
+
+  } else if (disc < EPS) {
+    const lam = T / 2;
+    // Check A = lam·I
+    if (Math.abs(a-lam)<EPS && Math.abs(b)<EPS && Math.abs(c)<EPS && Math.abs(d-lam)<EPS) {
+      eigen.type = 'scalar';
+      eigen.lam = lam;
+      eigen.dirs = [];
+    } else {
+      eigen.type = 'repeated';
+      eigen.lam = lam;
+      const v = eigVec(lam);
+      eigen.dirs = v ? [{ vec:v, lam }] : [];
+    }
+
+  } else {
+    const sq = Math.sqrt(disc);
+    const l1 = (T + sq)/2, l2 = (T - sq)/2;
+    eigen.type = 'real';
+    eigen.lam1 = l1; eigen.lam2 = l2;
+    const v1 = eigVec(l1), v2 = eigVec(l2);
+    eigen.dirs = [];
+    if (v1) eigen.dirs.push({ vec:v1, lam:l1 });
+    if (v2) eigen.dirs.push({ vec:v2, lam:l2 });
+  }
+}
+
+function eigVec(lam) {
+  const {a, b, c, d} = A;
+  let vx, vy;
+  if (Math.abs(b) > EPS) {
+    vx = b; vy = lam - a;
+  } else if (Math.abs(c) > EPS) {
+    vx = lam - d; vy = c;
+  } else {
+    // diagonal: pick the axis that matches lam
+    vx = Math.abs(a - lam) < EPS ? 1 : 0;
+    vy = Math.abs(a - lam) < EPS ? 0 : 1;
+  }
+  const len = Math.sqrt(vx*vx + vy*vy);
+  if (len < EPS) return null;
+  return [vx/len, vy/len];
+}
+
+// ─── Draw: grid ──────────────────────────────────────────────────
+function drawGrid() {
+  clr('g-grid');
+  const g = $('g-grid');
+  for (let i = -GR; i <= GR; i++) {
+    const [x1,y1]=toS(i,-GR), [x2,y2]=toS(i,GR);
+    g.appendChild(ns('line',{x1,y1,x2,y2,stroke:'#1c2128','stroke-width':1}));
+    const [x3,y3]=toS(-GR,i), [x4,y4]=toS(GR,i);
+    g.appendChild(ns('line',{x1:x3,y1:y3,x2:x4,y2:y4,stroke:'#1c2128','stroke-width':1}));
+  }
+}
+
+// ─── Draw: unit circle ───────────────────────────────────────────
+function drawCircle() {
+  clr('g-circle');
+  const [ox,oy] = toS(0,0);
+  $('g-circle').appendChild(ns('circle',{
+    cx:ox, cy:oy, r:scale,
+    fill:'none', stroke:'#2a3240', 'stroke-width':1, 'stroke-dasharray':'4,3'
+  }));
+}
+
+// ─── Draw: axes + ticks ──────────────────────────────────────────
+function drawAxes() {
+  clr('g-axes');
+  const g = $('g-axes');
+  g.appendChild(ns('line',{x1:0,y1:cy,x2:W,y2:cy,stroke:'#30363d','stroke-width':1}));
+  g.appendChild(ns('line',{x1:cx,y1:0,x2:cx,y2:H,stroke:'#30363d','stroke-width':1}));
+  for (let i=-GR; i<=GR; i++) {
+    if (i===0) continue;
+    const [sx] = toS(i,0), [,sy] = toS(0,i);
+    g.appendChild(ns('line',{x1:sx,y1:cy-3,x2:sx,y2:cy+3,stroke:'#30363d','stroke-width':1}));
+    g.appendChild(ns('line',{x1:cx-3,y1:sy,x2:cx+3,y2:sy,stroke:'#30363d','stroke-width':1}));
+    if (Math.abs(i) <= 3) {
+      g.appendChild(ns('text',{x:sx,y:cy+13,'text-anchor':'middle',fill:'#484f58','font-size':9},i));
+      g.appendChild(ns('text',{x:cx-7,y:sy+4,'text-anchor':'end',fill:'#484f58','font-size':9},i));
+    }
+  }
+  // Axis labels
+  g.appendChild(ns('text',{x:W-8,y:cy+12,'text-anchor':'end',fill:'#484f58','font-size':10,'font-style':'italic'},'x'));
+  g.appendChild(ns('text',{x:cx+7,y:10,'text-anchor':'start',fill:'#484f58','font-size':10,'font-style':'italic'},'y'));
+}
+
+// ─── Draw: eigenlines ────────────────────────────────────────────
+function drawEigenlines() {
+  clr('g-eigenlines');
+  if (!$('tog-lines').checked) return;
+  const g = $('g-eigenlines');
+
+  if (eigen.type === 'scalar') {
+    // Highlight ring: every direction is an eigenvector
+    const [ox,oy] = toS(0,0);
+    g.appendChild(ns('circle',{
+      cx:ox, cy:oy, r:scale,
+      fill:'none', stroke:'rgba(63,185,80,0.25)', 'stroke-width':3, 'stroke-dasharray':'6,4'
+    }));
+    return;
+  }
+
+  const ext = Math.max(W, H) / scale * 1.5;
+  for (const { vec, lam } of eigen.dirs) {
+    const col = lam >= 0 ? 'rgba(63,185,80,0.55)' : 'rgba(248,81,73,0.55)';
+    const [ux, uy] = vec;
+    const [x1,y1] = toS(-ext*ux, -ext*uy);
+    const [x2,y2] = toS( ext*ux,  ext*uy);
+    g.appendChild(ns('line',{x1,y1,x2,y2,stroke:col,'stroke-width':1.5,'stroke-dasharray':'9,5'}));
+
+    // lambda label near positive tip
+    const d = Math.min(ext*0.7, GR*0.85);
+    const [lx,ly] = toS(ux*d, uy*d);
+    g.appendChild(ns('text',{
+      x:lx, y:ly, 'text-anchor':'middle', 'dominant-baseline':'middle',
+      fill:col, 'font-size':10, 'font-style':'italic',
+      'paint-order':'stroke', stroke:'#0d1117', 'stroke-width':3
+    }, `λ=${f1(lam)}`));
+  }
+}
+
+// ─── Draw: arrow helper ───────────────────────────────────────────
+function arrow(gid, ex, ey, color, marker, width, glow) {
+  const [ox,oy] = toS(0,0);
+  const dx = ex-ox, dy = ey-oy;
+  const len = Math.sqrt(dx*dx+dy*dy);
+  if (len < 4) return;
+  const shrink = 11/len;
+  const x2 = ex - dx*shrink, y2 = ey - dy*shrink;
+
+  if (glow) {
+    $(gid).appendChild(ns('line',{
+      x1:ox,y1:oy,x2,y2,
+      stroke:color,'stroke-width':width+8,opacity:0.18,'stroke-linecap':'round'
+    }));
+  }
+  $(gid).appendChild(ns('line',{
+    x1:ox,y1:oy,x2,y2,
+    stroke:color,'stroke-width':width,'stroke-linecap':'round',
+    'marker-end':`url(#${marker})`
+  }));
+}
+
+// ─── Draw: v and Av ──────────────────────────────────────────────
+function drawVectors() {
+  clr('g-v'); clr('g-Av'); clr('g-labels');
+
+  const vx = Math.cos(theta), vy = Math.sin(theta);
+  const Avx = A.a*vx + A.b*vy, Avy = A.c*vx + A.d*vy;
+  const AvLen = Math.sqrt(Avx*Avx + Avy*Avy);
+
+  // Alignment: |cross(v, Av/|Av|)| < threshold → (anti)parallel
+  const cross = vx*Avy - vy*Avx;
+  const dot   = vx*Avx + vy*Avy;
+  aligned = AvLen > EPS && Math.abs(cross) < 0.1 * AvLen;
+  alignSign = dot >= 0 ? 1 : -1;
+
+  // Colors and markers
+  const hiColor = alignSign > 0 ? '#3fb950' : '#f85149';
+  const hiMark  = alignSign > 0 ? 'mk-hi-pos' : 'mk-hi-neg';
+  const vColor  = aligned ? hiColor : '#58a6ff';
+  const AvColor = aligned ? hiColor : '#f0883e';
+  const vMark   = aligned ? hiMark : 'mk-v';
+  const AvMark  = aligned ? hiMark : 'mk-Av';
+  const vW      = aligned ? 3.5 : 2.5;
+  const AvW     = aligned ? 3.5 : 2;
+
+  // Draw Av first (behind v)
+  const [ex, ey] = toS(Avx, Avy);
+  arrow('g-Av', ex, ey, AvColor, AvMark, AvW, aligned);
+
+  // Draw v
+  const [vex, vey] = toS(vx, vy);
+  arrow('g-v', vex, vey, vColor, vMark, vW, aligned);
+
+  // Drag handle circle at tip of v
+  $('g-v').appendChild(ns('circle',{
+    cx:vex, cy:vey, r:7,
+    fill:vColor, opacity:0.92,
+    stroke:'#0d1117', 'stroke-width':1.5,
+    style:'cursor:grab'
+  }));
+
+  // Labels
+  const lg = $('g-labels');
+
+  // v label: slightly beyond unit circle tip
+  const [vlx, vly] = toS(vx*1.22, vy*1.22);
+  lg.appendChild(ns('text',{
+    x:vlx, y:vly, 'text-anchor':'middle', 'dominant-baseline':'middle',
+    fill:vColor, 'font-size':14, 'font-weight':700, 'font-style':'italic',
+    'paint-order':'stroke', stroke:'#0d1117', 'stroke-width':3
+  },'v'));
+
+  // Av label: beyond Av tip
+  if (AvLen > 0.08) {
+    const nx = Avx/AvLen, ny = Avy/AvLen;
+    const off = 0.3;
+    const [alx, aly] = toS(Avx + nx*off, Avy + ny*off);
+    lg.appendChild(ns('text',{
+      x:alx, y:aly, 'text-anchor':'middle', 'dominant-baseline':'middle',
+      fill:AvColor, 'font-size':14, 'font-weight':700, 'font-style':'italic',
+      'paint-order':'stroke', stroke:'#0d1117', 'stroke-width':3
+    },'Av'));
+  }
+
+  // Alignment callout during animation
+  if (aligned && animating) {
+    const sign = alignSign > 0 ? '+' : '−';
+    const lam  = alignSign * AvLen;
+    const [ox2, oy2] = toS(0, 0);
+    const mid  = toS((Avx + vx)/2 + 0.4, (Avy + vy)/2 + 0.3);
+    lg.appendChild(ns('text',{
+      x:mid[0], y:mid[1], 'text-anchor':'middle', 'dominant-baseline':'middle',
+      fill:hiColor, 'font-size':11, 'font-weight':600,
+      'paint-order':'stroke', stroke:'#0d1117', 'stroke-width':3
+    }, `Av = ${f2(lam)}·v`));
+  }
+}
+
+// ─── Readout ─────────────────────────────────────────────────────
+function f2(x) { return (Math.abs(x)<1e-9?0:x).toFixed(2); }
+function f1(x) { return (Math.abs(x)<1e-9?0:x).toFixed(1); }
+
+function updateReadout() {
+  const vx = Math.cos(theta), vy = Math.sin(theta);
+  const Avx = A.a*vx + A.b*vy, Avy = A.c*vx + A.d*vy;
+  const AvLen = Math.sqrt(Avx*Avx + Avy*Avy);
+  const dot = vx*Avx + vy*Avy;
+
+  $('r-v').textContent  = `(${f2(vx)},  ${f2(vy)})`;
+  $('r-Av').textContent = `(${f2(Avx)},  ${f2(Avy)})`;
+
+  // Angle v → Av
+  if (AvLen > EPS) {
+    const cosA = Math.max(-1, Math.min(1, dot / AvLen));
+    $('r-angle').textContent = `${f2(Math.acos(cosA)*180/Math.PI)}°`;
+  } else {
+    $('r-angle').textContent = '—';
+  }
+
+  // Signed stretch factor
+  const stretch = AvLen * (dot >= 0 ? 1 : -1);
+  const sEl = $('r-stretch');
+  sEl.textContent = f2(stretch);
+  sEl.className = 'r-val ' + (stretch > 1e-6 ? 'green' : stretch < -1e-6 ? 'red' : '');
+
+  // Case badge
+  const bw = $('case-wrap');
+  bw.innerHTML = '';
+  let cls, txt;
+  if (eigen.type==='complex') {
+    cls='badge-complex'; txt='Komplex — keine reellen Eigenvektoren';
+  } else if (eigen.type==='scalar') {
+    cls='badge-scalar';  txt='Jede Richtung ist Eigenvektor';
+  } else if (eigen.type==='repeated') {
+    cls='badge-double';  txt='Doppelter Eigenwert — eine Eigenrichtung';
+  } else {
+    cls='badge-real';    txt='Zwei reelle Eigenwerte';
+  }
+  const b = document.createElement('span');
+  b.className = 'case-badge ' + cls;
+  b.textContent = txt;
+  bw.appendChild(b);
+
+  // λ₁, λ₂
+  const l1El = $('r-l1'), l2El = $('r-l2');
+  if (eigen.type==='complex') {
+    l1El.textContent = `${f2(eigen.re)} + ${f2(eigen.im)}i`;
+    l2El.textContent = `${f2(eigen.re)} − ${f2(eigen.im)}i`;
+    l1El.className = l2El.className = 'r-val red';
+  } else if (eigen.type==='repeated' || eigen.type==='scalar') {
+    l1El.textContent = l2El.textContent = f2(eigen.lam);
+    l1El.className = l2El.className = 'r-val gold';
+  } else {
+    l1El.textContent = f2(eigen.lam1);
+    l2El.textContent = f2(eigen.lam2);
+    l1El.className = 'r-val ' + (eigen.lam1 >= 0 ? 'green' : 'red');
+    l2El.className = 'r-val ' + (eigen.lam2 >= 0 ? 'green' : 'red');
+  }
+
+  // Eigenvectors
+  const evEl = $('r-evec');
+  if (eigen.type==='complex') {
+    evEl.textContent = 'keine reellen Eigenvektoren\n— A wirkt wie eine Drehung';
+    evEl.className = 'r-val red';
+  } else if (eigen.type==='scalar') {
+    evEl.textContent = 'jede Richtung';
+    evEl.className = 'r-val blue';
+  } else if (eigen.dirs.length === 0) {
+    evEl.textContent = '—';
+    evEl.className = 'r-val muted';
+  } else {
+    evEl.textContent = eigen.dirs.map(
+      ({vec,lam}) => `(${f2(vec[0])}, ${f2(vec[1])})  λ=${f2(lam)}`
+    ).join('\n');
+    evEl.className = 'r-val';
+  }
+  evEl.style.whiteSpace = 'pre';
+
+  $('r-det').textContent = f2(eigen.D);
+  $('r-tr').textContent  = f2(eigen.T);
+}
+
+// ─── Full render ─────────────────────────────────────────────────
+function render() {
+  computeEigen();
+  drawGrid();
+  drawCircle();
+  drawAxes();
+  drawEigenlines();
+  drawVectors();
+  updateReadout();
+}
+
+// ─── Resize ──────────────────────────────────────────────────────
+function onResize() {
+  const wrap = $('svg-wrap');
+  W = wrap.clientWidth;
+  H = wrap.clientHeight;
+  $('plot').setAttribute('viewBox', `0 0 ${W} ${H}`);
+  cx = W/2; cy = H/2;
+  scale = Math.min(W, H) / (GR*2) * 0.84;
+  render();
+}
+
+// ─── Drag: project mouse onto unit circle ────────────────────────
+let dragging = false;
+
+function pointerAngle(e) {
+  const rect = $('plot').getBoundingClientRect();
+  const cx_ = e.touches ? e.touches[0].clientX : e.clientX;
+  const cy_ = e.touches ? e.touches[0].clientY : e.clientY;
+  const [mx, my] = frS(cx_ - rect.left, cy_ - rect.top);
+  return Math.atan2(my, mx);
+}
+
+$('plot').addEventListener('mousedown', e => {
+  if (animating) stopAnim();
+  dragging = true;
+  theta = pointerAngle(e);
+  render();
+});
+window.addEventListener('mousemove', e => {
+  if (!dragging) return;
+  theta = pointerAngle(e);
+  render();
+});
+window.addEventListener('mouseup', () => { dragging = false; });
+
+$('plot').addEventListener('touchstart', e => {
+  e.preventDefault();
+  if (animating) stopAnim();
+  dragging = true;
+  theta = pointerAngle(e);
+  render();
+}, { passive: false });
+window.addEventListener('touchmove', e => {
+  if (!dragging) return;
+  e.preventDefault();
+  theta = pointerAngle(e);
+  render();
+}, { passive: false });
+window.addEventListener('touchend', () => { dragging = false; });
+
+// ─── Animation ───────────────────────────────────────────────────
+function startAnim() {
+  animating = true;
+  sweepStart = null;
+  animId = requestAnimationFrame(animStep);
+}
+
+function stopAnim() {
+  animating = false;
+  cancelAnimationFrame(animId);
+  animId = null;
+  $('tog-sweep').checked = false;
+}
+
+function animStep(ts) {
+  if (!sweepStart) sweepStart = ts;
+  const t = (ts - sweepStart) / SWEEP_DUR;
+  if (t >= 1) { stopAnim(); return; }
+  theta = t * Math.PI * 2;
+  render();
+  animId = requestAnimationFrame(animStep);
+}
+
+$('tog-sweep').addEventListener('change', e => {
+  if (e.target.checked) startAnim(); else stopAnim();
+});
+
+$('tog-lines').addEventListener('change', () => render());
+
+// ─── Matrix input ─────────────────────────────────────────────────
+function readA() {
+  A.a = parseFloat($('ma').value) || 0;
+  A.b = parseFloat($('mb').value) || 0;
+  A.c = parseFloat($('mc').value) || 0;
+  A.d = parseFloat($('md').value) || 0;
+}
+
+['ma','mb','mc','md'].forEach(id => {
+  $(id).addEventListener('input', () => { readA(); render(); });
+});
+
+// ─── Presets ─────────────────────────────────────────────────────
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const [a,b,c,d] = btn.dataset.m.split(',').map(Number);
+    Object.assign(A, {a,b,c,d});
+    $('ma').value=a; $('mb').value=b;
+    $('mc').value=c; $('md').value=d;
+    render();
+  });
+});
+
+// ─── Init ─────────────────────────────────────────────────────────
+new ResizeObserver(() => onResize()).observe($('svg-wrap'));
+onResize();
+</script>
+</body>
+</html>
