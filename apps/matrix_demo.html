@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Matrizen als lineare Abbildungen</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  background: #0d1117;
+  color: #c9d1d9;
+}
+
+/* ── Left panel ───────────────────────────────────────────────── */
+#left {
+  width: 390px;
+  min-width: 330px;
+  height: 100vh;
+  overflow-y: auto;
+  background: #161b22;
+  border-right: 1px solid #21262d;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── Right panel ──────────────────────────────────────────────── */
+#right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0d1117;
+  overflow: hidden;
+}
+
+#svg-wrap {
+  flex: 1;
+  min-height: 0;
+}
+
+#svg-wrap svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ── Typography ───────────────────────────────────────────────── */
+h1 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #79c0ff;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+/* ── Card ─────────────────────────────────────────────────────── */
+.card {
+  background: #1c2128;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.card-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #388bfd;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ── Select ───────────────────────────────────────────────────── */
+select {
+  width: 100%;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  padding: 6px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M6 8L0 0h12z' fill='%236e7681'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+select:focus { border-color: #388bfd; }
+
+/* ── Sliders ──────────────────────────────────────────────────── */
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.slider-label {
+  font-size: 12px;
+  width: 14px;
+  flex-shrink: 0;
+  font-weight: 700;
+  font-family: Georgia, serif;
+  font-style: italic;
+  text-align: center;
+}
+
+.slider-val {
+  font-size: 11px;
+  color: #c9d1d9;
+  width: 36px;
+  text-align: right;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+input[type=range] {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 5px;
+  background: #30363d;
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #388bfd;
+  box-shadow: 0 0 0 3px rgba(56,139,253,0.2);
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+input[type=range]:active::-webkit-slider-thumb {
+  box-shadow: 0 0 0 5px rgba(56,139,253,0.3);
+}
+.col1 input[type=range]::-webkit-slider-thumb { background: #58a6ff; }
+.col2 input[type=range]::-webkit-slider-thumb { background: #f0883e; }
+.col2 input[type=range]:active::-webkit-slider-thumb {
+  box-shadow: 0 0 0 5px rgba(240,136,62,0.3);
+}
+
+/* ── Matrix display ───────────────────────────────────────────── */
+.matrix-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 4px 8px;
+}
+
+.matrix-bracket {
+  font-size: 40px;
+  color: #6e7681;
+  font-weight: 100;
+  line-height: 1;
+  margin-top: -2px;
+}
+
+.matrix-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 16px;
+  text-align: center;
+}
+
+.matrix-entry {
+  font-size: 16px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  min-width: 36px;
+}
+
+.col1-entry { color: #58a6ff; }
+.col2-entry { color: #f0883e; }
+
+/* ── Toggles ──────────────────────────────────────────────────── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+.toggle-row:first-of-type { margin-top: 0; }
+
+.toggle-row label {
+  font-size: 11.5px;
+  color: #8b949e;
+  cursor: pointer;
+}
+
+.toggle-row input[type=checkbox] {
+  accent-color: #388bfd;
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+}
+
+/* ── Readouts ─────────────────────────────────────────────────── */
+.readout-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 4px 0;
+  border-bottom: 1px solid #21262d;
+  font-size: 11.5px;
+}
+.readout-row:last-child { border-bottom: none; }
+
+.readout-key { color: #8b949e; }
+.readout-val { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.val-pos  { color: #3fb950; }
+.val-neg  { color: #f85149; }
+.val-zero { color: #e3b341; }
+
+/* ── Explanation ──────────────────────────────────────────────── */
+.explain {
+  font-size: 11.5px;
+  color: #8b949e;
+  line-height: 1.65;
+}
+.explain .blue   { color: #58a6ff; }
+.explain .orange { color: #f0883e; }
+
+.sep { height: 1px; background: #21262d; margin: 6px 0; }
+</style>
+</head>
+<body>
+
+<div id="left">
+  <h1>Matrizen als lineare Abbildungen</h1>
+
+  <div class="explain">
+    Jede 2×2-Matrix <em>A</em> beschreibt eine lineare Abbildung der Ebene.
+    Die <span class="blue">erste Spalte</span> ist das Bild von <span class="blue"><strong>e₁ = (1, 0)</strong></span>,
+    die <span class="orange">zweite Spalte</span> das Bild von <span class="orange"><strong>e₂ = (0, 1)</strong></span>.
+    Das transformierte Gitter zeigt, wie <em>A</em> den gesamten Raum verformt.
+    Die Determinante gibt an, um welchen (vorzeichenbehafteten) Faktor Flächen skaliert werden.
+  </div>
+
+  <!-- Matrix entries -->
+  <div class="card">
+    <span class="card-label">Matrixeinträge</span>
+
+    <div class="matrix-display">
+      <span class="matrix-bracket">[</span>
+      <div class="matrix-grid">
+        <span class="matrix-entry col1-entry" id="disp-a">1.0</span>
+        <span class="matrix-entry col2-entry" id="disp-b">0.0</span>
+        <span class="matrix-entry col1-entry" id="disp-c">0.0</span>
+        <span class="matrix-entry col2-entry" id="disp-d">1.0</span>
+      </div>
+      <span class="matrix-bracket">]</span>
+    </div>
+
+    <div class="sep"></div>
+
+    <div class="col1">
+      <div class="slider-row">
+        <span class="slider-label" style="color:#58a6ff">a</span>
+        <input type="range" id="sl-a" min="-3" max="3" step="0.1" value="1">
+        <span class="slider-val" id="val-a">1.0</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label" style="color:#58a6ff">c</span>
+        <input type="range" id="sl-c" min="-3" max="3" step="0.1" value="0">
+        <span class="slider-val" id="val-c">0.0</span>
+      </div>
+    </div>
+
+    <div style="height: 6px"></div>
+
+    <div class="col2">
+      <div class="slider-row">
+        <span class="slider-label" style="color:#f0883e">b</span>
+        <input type="range" id="sl-b" min="-3" max="3" step="0.1" value="0">
+        <span class="slider-val" id="val-b">0.0</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-label" style="color:#f0883e">d</span>
+        <input type="range" id="sl-d" min="-3" max="3" step="0.1" value="1">
+        <span class="slider-val" id="val-d">1.0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Presets -->
+  <div class="card">
+    <span class="card-label">Voreinstellungen</span>
+    <select id="preset">
+      <option value="">– Beispiel wählen –</option>
+      <option value="1,0,0,1">Identität</option>
+      <option value="0.71,-0.71,0.71,0.71">Rotation 45°</option>
+      <option value="0,-1,1,0">Rotation 90°</option>
+      <option value="-1,0,0,-1">Rotation 180°</option>
+      <option value="1,1,0,1">Scherung (horizontal)</option>
+      <option value="1,0,1,1">Scherung (vertikal)</option>
+      <option value="2,0,0,2">Skalierung × 2</option>
+      <option value="0.5,0,0,0.5">Skalierung × ½</option>
+      <option value="1,0,0,-1">Spiegelung (x-Achse)</option>
+      <option value="-1,0,0,1">Spiegelung (y-Achse)</option>
+      <option value="0,1,1,0">Spiegelung an y = x</option>
+      <option value="1,0,0,0">Projektion auf x-Achse</option>
+      <option value="2,1,-1,2">Rotation + Skalierung</option>
+      <option value="1,2,0.5,1">Singuläre Matrix (det = 0)</option>
+    </select>
+  </div>
+
+  <!-- Toggles -->
+  <div class="card">
+    <span class="card-label">Anzeige</span>
+    <div class="toggle-row">
+      <label for="tog-grid">Transformiertes Gitter</label>
+      <input type="checkbox" id="tog-grid" checked>
+    </div>
+    <div class="toggle-row">
+      <label for="tog-orig">Original-Gitter</label>
+      <input type="checkbox" id="tog-orig" checked>
+    </div>
+    <div class="toggle-row">
+      <label for="tog-square">Einheitsquadrat</label>
+      <input type="checkbox" id="tog-square" checked>
+    </div>
+    <div class="toggle-row">
+      <label for="tog-vec">Basisvektoren Ae₁, Ae₂</label>
+      <input type="checkbox" id="tog-vec" checked>
+    </div>
+  </div>
+
+  <!-- Readouts -->
+  <div class="card">
+    <span class="card-label">Kenngrößen</span>
+    <div class="readout-row">
+      <span class="readout-key">det(A)</span>
+      <span class="readout-val" id="read-det">1.000</span>
+    </div>
+    <div class="readout-row">
+      <span class="readout-key">Flächenskalierung |det A|</span>
+      <span class="readout-val" id="read-area">1.000</span>
+    </div>
+    <div class="readout-row">
+      <span class="readout-key">Orientierung</span>
+      <span class="readout-val" id="read-orient">erhaltend</span>
+    </div>
+    <div class="readout-row">
+      <span class="readout-key">Rang</span>
+      <span class="readout-val" id="read-rank">2</span>
+    </div>
+  </div>
+</div>
+
+<!-- Right: SVG plot -->
+<div id="right">
+  <div id="svg-wrap">
+    <svg id="plot" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr-e1" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#58a6ff"/>
+        </marker>
+        <marker id="arr-e2" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#f0883e"/>
+        </marker>
+      </defs>
+
+      <!-- Draw order: back → front -->
+      <g id="layer-orig-grid"></g>
+      <g id="layer-axes"></g>
+      <g id="layer-grid"></g>
+      <g id="layer-square-orig"></g>
+      <g id="layer-square"></g>
+      <g id="layer-vectors"></g>
+      <g id="layer-labels"></g>
+    </svg>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+// ── State ──────────────────────────────────────────────────────────
+let A = { a: 1, b: 0, c: 0, d: 1 };
+let W = 0, H = 0, cx = 0, cy = 0, scale = 80;
+const GRID_RANGE = 5;
+
+// ── Coordinate helpers ─────────────────────────────────────────────
+function toSVG(mx, my) {
+  return [cx + mx * scale, cy - my * scale];
+}
+
+function applyA(x, y) {
+  return [A.a * x + A.b * y, A.c * x + A.d * y];
+}
+
+// ── SVG element factory ────────────────────────────────────────────
+function svgEl(tag, attrs, text) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  if (text !== undefined) el.textContent = text;
+  return el;
+}
+
+function clearLayer(id) {
+  const g = $(id);
+  while (g.firstChild) g.removeChild(g.firstChild);
+}
+
+// ── Resize ────────────────────────────────────────────────────────
+function onResize() {
+  const wrap = $('svg-wrap');
+  W = wrap.clientWidth;
+  H = wrap.clientHeight;
+  $('plot').setAttribute('viewBox', `0 0 ${W} ${H}`);
+  cx = W / 2;
+  cy = H / 2;
+  scale = Math.min(W, H) / (GRID_RANGE * 2) * 0.85;
+  render();
+}
+
+// ── Draw: original grid ────────────────────────────────────────────
+function drawOrigGrid() {
+  clearLayer('layer-orig-grid');
+  if (!$('tog-orig').checked) return;
+  const g = $('layer-orig-grid');
+  for (let i = -GRID_RANGE; i <= GRID_RANGE; i++) {
+    const [x1, y1] = toSVG(i, -GRID_RANGE);
+    const [x2, y2] = toSVG(i,  GRID_RANGE);
+    g.appendChild(svgEl('line', { x1, y1, x2, y2, stroke: '#21262d', 'stroke-width': 0.8 }));
+    const [x3, y3] = toSVG(-GRID_RANGE, i);
+    const [x4, y4] = toSVG( GRID_RANGE, i);
+    g.appendChild(svgEl('line', { x1: x3, y1: y3, x2: x4, y2: y4, stroke: '#21262d', 'stroke-width': 0.8 }));
+  }
+}
+
+// ── Draw: axes + tick labels ───────────────────────────────────────
+function drawAxes() {
+  clearLayer('layer-axes');
+  const g = $('layer-axes');
+
+  g.appendChild(svgEl('line', { x1: 0, y1: cy, x2: W, y2: cy, stroke: '#30363d', 'stroke-width': 1 }));
+  g.appendChild(svgEl('line', { x1: cx, y1: 0, x2: cx, y2: H, stroke: '#30363d', 'stroke-width': 1 }));
+
+  for (let i = -GRID_RANGE; i <= GRID_RANGE; i++) {
+    if (i === 0) continue;
+    const [sx] = toSVG(i, 0);
+    const [, sy] = toSVG(0, i);
+    g.appendChild(svgEl('line', { x1: sx, y1: cy - 3, x2: sx, y2: cy + 3, stroke: '#484f58', 'stroke-width': 1 }));
+    g.appendChild(svgEl('line', { x1: cx - 3, y1: sy, x2: cx + 3, y2: sy, stroke: '#484f58', 'stroke-width': 1 }));
+    g.appendChild(svgEl('text', { x: sx, y: cy + 14, 'text-anchor': 'middle', fill: '#484f58', 'font-size': 10 }, i));
+    g.appendChild(svgEl('text', { x: cx - 7, y: sy + 4, 'text-anchor': 'end', fill: '#484f58', 'font-size': 10 }, i));
+  }
+}
+
+// ── Draw: transformed grid ─────────────────────────────────────────
+function drawTransformedGrid() {
+  clearLayer('layer-grid');
+  if (!$('tog-grid').checked) return;
+  const g = $('layer-grid');
+  const R = GRID_RANGE;
+  for (let i = -R; i <= R; i++) {
+    // originally-vertical lines (x = i)
+    let [ax1, ay1] = applyA(i, -R); let [sx1, sy1] = toSVG(ax1, ay1);
+    let [ax2, ay2] = applyA(i,  R); let [sx2, sy2] = toSVG(ax2, ay2);
+    g.appendChild(svgEl('line', { x1: sx1, y1: sy1, x2: sx2, y2: sy2, stroke: '#1d3d6b', 'stroke-width': 1 }));
+    // originally-horizontal lines (y = i)
+    let [ax3, ay3] = applyA(-R, i); let [sx3, sy3] = toSVG(ax3, ay3);
+    let [ax4, ay4] = applyA( R, i); let [sx4, sy4] = toSVG(ax4, ay4);
+    g.appendChild(svgEl('line', { x1: sx3, y1: sy3, x2: sx4, y2: sy4, stroke: '#1a4535', 'stroke-width': 1 }));
+  }
+}
+
+// ── Draw: unit square (original ghost + transformed) ───────────────
+function drawUnitSquare() {
+  clearLayer('layer-square-orig');
+  clearLayer('layer-square');
+
+  const corners = [[0,0],[1,0],[1,1],[0,1]];
+
+  // Ghost of original unit square
+  if ($('tog-orig').checked && $('tog-square').checked) {
+    const pts = corners.map(([x,y]) => toSVG(x,y).join(',')).join(' ');
+    $('layer-square-orig').appendChild(svgEl('polygon', {
+      points: pts,
+      fill: 'rgba(88,166,255,0.05)',
+      stroke: '#30363d',
+      'stroke-width': 1,
+      'stroke-dasharray': '4,3'
+    }));
+  }
+
+  if (!$('tog-square').checked) return;
+
+  const det = A.a * A.d - A.b * A.c;
+  const eps = 1e-6;
+  const fillColor   = Math.abs(det) < eps ? 'rgba(227,179,65,0.15)'
+                    : det > 0             ? 'rgba(63,185,80,0.15)'
+                    :                       'rgba(248,81,73,0.18)';
+  const strokeColor = Math.abs(det) < eps ? '#e3b341'
+                    : det > 0             ? '#3fb950'
+                    :                       '#f85149';
+
+  const transformed = corners.map(([x,y]) => applyA(x,y));
+  const pts = transformed.map(([x,y]) => toSVG(x,y).join(',')).join(' ');
+  $('layer-square').appendChild(svgEl('polygon', {
+    points: pts,
+    fill: fillColor,
+    stroke: strokeColor,
+    'stroke-width': 1.5
+  }));
+
+  // Centroid label
+  const sumX = transformed.reduce((s,[x]) => s+x, 0) / 4;
+  const sumY = transformed.reduce((s,[,y]) => s+y, 0) / 4;
+  const [lcx, lcy] = toSVG(sumX, sumY);
+  $('layer-square').appendChild(svgEl('text', {
+    x: lcx, y: lcy,
+    'text-anchor': 'middle',
+    'dominant-baseline': 'middle',
+    fill: strokeColor,
+    'font-size': 11,
+    'font-weight': 600
+  }, `det = ${det.toFixed(2)}`));
+}
+
+// ── Draw: basis vector arrows ──────────────────────────────────────
+function drawVectors() {
+  clearLayer('layer-vectors');
+  clearLayer('layer-labels');
+  if (!$('tog-vec').checked) return;
+
+  const [ox, oy] = toSVG(0, 0);
+
+  function arrow(tx, ty, color, markerId, labelTxt) {
+    const [ex, ey] = toSVG(tx, ty);
+    const dx = ex - ox, dy = ey - oy;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    if (len < 6) return;
+
+    const shrink = 10 / len;
+    $('layer-vectors').appendChild(svgEl('line', {
+      x1: ox, y1: oy,
+      x2: ex - dx * shrink, y2: ey - dy * shrink,
+      stroke: color, 'stroke-width': 2.5,
+      'stroke-linecap': 'round',
+      'marker-end': `url(#${markerId})`
+    }));
+
+    const [lx, ly] = [ex + dx/len * 16, ey + dy/len * 16];
+    $('layer-labels').appendChild(svgEl('text', {
+      x: lx, y: ly,
+      'text-anchor': 'middle',
+      'dominant-baseline': 'middle',
+      fill: color,
+      'font-size': 12,
+      'font-weight': 700,
+      'font-style': 'italic'
+    }, labelTxt));
+  }
+
+  arrow(A.a, A.c, '#58a6ff', 'arr-e1', 'Ae₁');
+  arrow(A.b, A.d, '#f0883e', 'arr-e2', 'Ae₂');
+}
+
+// ── Update readouts ────────────────────────────────────────────────
+function updateReadouts() {
+  const det = A.a * A.d - A.b * A.c;
+  const eps = 1e-6;
+
+  const detEl = $('read-det');
+  detEl.textContent = det.toFixed(3);
+  detEl.className = 'readout-val ' + (Math.abs(det) < eps ? 'val-zero' : det > 0 ? 'val-pos' : 'val-neg');
+
+  $('read-area').textContent = Math.abs(det).toFixed(3);
+
+  const orientEl = $('read-orient');
+  if (Math.abs(det) < eps) {
+    orientEl.textContent = 'entartet';
+    orientEl.className = 'readout-val val-zero';
+  } else {
+    orientEl.textContent = det > 0 ? 'erhaltend' : 'umgekehrt';
+    orientEl.className = 'readout-val ' + (det > 0 ? 'val-pos' : 'val-neg');
+  }
+
+  const rank = Math.abs(det) > eps ? 2
+    : (Math.abs(A.a) > eps || Math.abs(A.b) > eps || Math.abs(A.c) > eps || Math.abs(A.d) > eps) ? 1
+    : 0;
+  const rankEl = $('read-rank');
+  rankEl.textContent = rank;
+  rankEl.className = 'readout-val ' + (rank === 2 ? 'val-pos' : rank === 1 ? 'val-zero' : 'val-neg');
+}
+
+// ── Update slider display labels ───────────────────────────────────
+function updateLabels() {
+  for (const k of ['a','b','c','d']) {
+    const v = A[k].toFixed(1);
+    $(`val-${k}`).textContent = v;
+    $(`disp-${k}`).textContent = v;
+  }
+}
+
+// ── Full render ────────────────────────────────────────────────────
+function render() {
+  drawOrigGrid();
+  drawAxes();
+  drawTransformedGrid();
+  drawUnitSquare();
+  drawVectors();
+  updateReadouts();
+  updateLabels();
+}
+
+// ── Events ────────────────────────────────────────────────────────
+for (const k of ['a','b','c','d']) {
+  $(`sl-${k}`).addEventListener('input', e => { A[k] = +e.target.value; render(); });
+}
+
+$('preset').addEventListener('change', e => {
+  if (!e.target.value) return;
+  const [a, b, c, d] = e.target.value.split(',').map(Number);
+  Object.assign(A, { a, b, c, d });
+  $('sl-a').value = a; $('sl-b').value = b;
+  $('sl-c').value = c; $('sl-d').value = d;
+  render();
+  e.target.value = '';
+});
+
+for (const id of ['tog-grid','tog-orig','tog-square','tog-vec']) {
+  $(id).addEventListener('change', () => render());
+}
+
+new ResizeObserver(() => onResize()).observe($('svg-wrap'));
+onResize();
+</script>
+</body>
+</html>
