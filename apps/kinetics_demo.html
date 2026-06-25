@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Chemische Kinetik — Reaktionen aufbauen und simulieren</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  background: #0d1117;
+  color: #c9d1d9;
+}
+
+/* ── Left panel ───────────────────────────────────────────────── */
+#left {
+  width: 420px;
+  min-width: 360px;
+  height: 100vh;
+  overflow-y: auto;
+  background: #161b22;
+  border-right: 1px solid #21262d;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── Right panel ──────────────────────────────────────────────── */
+#right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0d1117;
+  overflow: hidden;
+}
+
+#plot-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+
+#plot-wrap svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ── Typography ───────────────────────────────────────────────── */
+h1 {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #79c0ff;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+}
+
+/* ── Card ─────────────────────────────────────────────────────── */
+.card {
+  background: #1c2128;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.card-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #388bfd;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ── Select ───────────────────────────────────────────────────── */
+select {
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  padding: 5px 26px 5px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M6 8L0 0h12z' fill='%236e7681'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+select:focus { border-color: #388bfd; }
+select.full { width: 100%; }
+
+/* ── Number inputs ────────────────────────────────────────────── */
+input[type=number] {
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 5px;
+  color: #c9d1d9;
+  font-size: 12px;
+  padding: 4px 6px;
+  outline: none;
+  -moz-appearance: textfield;
+  font-variant-numeric: tabular-nums;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type=number]:focus { border-color: #388bfd; }
+
+input[type=text] {
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 5px;
+  color: #c9d1d9;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 6px;
+  outline: none;
+}
+input[type=text]:focus { border-color: #388bfd; }
+
+/* ── Toggle switch (exact inner_product_demo style) ───────────── */
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.switch {
+  position: relative;
+  width: 38px;
+  height: 21px;
+  flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.knob {
+  position: absolute;
+  inset: 0;
+  background: #30363d;
+  border-radius: 21px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.knob::before {
+  content: '';
+  position: absolute;
+  width: 15px; height: 15px;
+  left: 3px; top: 3px;
+  background: #6e7681;
+  border-radius: 50%;
+  transition: transform 0.2s, background 0.2s;
+}
+.switch input:checked + .knob { background: #1a3a6b; }
+.switch input:checked + .knob::before { transform: translateX(17px); background: #388bfd; }
+.toggle-text { font-size: 12px; color: #8b949e; }
+
+/* ── Readout rows (exact inner_product_demo style) ────────────── */
+.r-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid #21262d;
+}
+.r-row:last-child { border-bottom: none; }
+.r-key { color: #6e7681; font-size: 11.5px; }
+.r-val {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+  font-size: 12px;
+  color: #e6edf3;
+  font-weight: 600;
+  text-align: right;
+  max-width: 55%;
+}
+.r-val.gold  { color: #e3b341; }
+.r-val.green { color: #3fb950; }
+.r-val.red   { color: #f85149; }
+.r-val.blue  { color: #58a6ff; }
+.r-val.muted { color: #6e7681; }
+
+/* ── Buttons ──────────────────────────────────────────────────── */
+.btn {
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #8b949e;
+  font-size: 11.5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn:hover { border-color: #388bfd; color: #c9d1d9; }
+
+.btn-primary {
+  background: #1a3a6b;
+  border: 1px solid #388bfd;
+  border-radius: 6px;
+  color: #79c0ff;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 7px 14px;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.15s;
+}
+.btn-primary:hover { background: #1f4a8a; }
+
+.btn-icon {
+  background: none;
+  border: 1px solid #30363d;
+  border-radius: 4px;
+  color: #484f58;
+  font-size: 13px;
+  width: 22px; height: 22px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.btn-icon:hover { border-color: #f85149; color: #f85149; }
+.btn-icon.add { color: #388bfd; }
+.btn-icon.add:hover { border-color: #388bfd; color: #388bfd; }
+
+/* ── Species table ────────────────────────────────────────────── */
+.species-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border-bottom: 1px solid #21262d;
+}
+.species-row:last-child { border-bottom: none; }
+
+.sp-color {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sp-name { width: 40px; }
+.sp-c0   { width: 68px; }
+.sp-unit { font-size: 10px; color: #6e7681; flex: 1; }
+
+/* ── Reaction card ────────────────────────────────────────────── */
+.rxn-card {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+}
+.rxn-card:last-of-type { margin-bottom: 0; }
+
+.rxn-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 7px;
+}
+
+.rxn-num {
+  font-size: 10px;
+  font-weight: 700;
+  color: #388bfd;
+  letter-spacing: 0.06em;
+  flex-shrink: 0;
+}
+
+.rxn-rev-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.rxn-rev-label { font-size: 10.5px; color: #6e7681; }
+
+/* mini switch for reactions */
+.switch-sm {
+  position: relative;
+  width: 28px; height: 16px;
+  flex-shrink: 0;
+}
+.switch-sm input { opacity: 0; width: 0; height: 0; }
+.knob-sm {
+  position: absolute;
+  inset: 0;
+  background: #30363d;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.knob-sm::before {
+  content: '';
+  position: absolute;
+  width: 10px; height: 10px;
+  left: 3px; top: 3px;
+  background: #6e7681;
+  border-radius: 50%;
+  transition: transform 0.2s, background 0.2s;
+}
+.switch-sm input:checked + .knob-sm { background: #1a3a6b; }
+.switch-sm input:checked + .knob-sm::before { transform: translateX(12px); background: #388bfd; }
+
+.rxn-sides {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.rxn-side { flex: 1; min-width: 0; }
+
+.rxn-side-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #484f58;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 3px;
+}
+
+.rxn-arrow-col {
+  display: flex;
+  align-items: center;
+  padding-top: 22px;
+  flex-shrink: 0;
+  font-size: 16px;
+  color: #6e7681;
+}
+
+.term-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 3px;
+}
+.term-coeff { width: 36px; }
+.term-mult   { font-size: 10px; color: #484f58; }
+.term-spec   { flex: 1; }
+.term-spec select { width: 100%; }
+
+.rxn-rates {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-top: 1px solid #21262d;
+  padding-top: 6px;
+  margin-top: 2px;
+}
+
+.rate-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+}
+.rate-label { color: #6e7681; min-width: 30px; font-style: italic; }
+.rate-k     { width: 72px; }
+.rate-unit  { color: #e3b341; font-size: 10px; font-family: 'SF Mono','Courier New',monospace; }
+
+/* ── ODE display ──────────────────────────────────────────────── */
+.ode-line {
+  font-size: 11px;
+  color: #8b949e;
+  line-height: 1.7;
+  font-family: 'SF Mono','Fira Code','Cascadia Code','Courier New',monospace;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+.ode-line .sp  { color: #58a6ff; }
+.ode-line .k   { color: #e3b341; }
+.ode-line .neg { color: #f85149; }
+.ode-line .pos { color: #3fb950; }
+
+/* ── Validation error ─────────────────────────────────────────── */
+#err-box {
+  background: rgba(248,81,73,0.08);
+  border: 1px solid rgba(248,81,73,0.3);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 11px;
+  color: #f85149;
+  line-height: 1.55;
+  display: none;
+}
+
+/* ── Integration status ───────────────────────────────────────── */
+#status-box {
+  font-size: 11px;
+  line-height: 1.55;
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: none;
+}
+#status-box.warn {
+  display: block;
+  background: rgba(227,179,65,0.08);
+  border: 1px solid rgba(227,179,65,0.3);
+  color: #e3b341;
+}
+#status-box.ok {
+  display: none;
+}
+
+/* ── Callout ──────────────────────────────────────────────────── */
+.callout {
+  background: rgba(56,139,253,0.07);
+  border: 1px solid rgba(56,139,253,0.2);
+  border-left: 3px solid #388bfd;
+  border-radius: 6px;
+  padding: 9px 11px;
+  font-size: 11px;
+  color: #8b949e;
+  line-height: 1.65;
+}
+.callout em { color: #79c0ff; font-style: normal; }
+
+/* ── Units row ────────────────────────────────────────────────── */
+.units-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.unit-field label {
+  display: block;
+  font-size: 10px;
+  color: #6e7681;
+  margin-bottom: 3px;
+}
+.unit-field select { width: 100%; }
+
+/* ── Plot empty state ─────────────────────────────────────────── */
+#plot-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #30363d;
+  font-size: 13px;
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════ LEFT PANEL -->
+<div id="left">
+
+  <h1>Chemische Kinetik — Reaktionen aufbauen und simulieren</h1>
+
+  <!-- Global units -->
+  <div class="card">
+    <span class="card-label">Einheiten</span>
+    <div class="units-grid">
+      <div class="unit-field">
+        <label>Konzentration</label>
+        <select id="u-conc">
+          <option value="mol/L">mol/L</option>
+          <option value="mmol/L">mmol/L</option>
+          <option value="µmol/L">µmol/L</option>
+        </select>
+      </div>
+      <div class="unit-field">
+        <label>Zeit</label>
+        <select id="u-time">
+          <option value="s">s</option>
+          <option value="min">min</option>
+          <option value="h">h</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Species -->
+  <div class="card">
+    <span class="card-label">Spezies</span>
+    <div id="species-wrap"></div>
+    <button class="btn" id="btn-add-sp" style="margin-top:6px;width:100%">+ Spezies</button>
+  </div>
+
+  <!-- Reactions -->
+  <div class="card">
+    <span class="card-label">Reaktionen</span>
+    <div id="rxn-wrap"></div>
+    <button class="btn" id="btn-add-rxn" style="margin-top:6px;width:100%">+ Reaktion</button>
+  </div>
+
+  <!-- Differential equations display -->
+  <div class="card">
+    <span class="card-label">Ratengleichungen (automatisch)</span>
+    <div id="ode-wrap"></div>
+  </div>
+
+  <!-- Preset + simulate -->
+  <div class="card">
+    <span class="card-label">Voreinstellungen &amp; Simulation</span>
+    <select class="full" id="preset-sel" style="margin-bottom:8px">
+      <option value="">– Beispiel laden –</option>
+      <option value="decay">A → B (Zerfall 1. Ordnung)</option>
+      <option value="equil">A ⇌ B (Gleichgewicht)</option>
+      <option value="bimol">A + B → C (2. Ordnung)</option>
+      <option value="consec">A → B → C (Folgereaktion)</option>
+      <option value="preq">A ⇌ B → C (vorgelagertes Gleichgewicht)</option>
+    </select>
+
+    <div class="toggle-row" style="margin-bottom:8px">
+      <label class="switch">
+        <input type="checkbox" id="auto-tend" checked>
+        <span class="knob"></span>
+      </label>
+      <span class="toggle-text">t<sub>end</sub> automatisch</span>
+      <input type="number" id="tend-val" value="10" min="1e-6" step="any"
+             style="width:68px;display:none">
+      <span id="tend-unit" style="font-size:11px;color:#6e7681;display:none">s</span>
+    </div>
+
+    <div class="toggle-row" style="margin-bottom:8px">
+      <label class="switch">
+        <input type="checkbox" id="log-time">
+        <span class="knob"></span>
+      </label>
+      <span class="toggle-text">Logarithmische Zeitachse</span>
+    </div>
+
+    <button class="btn-primary" id="btn-sim">▶ Simulieren</button>
+  </div>
+
+  <!-- Validation errors -->
+  <div id="err-box"></div>
+
+  <!-- Integration status / warning -->
+  <div id="status-box"></div>
+
+  <!-- Readout -->
+  <div class="card" id="readout-card">
+    <span class="card-label">Numerische Auswertung</span>
+    <div id="readout-wrap"></div>
+  </div>
+
+  <!-- Callout -->
+  <div class="callout">
+    Das hier verwendete <em>K = k<sub>f</sub>/k<sub>r</sub></em> ist die
+    konzentrationsbasierte Gleichgewichtskonstante <em>K<sub>c</sub></em>
+    (mit den oben angegebenen Einheiten) — nicht die dimensionslose
+    thermodynamische Konstante. Die Ratengesetze folgen der Massenwirkung für
+    Elementarschritte; reale Geschwindigkeitsgesetze sind empirisch und müssen
+    nicht der Stöchiometrie entsprechen.
+  </div>
+
+</div><!-- #left -->
+
+<!-- ══════════════════════════════════════════════════ RIGHT PANEL -->
+<div id="right">
+  <div id="plot-wrap">
+    <div id="plot-empty">Reaktionsmechanismus eingeben und auf „Simulieren" klicken</div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ─── Unicode helpers ──────────────────────────────────────────────
+const SUP = {'0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻'};
+const SUB = {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉','-':'₋'};
+function sup(n) { return String(n).split('').map(c=>SUP[c]||c).join(''); }
+function sub(n) { return String(n).split('').map(c=>SUB[c]||c).join(''); }
+
+// ─── State ────────────────────────────────────────────────────────
+const SPECIES_COLORS = ['#58a6ff','#f0883e','#3fb950','#f85149','#e3b341'];
+const MAX_SP = 5, MAX_RXN = 6;
+
+let species = [
+  {name:'A', c0:1.0},
+  {name:'B', c0:0.0}
+];
+
+// Each reaction: reactants/products = [{si, c}], kf, rev, kr
+let reactions = [{
+  reactants:[{si:0,c:1}], products:[{si:1,c:1}],
+  kf:0.5, rev:false, kr:0.0
+}];
+
+let unitConc = 'mol/L';
+let unitTime  = 's';
+let autoTend  = true;
+let manualTend = 10;
+let logTime   = false;
+let simResult = null;
+
+// ─── Unit computation ─────────────────────────────────────────────
+function concPow(p, cu) {
+  // Returns string for [C]^p given concUnit cu (e.g. "mol/L")
+  if (p === 0) return '1';
+  const [cn, cd] = cu.includes('/') ? cu.split('/') : [cu, ''];
+  const ap = Math.abs(p);
+  const apStr = ap === 1 ? '' : sup(ap);
+  if (p > 0) {
+    const num = cn + apStr;
+    const den = cd ? '·' + cd + sup(-ap) : '';
+    return num + den;
+  } else {
+    const num = cd ? cd + apStr + '·' : '';
+    return num + cn + sup(-ap);
+  }
+}
+
+function kUnit(order, cu, tu) {
+  const p = 1 - order;
+  if (p === 0) return `1/${tu}`;
+  const cp = concPow(p, cu);
+  return `${cp}·${tu}${sup(-1)}`;
+}
+
+function Kunit(nf, nr, cu) {
+  const p = nr - nf;
+  if (p === 0) return 'dimensionslos';
+  return concPow(p, cu);
+}
+
+function rxnOrder(terms) {
+  return terms.reduce((s, t) => s + t.c, 0);
+}
+
+// ─── ODE system builder ───────────────────────────────────────────
+function buildRHS() {
+  const ns = species.length;
+  return function(t, y) {
+    // Clamp negatives only for rate computation
+    const c = y.map(v => Math.max(0, v));
+    const dy = new Array(ns).fill(0);
+    for (const rxn of reactions) {
+      let rf = rxn.kf;
+      for (const {si,c:co} of rxn.reactants) rf *= Math.pow(c[si], co);
+      let rr = 0;
+      if (rxn.rev) {
+        rr = rxn.kr;
+        for (const {si,c:co} of rxn.products) rr *= Math.pow(c[si], co);
+      }
+      const r = rf - rr;
+      for (const {si,c:co} of rxn.reactants) dy[si] -= co * r;
+      for (const {si,c:co} of rxn.products)  dy[si] += co * r;
+    }
+    return dy;
+  };
+}
+
+// ─── Stoichiometric matrix ────────────────────────────────────────
+function stoichMatrix() {
+  const ns = species.length, nr = reactions.length;
+  const N = Array.from({length:ns}, () => new Array(nr).fill(0));
+  for (let j = 0; j < nr; j++) {
+    for (const {si,c} of reactions[j].reactants) N[si][j] -= c;
+    for (const {si,c} of reactions[j].products)  N[si][j] += c;
+  }
+  return N;
+}
+
+// ─── Conservation law detection ───────────────────────────────────
+function findConservationLaws() {
+  const N = stoichMatrix();
+  const ns = species.length, nr = reactions.length;
+  if (nr === 0) return [];
+
+  // Build N^T (nr × ns), augment with identity (nr × nr) to track row ops
+  const EPS = 1e-9;
+  // Row-reduce N^T to find its null space (= left null space of N)
+  // We only need to identify free columns of N^T → those give null vectors
+
+  // Copy N^T
+  const mat = Array.from({length:nr}, (_,j) =>
+    Array.from({length:ns}, (_,i) => N[i][j])
+  );
+
+  const pivotCol = []; // pivot column for each pivot row
+  let row = 0;
+  for (let col = 0; col < ns && row < nr; col++) {
+    let best = row, bestV = 0;
+    for (let r = row; r < nr; r++) if (Math.abs(mat[r][col]) > bestV) { bestV = Math.abs(mat[r][col]); best = r; }
+    if (bestV < EPS) continue;
+    [mat[row], mat[best]] = [mat[best], mat[row]];
+    const sc = mat[row][col];
+    for (let c = 0; c < ns; c++) mat[row][c] /= sc;
+    for (let r = 0; r < nr; r++) {
+      if (r === row || Math.abs(mat[r][col]) < EPS) continue;
+      const f = mat[r][col];
+      for (let c = 0; c < ns; c++) mat[r][c] -= f * mat[row][c];
+    }
+    pivotCol.push(col);
+    row++;
+  }
+
+  // Free columns
+  const allCols = Array.from({length:ns}, (_,i) => i);
+  const freeCols = allCols.filter(c => !pivotCol.includes(c));
+
+  // Build null vectors for each free column
+  const laws = [];
+  for (const fc of freeCols) {
+    const v = new Array(ns).fill(0);
+    v[fc] = 1;
+    for (let r = 0; r < pivotCol.length; r++) {
+      v[pivotCol[r]] = -mat[r][fc];
+    }
+    // Round near-integers
+    const vr = v.map(x => Math.abs(x - Math.round(x)) < 1e-6 ? Math.round(x) : x);
+    laws.push(vr);
+  }
+  return laws;
+}
+
+// ─── Auto t_end estimate ──────────────────────────────────────────
+function estimateTEnd() {
+  // Use a representative concentration: max(c0) as fallback for zero-start species
+  const maxC0 = Math.max(...species.map(sp => sp.c0), 1e-3);
+  const refC  = maxC0 * 0.1; // 10% of peak as fallback for zero-init intermediates
+  let maxTChar = 0; // largest characteristic time = slowest process
+  for (const rxn of reactions) {
+    if (rxn.kf > 0) {
+      let r = rxn.kf;
+      for (const {si,c} of rxn.reactants) r *= Math.pow(Math.max(species[si]?.c0 ?? 0, refC), c);
+      if (r > 0) maxTChar = Math.max(maxTChar, 1 / r);
+    }
+    if (rxn.rev && rxn.kr > 0) {
+      let r = rxn.kr;
+      for (const {si,c} of rxn.products) r *= Math.pow(Math.max(species[si]?.c0 ?? 0, refC), c);
+      if (r > 0) maxTChar = Math.max(maxTChar, 1 / r);
+    }
+  }
+  return maxTChar > 0 ? Math.max(1e-6, Math.min(1e8, 5 * maxTChar)) : 10;
+}
+
+// ─── Dormand-Prince RK45 ──────────────────────────────────────────
+function dpStep(f, t, y, h, k1) {
+  const n = y.length;
+  function ya(a1,a2,a3,a4,a5,a6) {
+    return y.map((yi,i) => yi + h*(a1*k1[i] + (a2?a2*k2[i]:0) + (a3?a3*k3[i]:0) +
+      (a4?a4*k4[i]:0) + (a5?a5*k5[i]:0) + (a6?a6*k6[i]:0)));
+  }
+  const k2 = f(t + h/5,     ya(1/5));
+  const k3 = f(t + 3*h/10,  ya(3/40, 9/40));
+  const k4 = f(t + 4*h/5,   ya(44/45, -56/15, 32/9));
+  const k5 = f(t + 8*h/9,   ya(19372/6561, -25360/2187, 64448/6561, -212/729));
+  const k6 = f(t + h,        ya(9017/3168, -355/33, 46732/5247, 49/176, -5103/18656));
+  const yNew = ya(35/384, 0, 500/1113, 125/192, -2187/6784, 11/84);
+  const k7 = f(t + h, yNew);
+  const err = yNew.map((_,i) => h*(71/57600*k1[i] - 71/16695*k3[i] + 71/1920*k4[i]
+    - 17253/339200*k5[i] + 22/525*k6[i] - 1/40*k7[i]));
+  return {yNew, err, k7};
+}
+
+function errNorm(err, y, yNew, atol, rtol) {
+  const n = err.length;
+  let s = 0;
+  for (let i = 0; i < n; i++) {
+    const sc = atol + rtol * Math.max(Math.abs(y[i]), Math.abs(yNew[i]));
+    s += (err[i]/sc)**2;
+  }
+  return Math.sqrt(s/n);
+}
+
+function integrate(y0, tEnd) {
+  const f = buildRHS();
+  const n = y0.length;
+  const rtol = 1e-6, atol = 1e-9;
+  const hmin = 1e-14 * tEnd, hmax = tEnd / 5;
+  const MAX_STEPS = 50000;
+
+  let t = 0, y = [...y0];
+  let h = Math.min(hmax, tEnd / 100);
+  const ts = [0], ys = [y0.map(v=>v)];
+  let k1 = f(0, y);
+  let steps = 0, status = 'ok', msg = '';
+
+  while (t < tEnd * (1 - 1e-10)) {
+    if (steps >= MAX_STEPS) {
+      status = 'warn';
+      msg = 'Maximale Schrittanzahl (50 000) überschritten. Wahrscheinliche Ursache: stark unterschiedliche oder sehr große Geschwindigkeitskonstanten führen zu einem steifen System. Bitte k-Werte anpassen (Größenordnungen verringern).';
+      break;
+    }
+    h = Math.min(h, tEnd - t);
+    if (h < hmin) {
+      status = 'warn';
+      msg = 'Schrittweite unterläuft Minimum — das System ist wahrscheinlich steif oder instabil. Bitte k-Werte anpassen.';
+      break;
+    }
+
+    const res = dpStep(f, t, y, h, k1);
+    const norm = errNorm(res.err, y, res.yNew, atol, rtol);
+    const fac = Math.min(5, Math.max(0.1, 0.9 * (norm > 0 ? Math.pow(norm, -0.2) : 5)));
+
+    if (norm <= 1.0) {
+      t += h;
+      y = res.yNew;
+      k1 = res.k7;
+
+      // Check for NaN/Inf
+      if (y.some(v => !isFinite(v))) {
+        status = 'warn';
+        msg = 'Numerischer Fehler: NaN oder Inf in einer Konzentration. Wahrscheinlich zu große k-Werte oder ungültige Anfangsbedingungen.';
+        break;
+      }
+      // Check for significant negative concentrations
+      const minC = Math.min(...y);
+      if (minC < -1e-6) {
+        status = 'warn';
+        msg = `Konzentration wurde stark negativ (${minC.toExponential(2)} ${unitConc}). Bitte Stöchiometrie und Anfangsbedingungen prüfen.`;
+        break;
+      }
+      // Clamp tiny negatives (roundoff)
+      for (let i = 0; i < n; i++) if (y[i] < 0) y[i] = 0;
+
+      ts.push(t); ys.push([...y]); steps++;
+    }
+    h *= fac;
+  }
+
+  // Transpose ys → per-species arrays
+  const yOut = Array.from({length:n}, (_,i) => ts.map((_,ti) => ys[ti][i]));
+  return {t:ts, y:yOut, status, msg};
+}
+
+// ─── Validation ───────────────────────────────────────────────────
+function validate() {
+  const errs = [];
+  if (species.length === 0) errs.push('Mindestens eine Spezies erforderlich.');
+  const names = new Set();
+  for (let i = 0; i < species.length; i++) {
+    const n = species[i].name.trim();
+    if (!n) errs.push(`Spezies ${i+1}: Name darf nicht leer sein.`);
+    if (names.has(n)) errs.push(`Speziesname „${n}" ist doppelt vergeben.`);
+    names.add(n);
+    if (!isFinite(species[i].c0) || species[i].c0 < 0) errs.push(`Spezies ${n}: c₀ muss ≥ 0 sein.`);
+  }
+  if (reactions.length === 0) errs.push('Mindestens eine Reaktion erforderlich.');
+  for (let j = 0; j < reactions.length; j++) {
+    const rxn = reactions[j], label = `Reaktion ${j+1}`;
+    if (rxn.reactants.length === 0) errs.push(`${label}: Edukte fehlen.`);
+    if (rxn.products.length === 0)  errs.push(`${label}: Produkte fehlen.`);
+    for (const {si,c} of [...rxn.reactants,...rxn.products]) {
+      if (si < 0 || si >= species.length) errs.push(`${label}: ungültiger Speziesindex.`);
+      if (!Number.isInteger(c) || c < 1)  errs.push(`${label}: Koeffizient muss ganze Zahl ≥ 1 sein.`);
+    }
+    if (!isFinite(rxn.kf) || rxn.kf < 0) errs.push(`${label}: k_f muss ≥ 0 sein.`);
+    if (rxn.rev && (!isFinite(rxn.kr) || rxn.kr <= 0)) errs.push(`${label}: k_r muss > 0 sein (reversible Reaktion).`);
+  }
+  return errs;
+}
+
+// ─── ODE display ──────────────────────────────────────────────────
+function fmtTerm(coeff, kLabel, termList, sign) {
+  const s = sign === '+' ? '<span class="pos">+</span>' : '<span class="neg">−</span>';
+  const cStr = coeff === 1 ? '' : `${coeff}·`;
+  const prod = termList.map(({si,c:co}) => {
+    const nm = species[si]?.name ?? '?';
+    return `<span class="sp">[${nm}]</span>${co>1?sup(co):''}`;
+  }).join('·');
+  return `${s}${cStr}<span class="k">${kLabel}</span>·${prod}`;
+}
+
+function renderODE() {
+  const wrap = document.getElementById('ode-wrap');
+  if (reactions.length === 0 || species.length === 0) { wrap.innerHTML='<span style="color:#484f58;font-size:11px">–</span>'; return; }
+  let html = '';
+  for (let i = 0; i < species.length; i++) {
+    const nm = species[i].name || '?';
+    let terms = [];
+    for (let j = 0; j < reactions.length; j++) {
+      const rxn = reactions[j];
+      const rCoeff = (rxn.reactants.find(t=>t.si===i)?.c ?? 0);
+      const pCoeff = (rxn.products.find(t=>t.si===i)?.c ?? 0);
+      const netCoeff = pCoeff - rCoeff;
+      if (netCoeff === 0) continue;
+      const sign = netCoeff > 0 ? '+' : '−';
+      const absNet = Math.abs(netCoeff);
+      const kLab = `k${sub(j+1)}`;
+      terms.push(fmtTerm(absNet, kLab, rxn.reactants, sign));
+      if (rxn.rev) {
+        const kLab2 = `k${sub('−'+(j+1))}`;
+        const revSign = netCoeff > 0 ? '−' : '+';
+        terms.push(fmtTerm(absNet, kLab2, rxn.products, revSign));
+      }
+    }
+    const rhs = terms.length ? terms.join(' ') : '<span style="color:#484f58">0</span>';
+    html += `<div class="ode-line">d<span class="sp">[${nm}]</span>/dt = ${rhs}</div>`;
+  }
+  wrap.innerHTML = html;
+}
+
+// ─── Species table ─────────────────────────────────────────────────
+function renderSpecies() {
+  let html = '';
+  for (let i = 0; i < species.length; i++) {
+    const canDel = !reactions.some(r => r.reactants.some(t=>t.si===i) || r.products.some(t=>t.si===i));
+    html += `<div class="species-row">
+      <div class="sp-color" style="background:${SPECIES_COLORS[i]}"></div>
+      <input class="sp-name" type="text" data-si="${i}" data-key="name" value="${esc(species[i].name)}" maxlength="8" placeholder="A">
+      <input class="sp-c0" type="number" data-si="${i}" data-key="c0" value="${species[i].c0}" min="0" step="any" style="width:70px">
+      <span class="sp-unit">${unitConc}</span>
+      <button class="btn-icon" data-si="${i}" data-action="del-sp" title="${canDel?'Entfernen':'In Reaktion verwendet'}" ${canDel?'':'disabled style="opacity:0.3;cursor:not-allowed"'}>×</button>
+    </div>`;
+  }
+  document.getElementById('species-wrap').innerHTML = html;
+  document.getElementById('btn-add-sp').disabled = species.length >= MAX_SP;
+}
+
+// ─── Reaction list ─────────────────────────────────────────────────
+function speciesOptions(selectedSi) {
+  return species.map((sp,i) =>
+    `<option value="${i}" ${i===selectedSi?'selected':''}>${esc(sp.name)}</option>`
+  ).join('');
+}
+
+function termHtml(ri, side, terms) {
+  let html = '';
+  for (let ti = 0; ti < terms.length; ti++) {
+    const {si,c} = terms[ti];
+    html += `<div class="term-row">
+      <input class="term-coeff" type="number" value="${c}" min="1" max="9" step="1"
+             data-ri="${ri}" data-side="${side}" data-ti="${ti}" data-action="coeff">
+      <span class="term-mult">×</span>
+      <div class="term-spec">
+        <select data-ri="${ri}" data-side="${side}" data-ti="${ti}" data-action="spec">
+          ${speciesOptions(si)}
+        </select>
+      </div>
+      <button class="btn-icon" data-ri="${ri}" data-side="${side}" data-ti="${ti}" data-action="del-term"
+              ${terms.length===1?'disabled style="opacity:0.3"':''}>−</button>
+    </div>`;
+  }
+  const usedSi = new Set(terms.map(t=>t.si));
+  const canAdd = terms.length < species.length;
+  html += `<button class="btn-icon add" data-ri="${ri}" data-side="${side}" data-action="add-term"
+             style="font-size:14px;width:auto;padding:0 6px" ${canAdd?'':'disabled style="opacity:0.3"'}>+</button>`;
+  return html;
+}
+
+function renderReactions() {
+  let html = '';
+  for (let ri = 0; ri < reactions.length; ri++) {
+    const rxn = reactions[ri];
+    const nf = rxnOrder(rxn.reactants), nr2 = rxnOrder(rxn.products);
+    const kfu = kUnit(nf, unitConc, unitTime);
+    const kru = rxn.rev ? kUnit(nr2, unitConc, unitTime) : '';
+    html += `<div class="rxn-card">
+      <div class="rxn-header">
+        <span class="rxn-num">R${ri+1}</span>
+        <div class="rxn-rev-wrap">
+          <label class="switch-sm">
+            <input type="checkbox" data-ri="${ri}" data-action="rev" ${rxn.rev?'checked':''}>
+            <span class="knob-sm"></span>
+          </label>
+          <span class="rxn-rev-label">Reversibel</span>
+        </div>
+        <button class="btn-icon" data-ri="${ri}" data-action="del-rxn">×</button>
+      </div>
+
+      <div class="rxn-sides">
+        <div class="rxn-side">
+          <div class="rxn-side-label">Edukte</div>
+          ${termHtml(ri,'r',rxn.reactants)}
+        </div>
+        <div class="rxn-arrow-col">${rxn.rev ? '⇌' : '→'}</div>
+        <div class="rxn-side">
+          <div class="rxn-side-label">Produkte</div>
+          ${termHtml(ri,'p',rxn.products)}
+        </div>
+      </div>
+
+      <div class="rxn-rates">
+        <div class="rate-row">
+          <span class="rate-label">k${sub(ri+1)}</span>
+          <input class="rate-k" type="number" value="${rxn.kf}" min="0" step="any"
+                 data-ri="${ri}" data-key="kf" data-action="rate">
+          <span class="rate-unit">${kfu}</span>
+        </div>
+        ${rxn.rev ? `<div class="rate-row">
+          <span class="rate-label">k${sub('−'+(ri+1))}</span>
+          <input class="rate-k" type="number" value="${rxn.kr}" min="0" step="any"
+                 data-ri="${ri}" data-key="kr" data-action="rate">
+          <span class="rate-unit">${kru}</span>
+        </div>` : ''}
+      </div>
+    </div>`;
+  }
+  document.getElementById('rxn-wrap').innerHTML = html;
+  document.getElementById('btn-add-rxn').disabled = reactions.length >= MAX_RXN;
+}
+
+// ─── Readout ───────────────────────────────────────────────────────
+function fmt3(x) { return (Math.abs(x)<1e-9?0:x).toFixed(3); }
+function fmtE(x) { return x.toExponential(3); }
+function fmtNum(x) { return Math.abs(x) < 1e-4 || Math.abs(x) >= 1e5 ? fmtE(x) : fmt3(x); }
+
+function renderReadout() {
+  const wrap = document.getElementById('readout-wrap');
+  let rows = '';
+
+  // K values for reversible reactions (always live)
+  for (let j = 0; j < reactions.length; j++) {
+    const rxn = reactions[j];
+    if (!rxn.rev || rxn.kr <= 0) continue;
+    const K = rxn.kf / rxn.kr;
+    const nf = rxnOrder(rxn.reactants), nr2 = rxnOrder(rxn.products);
+    const ku = Kunit(nf, nr2, unitConc);
+    rows += `<div class="r-row">
+      <span class="r-key">K${sub(j+1)} = k${sub(j+1)}/k${sub('−'+(j+1))}</span>
+      <span class="r-val gold">${fmtNum(K)} ${ku}</span>
+    </div>`;
+  }
+
+  if (simResult) {
+    const last = simResult.t.length - 1;
+    // Final concentrations
+    for (let i = 0; i < species.length; i++) {
+      const cFinal = simResult.y[i][last];
+      rows += `<div class="r-row">
+        <span class="r-key">[${esc(species[i].name)}]<sub>final</sub></span>
+        <span class="r-val" style="color:${SPECIES_COLORS[i]}">${fmtNum(cFinal)} ${unitConc}</span>
+      </div>`;
+    }
+
+    // Conservation laws
+    const laws = findConservationLaws();
+    for (const law of laws) {
+      // Only show laws with at least 2 nonzero entries
+      const nonzero = law.map((v,i)=>({v,i})).filter(x=>Math.abs(x.v)>1e-6);
+      if (nonzero.length < 2) continue;
+
+      const val0 = nonzero.reduce((s,{v,i})=>s+v*(species[i]?.c0??0), 0);
+      const vals = simResult.t.map((_,ti) =>
+        nonzero.reduce((s,{v,i})=>s+v*simResult.y[i][ti], 0));
+      const maxDev = Math.max(...vals.map(v=>Math.abs(v-val0)));
+      const relDev = Math.abs(val0) > 1e-12 ? maxDev/Math.abs(val0) : maxDev;
+
+      const terms = nonzero.map(({v,i}) => {
+        const sign = v < 0 ? '−' : (nonzero.indexOf({v,i}) ? '+' : '');
+        const av = Math.abs(v);
+        return (av===1?'':av+'·') + `[${species[i].name}]`;
+      }).join(' + ').replace(/\+ −/g,'− ');
+
+      const ok = relDev < 1e-4;
+      rows += `<div class="r-row">
+        <span class="r-key">Erhaltungsgröße: ${terms}</span>
+        <span class="r-val ${ok?'green':'gold'}">${ok?'✓ konserviert':'Δ='+fmtE(maxDev)}</span>
+      </div>`;
+    }
+
+    // Integration status
+    rows += `<div class="r-row">
+      <span class="r-key">Integration</span>
+      <span class="r-val ${simResult.status==='ok'?'green':'gold'}">${simResult.status==='ok'?'erfolgreich':'abgebrochen'}</span>
+    </div>`;
+    rows += `<div class="r-row">
+      <span class="r-key">Schritte</span>
+      <span class="r-val muted">${simResult.t.length}</span>
+    </div>`;
+  }
+
+  wrap.innerHTML = rows || '<span style="color:#484f58;font-size:11px">Nach Simulation verfügbar</span>';
+}
+
+// ─── Plot ──────────────────────────────────────────────────────────
+function niceAxis(lo, hi, n) {
+  if (hi <= lo) hi = lo + 1;
+  const range = hi - lo, rough = range / n;
+  const oom = Math.pow(10, Math.floor(Math.log10(rough || 1)));
+  let step = oom;
+  for (const f of [1,2,2.5,5,10]) { step = f*oom; if (range/step <= n*1.5) break; }
+  const lo2 = Math.floor(lo/step)*step, hi2 = Math.ceil(hi/step)*step;
+  const ticks = [];
+  for (let v=lo2; v<=hi2+step*0.01; v+=step) ticks.push(Math.round(v*1e10)/1e10);
+  return {lo:lo2, hi:hi2, step, ticks};
+}
+
+function drawPlot() {
+  const wrap = document.getElementById('plot-wrap');
+  if (!simResult) return;
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  const ml=62, mr=105, mt=18, mb=42;
+  const pw=W-ml-mr, ph=H-mt-mb;
+
+  const {t:ts, y:ys} = simResult;
+  const last = ts.length-1;
+
+  // Data ranges
+  let yMax=0;
+  for (const arr of ys) for (const v of arr) if (isFinite(v) && v>yMax) yMax=v;
+  if (yMax===0) yMax=1;
+  const yAx = niceAxis(0, yMax*1.08, 5);
+
+  // x transform
+  let xMin=ts[0], xMax=ts[last];
+  let toX;
+  if (logTime) {
+    const tPos = ts.filter(t=>t>0);
+    xMin = tPos.length ? tPos[0] : ts[1]||1e-9;
+    xMax = ts[last];
+    const lMin=Math.log10(xMin), lMax=Math.log10(xMax);
+    toX = t => t>0 ? ml+(Math.log10(t)-lMin)/(lMax-lMin)*pw : ml;
+  } else {
+    toX = t => ml + (t - xMin) / (xMax - xMin || 1) * pw;
+  }
+  const toY = v => mt + ph - (v - yAx.lo) / (yAx.hi - yAx.lo) * ph;
+
+  // Build SVG
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  s += `<rect x="${ml}" y="${mt}" width="${pw}" height="${ph}" fill="#0d1117"/>`;
+
+  // Y grid + labels
+  for (const yv of yAx.ticks) {
+    const yp = toY(yv);
+    if (yp < mt-1 || yp > mt+ph+1) continue;
+    s += `<line x1="${ml}" y1="${yp}" x2="${ml+pw}" y2="${yp}" stroke="#1c2128" stroke-width="1"/>`;
+    const lab = Math.abs(yv)>=1e4||( Math.abs(yv)<1e-3&&yv!==0) ? yv.toExponential(1) : String(+yv.toFixed(4));
+    s += `<text x="${ml-5}" y="${yp+4}" text-anchor="end" fill="#6e7681" font-size="10">${lab}</text>`;
+  }
+
+  // X grid + labels
+  let xTicks=[];
+  if (logTime) {
+    const l0=Math.floor(Math.log10(xMin)), l1=Math.ceil(Math.log10(xMax));
+    for (let e=l0;e<=l1;e++) {
+      xTicks.push(Math.pow(10,e));
+      for (const m of [2,3,4,5,6,7,8,9]) {
+        const v=m*Math.pow(10,e);
+        if (v>xMin&&v<xMax) xTicks.push(v);
+      }
+    }
+  } else {
+    xTicks = niceAxis(xMin, xMax, 5).ticks;
+  }
+  for (const xt of xTicks) {
+    const xp = toX(xt);
+    if (xp < ml-1 || xp > ml+pw+1) continue;
+    s += `<line x1="${xp}" y1="${mt}" x2="${xp}" y2="${mt+ph}" stroke="#1c2128" stroke-width="1"/>`;
+    const isDecade = logTime && Math.abs(Math.log10(xt)%1)<0.01;
+    if (!logTime || isDecade) {
+      const lab = xt>=1e4||xt<0.01 ? xt.toExponential(0) : String(+xt.toPrecision(3));
+      s += `<text x="${xp}" y="${mt+ph+13}" text-anchor="middle" fill="#6e7681" font-size="10">${lab}</text>`;
+    }
+  }
+
+  // Axes
+  s += `<rect x="${ml}" y="${mt}" width="${pw}" height="${ph}" fill="none" stroke="#30363d" stroke-width="1.5"/>`;
+
+  // Species lines (downsample to max 2000 pts)
+  const stride = Math.max(1, Math.floor(ts.length/2000));
+  for (let i=0; i<species.length; i++) {
+    let pts='';
+    for (let ti=0;ti<ts.length;ti+=stride) {
+      if (logTime && ts[ti]<=0) continue;
+      const x=toX(ts[ti]), y=toY(Math.max(yAx.lo, Math.min(yAx.hi, ys[i][ti])));
+      pts += `${x},${y} `;
+    }
+    if (ts[last]>0 || !logTime) {
+      const x=toX(ts[last]), y=toY(Math.max(yAx.lo,Math.min(yAx.hi,ys[i][last])));
+      pts += `${x},${y}`;
+    }
+    if (pts.trim()) {
+      s += `<polyline points="${pts.trim()}" fill="none" stroke="${SPECIES_COLORS[i]}" stroke-width="2" stroke-linejoin="round"/>`;
+    }
+  }
+
+  // Axis labels
+  const cx2=ml+pw/2, cy2=mt+ph/2;
+  s += `<text x="${cx2}" y="${H-6}" text-anchor="middle" fill="#8b949e" font-size="11">Zeit / ${unitTime}</text>`;
+  s += `<text transform="rotate(-90,12,${cy2})" x="12" y="${cy2}" text-anchor="middle" fill="#8b949e" font-size="11">Konzentration / ${unitConc}</text>`;
+
+  // Legend
+  let ly = mt+12;
+  for (let i=0; i<species.length; i++) {
+    const lx = ml+pw+10;
+    s += `<rect x="${lx}" y="${ly-8}" width="14" height="9" fill="${SPECIES_COLORS[i]}" rx="2"/>`;
+    s += `<text x="${lx+18}" y="${ly+1}" fill="${SPECIES_COLORS[i]}" font-size="11.5" font-weight="600">${esc(species[i].name)}</text>`;
+    ly += 18;
+  }
+
+  s += `</svg>`;
+
+  // Remove empty state message, insert svg
+  document.getElementById('plot-empty').style.display = 'none';
+  const old = wrap.querySelector('svg');
+  if (old) old.remove();
+  wrap.insertAdjacentHTML('beforeend', s);
+}
+
+// ─── Simulate ─────────────────────────────────────────────────────
+function simulate() {
+  const errs = validate();
+  const errBox = document.getElementById('err-box');
+  if (errs.length) {
+    errBox.innerHTML = errs.map(e=>`• ${e}`).join('<br>');
+    errBox.style.display = 'block';
+    return;
+  }
+  errBox.style.display = 'none';
+
+  const tEnd = autoTend ? estimateTEnd() : (parseFloat(document.getElementById('tend-val').value) || 10);
+  const y0 = species.map(sp => sp.c0);
+
+  simResult = integrate(y0, tEnd);
+
+  const sb = document.getElementById('status-box');
+  if (simResult.status === 'warn') {
+    sb.textContent = '⚠ Die Integration wurde abgebrochen. ' + simResult.msg;
+    sb.className = 'warn';
+    sb.style.display = 'block';
+  } else {
+    sb.style.display = 'none';
+  }
+
+  drawPlot();
+  renderReadout();
+}
+
+// ─── Presets ──────────────────────────────────────────────────────
+const PRESETS = {
+  decay: {
+    sp: [{name:'A',c0:1},{name:'B',c0:0}],
+    rx: [{reactants:[{si:0,c:1}],products:[{si:1,c:1}],kf:0.5,rev:false,kr:0}]
+  },
+  equil: {
+    sp: [{name:'A',c0:1},{name:'B',c0:0}],
+    rx: [{reactants:[{si:0,c:1}],products:[{si:1,c:1}],kf:1.0,rev:true,kr:0.25}]
+  },
+  bimol: {
+    sp: [{name:'A',c0:1},{name:'B',c0:0.5},{name:'C',c0:0}],
+    rx: [{reactants:[{si:0,c:1},{si:1,c:1}],products:[{si:2,c:1}],kf:2.0,rev:false,kr:0}]
+  },
+  consec: {
+    sp: [{name:'A',c0:1},{name:'B',c0:0},{name:'C',c0:0}],
+    rx: [
+      {reactants:[{si:0,c:1}],products:[{si:1,c:1}],kf:0.5,rev:false,kr:0},
+      {reactants:[{si:1,c:1}],products:[{si:2,c:1}],kf:0.2,rev:false,kr:0}
+    ]
+  },
+  preq: {
+    sp: [{name:'A',c0:1},{name:'B',c0:0},{name:'C',c0:0}],
+    rx: [
+      {reactants:[{si:0,c:1}],products:[{si:1,c:1}],kf:1.0,rev:true,kr:0.4},
+      {reactants:[{si:1,c:1}],products:[{si:2,c:1}],kf:0.2,rev:false,kr:0}
+    ]
+  }
+};
+
+function loadPreset(key) {
+  const p = PRESETS[key];
+  if (!p) return;
+  species   = p.sp.map(s=>({...s}));
+  reactions = p.rx.map(r=>({...r, reactants:r.reactants.map(t=>({...t})), products:r.products.map(t=>({...t}))}));
+  simResult = null;
+  document.getElementById('plot-empty').style.display = 'flex';
+  const old = document.getElementById('plot-wrap').querySelector('svg');
+  if (old) old.remove();
+  document.getElementById('status-box').style.display='none';
+  document.getElementById('err-box').style.display='none';
+  renderAll();
+}
+
+// ─── Utility ──────────────────────────────────────────────────────
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderAll() {
+  renderSpecies();
+  renderReactions();
+  renderODE();
+  renderReadout();
+}
+
+// ─── Event delegation ─────────────────────────────────────────────
+document.getElementById('species-wrap').addEventListener('input', e => {
+  const t = e.target, si = parseInt(t.dataset.si);
+  if (isNaN(si)) return;
+  if (t.dataset.key === 'name') species[si].name = t.value;
+  if (t.dataset.key === 'c0')   species[si].c0   = parseFloat(t.value) || 0;
+  renderReactions(); renderODE(); renderReadout();
+});
+
+document.getElementById('species-wrap').addEventListener('click', e => {
+  const t = e.target;
+  if (t.dataset.action === 'del-sp') {
+    const si = parseInt(t.dataset.si);
+    if (isNaN(si)) return;
+    species.splice(si, 1);
+    // Fix reaction indices
+    for (const rxn of reactions) {
+      rxn.reactants = rxn.reactants.map(tm=>({...tm,si:tm.si>si?tm.si-1:tm.si})).filter(tm=>tm.si>=0&&tm.si<species.length);
+      rxn.products  = rxn.products.map(tm=>({...tm,si:tm.si>si?tm.si-1:tm.si})).filter(tm=>tm.si>=0&&tm.si<species.length);
+    }
+    renderAll();
+  }
+});
+
+document.getElementById('btn-add-sp').addEventListener('click', () => {
+  if (species.length >= MAX_SP) return;
+  const names = ['A','B','C','D','E'];
+  species.push({name: names[species.length] || `S${species.length}`, c0: 0});
+  renderAll();
+});
+
+document.getElementById('rxn-wrap').addEventListener('change', e => {
+  const t = e.target, ri = parseInt(t.dataset.ri);
+  if (isNaN(ri)) return;
+  const rxn = reactions[ri];
+  const action = t.dataset.action;
+
+  if (action === 'rev') {
+    rxn.rev = t.checked;
+    if (!t.checked) rxn.kr = 0;
+  } else if (action === 'coeff') {
+    const side = t.dataset.side, ti = parseInt(t.dataset.ti);
+    const terms = side==='r' ? rxn.reactants : rxn.products;
+    terms[ti].c = Math.max(1, Math.min(9, Math.round(parseFloat(t.value)||1)));
+  } else if (action === 'spec') {
+    const side = t.dataset.side, ti = parseInt(t.dataset.ti);
+    const terms = side==='r' ? rxn.reactants : rxn.products;
+    terms[ti].si = parseInt(t.value);
+  } else if (action === 'rate') {
+    rxn[t.dataset.key] = parseFloat(t.value) || 0;
+  }
+  renderReactions(); renderODE(); renderReadout();
+});
+
+document.getElementById('rxn-wrap').addEventListener('click', e => {
+  const t = e.target, ri = parseInt(t.dataset.ri);
+  if (isNaN(ri)) return;
+  const action = t.dataset.action;
+  const rxn = reactions[ri];
+
+  if (action === 'del-rxn') {
+    reactions.splice(ri, 1);
+    renderAll();
+  } else if (action === 'add-term') {
+    const side = t.dataset.side;
+    const terms = side==='r' ? rxn.reactants : rxn.products;
+    const used = new Set(terms.map(x=>x.si));
+    const next = species.findIndex((_,i)=>!used.has(i));
+    if (next >= 0) { terms.push({si:next,c:1}); renderReactions(); renderODE(); }
+  } else if (action === 'del-term') {
+    const side = t.dataset.side, ti = parseInt(t.dataset.ti);
+    const terms = side==='r' ? rxn.reactants : rxn.products;
+    if (terms.length > 1) { terms.splice(ti,1); renderReactions(); renderODE(); }
+  }
+});
+
+document.getElementById('btn-add-rxn').addEventListener('click', () => {
+  if (reactions.length >= MAX_RXN) return;
+  const si0 = 0, si1 = Math.min(1, species.length-1);
+  reactions.push({reactants:[{si:si0,c:1}],products:[{si:si1,c:1}],kf:1.0,rev:false,kr:0});
+  renderAll();
+});
+
+document.getElementById('preset-sel').addEventListener('change', e => {
+  if (e.target.value) { loadPreset(e.target.value); e.target.value=''; }
+});
+
+document.getElementById('btn-sim').addEventListener('click', () => simulate());
+
+document.getElementById('auto-tend').addEventListener('change', e => {
+  autoTend = e.target.checked;
+  document.getElementById('tend-val').style.display = autoTend ? 'none' : 'inline-block';
+  document.getElementById('tend-unit').style.display = autoTend ? 'none' : 'inline';
+});
+
+document.getElementById('tend-val').addEventListener('input', e => {
+  manualTend = parseFloat(e.target.value) || 10;
+});
+
+document.getElementById('log-time').addEventListener('change', e => {
+  logTime = e.target.checked;
+  if (simResult) drawPlot();
+});
+
+document.getElementById('u-conc').addEventListener('change', e => {
+  unitConc = e.target.value;
+  document.querySelectorAll('.sp-unit').forEach(el => el.textContent = unitConc);
+  document.getElementById('tend-unit').textContent = unitTime;
+  renderReactions(); renderReadout();
+});
+
+document.getElementById('u-time').addEventListener('change', e => {
+  unitTime = e.target.value;
+  document.getElementById('tend-unit').textContent = unitTime;
+  renderReactions(); renderReadout();
+});
+
+window.addEventListener('resize', () => { if (simResult) drawPlot(); });
+
+// ─── Init ──────────────────────────────────────────────────────────
+renderAll();
+</script>
+</body>
+</html>
