@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Farbstoff-Spektren aus dem 1D-Kasten</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070b14; --panel:#0d1525; --panel-2:#111c30; --line:rgba(124,146,186,.16);
+    --line-strong:rgba(124,146,186,.32);
+    --text:#e7edf9; --muted:#8a98b5; --muted-2:#7c89a6;
+    --accent:#6c7bff; --theory:#2fe6c8; --exp:#ff9d4d; --bond:#dbe4f5;
+    --mono:'JetBrains Mono',ui-monospace,monospace; --disp:'Space Grotesk',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:
+      radial-gradient(1100px 650px at 82% -10%, rgba(47,230,200,.06), transparent 60%),
+      radial-gradient(800px 560px at 6% 112%, rgba(108,123,255,.09), transparent 55%),
+      var(--bg);
+    color:var(--text);font-family:var(--disp);-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1240px;margin:0 auto;padding:18px 22px 36px}
+  header{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+  header h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+  header h1::before{content:"";width:11px;height:11px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,var(--theory),#0c7d6e 70%);box-shadow:0 0 12px rgba(47,230,200,.7)}
+  header p{margin:0;color:var(--muted);font-size:13px}
+  header .eq{margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--muted-2)}
+  header .eq b{color:var(--theory);font-weight:500}
+
+  .dyes{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .dyes button{font-family:var(--disp);font-size:13.5px;color:var(--muted);background:var(--panel-2);
+    border:1px solid var(--line);border-radius:9px;padding:10px 14px;cursor:pointer;transition:.14s;line-height:1.2}
+  .dyes button small{display:block;font-family:var(--mono);font-size:11px;color:var(--muted-2);margin-top:4px}
+  .dyes button:hover{border-color:var(--line-strong);color:var(--text)}
+  .dyes button.on{background:rgba(108,123,255,.15);border-color:var(--accent);color:#fff}
+  .dyes button.on small{color:var(--theory)}
+  .dyes button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 18px}
+  .card .ttl{font-size:11.5px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted-2);font-weight:600;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+
+  #struct{width:100%;height:auto;display:block;touch-action:none;cursor:crosshair;border-radius:8px}
+  .struct-foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;flex-wrap:wrap}
+  .lenpill{font-family:var(--mono);font-size:15px;color:var(--text)}
+  .lenpill b{color:var(--theory);font-weight:600}
+  .mini-btn{font-family:var(--disp);font-size:13px;color:var(--muted);background:var(--panel-2);
+    border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer;transition:.14s}
+  .mini-btn:hover{color:var(--text);border-color:var(--line-strong)}
+  .mini-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  .nums{display:grid;grid-template-columns:1fr auto;gap:9px 18px;font-family:var(--mono);font-size:15px;margin-top:14px}
+  .nums .k{color:var(--muted)} .nums .v{text-align:right;font-weight:500}
+  .v.th{color:var(--theory)} .v.ex{color:var(--exp)}
+  .err{font-family:var(--mono);font-size:13.5px;color:var(--muted);margin-top:12px;line-height:1.5}
+  .err b{color:var(--text)}
+
+  canvas{display:block;width:100%}
+  .legend{display:flex;gap:18px;font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:10px}
+  .legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+
+  @media (max-width:880px){ .row2{grid-template-columns:1fr} header .eq{display:none} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Farbe aus dem 1D-Kasten</h1>
+    <p>Freie-Elektronen-Modell (FEMO) · Farbstoff wählen, Kasten einzeichnen, mit Experiment vergleichen</p>
+    <div class="eq">λ = (8mc/h) · <b>L²/(N+1)</b></div>
+  </header>
+
+  <div class="dyes" id="dyes"></div>
+
+  <div class="card">
+    <div class="ttl"><span>Struktur — Linie über das Molekül ziehen, um die Kastenlänge L festzulegen</span><span id="dyename" style="color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none">—</span></div>
+    <svg id="struct" viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" aria-label="Farbstoffstruktur"></svg>
+    <div class="struct-foot">
+      <span class="lenpill">Kastenlänge L = <b id="Lval">—</b></span>
+      <div style="display:flex;gap:8px">
+        <button class="mini-btn" id="clearBtn">Linie löschen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row2">
+    <div class="card">
+      <div class="ttl"><span>Spektrum</span></div>
+      <canvas id="spec"></canvas>
+      <div class="legend">
+        <span><span class="sw" style="background:var(--exp)"></span>Experiment (λmax, Vibronik)</span>
+        <span><span class="sw" style="background:var(--theory)"></span>Theorie (dein Kasten)</span>
+      </div>
+      <div class="nums">
+        <span class="k">π-Elektronen N</span><span class="v" id="Nval">—</span>
+        <span class="k">λ Theorie</span><span class="v th" id="ltheory">—</span>
+        <span class="k">λ Experiment</span><span class="v ex" id="lexp">—</span>
+        <span class="k">ΔE (HOMO→LUMO)</span><span class="v" id="dEval">—</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="ttl"><span>Energieniveaus &amp; Besetzung</span></div>
+      <canvas id="levels"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const H=6.62607015e-34, M=9.1093837015e-31, C=299792458, EV=1.602176634e-19;
+  const SCALE=300, R=41.7;
+
+  const DYES=[
+    {id:'cy',  name:"1,1′-Diethyl-2,2′-cyanin",        short:"Cyanin",        N:6,  exp:530.55, bestL:1.067, bridge:1},
+    {id:'cc',  name:"1,1′-Diethyl-2,2′-carbocyanin",   short:"Carbocyanin",   N:8,  exp:611.88, bestL:1.299, bridge:3},
+    {id:'dc',  name:"1,1′-Diethyl-2,2′-dicarbocyanin", short:"Dicarbocyanin", N:10, exp:713.02, bestL:1.551, bridge:5},
+  ];
+  let dye=DYES[0];
+  let lineA=null, lineB=null;
+
+  function getCss(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim();}
+
+  // wavelength -> rgb
+  function wlRGB(wl){
+    let r=0,g=0,b=0;
+    if(wl>=380&&wl<440){r=-(wl-440)/60;b=1;}
+    else if(wl<490){g=(wl-440)/50;b=1;}
+    else if(wl<510){g=1;b=-(wl-510)/20;}
+    else if(wl<580){r=(wl-510)/70;g=1;}
+    else if(wl<645){r=1;g=-(wl-645)/65;}
+    else if(wl<=780){r=1;}
+    let f=1; if(wl<420)f=0.3+0.7*(wl-380)/40; else if(wl>700)f=0.3+0.7*(780-wl)/80;
+    const G=0.8;
+    return `rgb(${Math.round(255*Math.pow(Math.max(0,r)*f,G))},${Math.round(255*Math.pow(Math.max(0,g)*f,G))},${Math.round(255*Math.pow(Math.max(0,b)*f,G))})`;
+  }
+
+  /* ---------------- structure ---------------- */
+  const svg=document.getElementById('struct');
+  function vtx(cx,cy,a){return [cx+R*Math.cos(a*Math.PI/180), cy-R*Math.sin(a*Math.PI/180)];}
+  function hex(cx,cy){return [30,90,150,210,270,330].map(a=>vtx(cx,cy,a));}
+  function poly(pts){return `<polygon points="${pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}" fill="none" stroke="var(--bond)" stroke-width="2.2"/>`;}
+  function seg(a,b,w,col){return `<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" stroke="${col||'var(--bond)'}" stroke-width="${w||2.2}" stroke-linecap="round"/>`;}
+  function dbl(a,b,col){ // inner parallel line (π), shortened
+    const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy),nx=-dy/L*4.2,ny=dx/L*4.2,s=0.18;
+    return seg([a[0]+dx*s+nx,a[1]+dy*s+ny],[b[0]-dx*s+nx,b[1]-dy*s+ny],2.2,col);
+  }
+  // Vertices (pointy-top hexagon): index 0..5 at angles 30,90,150,210,270,330
+  // N1 sits at the bottom (270°); C2 at the inner-lower vertex bearing the bridge.
+  // Left quinoline = enamine (neutral N); right = iminium (N+). Benzo rings are
+  // full benzenes (3 doubles) with the ring-fusion bond single.
+  function quinoline(side){
+    const py=145;
+    const c2x = 360 + side*((dye.bridge+1)*R/2);
+    const pcx = c2x + side*0.866*R;
+    const bcx = pcx + side*1.732*R;
+    const P=hex(pcx,py), B=hex(bcx,py);
+    const PI='var(--exp)';                          // colour of the counted π pairs
+    let C2,N1,s=poly(B)+poly(P);
+    if(side<0){                                     // LEFT — enamine, neutral N
+      C2=P[5]; N1=P[4];
+      s+=dbl(P[0],P[1]);                            // ring C=C (not in the box)
+      s+=dbl(B[0],B[1])+dbl(B[2],B[3])+dbl(B[4],B[5]); // benzene
+    } else {                                        // RIGHT — iminium, N+
+      C2=P[3]; N1=P[4];
+      s+=dbl(P[1],P[2]);                            // ring C=C (not in the box)
+      s+=dbl(P[3],P[4],PI);                         // C2'=N+ : counted π pair
+      s+=dbl(B[1],B[2])+dbl(B[3],B[4])+dbl(B[5],B[0]); // benzene
+    }
+    // N-ethyl: straight down, then splay outward
+    const nx=N1[0], ny=N1[1];
+    s+=seg(N1,[nx,ny+24])+seg([nx,ny+24],[nx+side*15,ny+40]);
+    s+=`<circle cx="${nx.toFixed(1)}" cy="${ny.toFixed(1)}" r="12" fill="var(--panel)"/>`;
+    s+=`<text x="${nx.toFixed(1)}" y="${(ny+5).toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-size="16" fill="var(--accent)" font-weight="600">N</text>`;
+    if(side<0)                                      // lone pair = counted π pair (orange dash above N)
+      s+=seg([nx-6.3,ny-17],[nx+6.3,ny-17],3,PI);
+    else
+      s+=`<text x="${nx.toFixed(1)}" y="${(ny-16).toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-size="16" fill="#fff">+</text>`;
+    return {svg:s, C2, bcx};
+  }
+  function buildStructure(){
+    const Lq=quinoline(-1), Rq=quinoline(1);
+    let s=Lq.svg+Rq.svg;
+    // polymethine bridge: C2(left)=CH on the enamine side, single into C2'(right)
+    const n=dye.bridge, x0=Lq.C2[0], y0=Lq.C2[1], x1=Rq.C2[0];
+    const pts=[Lq.C2];
+    for(let i=1;i<=n;i++){ const x=x0+(x1-x0)*i/(n+1); const y=y0 + ((i%2)?12:-12); pts.push([x,y]); }
+    pts.push(Rq.C2);
+    for(let i=0;i<pts.length-1;i++){ s+=seg(pts[i],pts[i+1]); if(i%2===0) s+=dbl(pts[i],pts[i+1],'var(--exp)'); }
+    svg.innerHTML = s + drawnLineSVG();
+  }
+  function drawnL(){ if(!lineA||!lineB) return 0; return Math.hypot(lineB[0]-lineA[0],lineB[1]-lineA[1])/SCALE; }
+  function drawnLineSVG(){
+    if(!lineA||!lineB) return '';
+    const mid=[(lineA[0]+lineB[0])/2,(lineA[1]+lineB[1])/2];
+    return `<line x1="${lineA[0]}" y1="${lineA[1]}" x2="${lineB[0]}" y2="${lineB[1]}" stroke="var(--theory)" stroke-width="3.5" stroke-linecap="round" opacity="0.92"/>`+
+      `<circle cx="${lineA[0]}" cy="${lineA[1]}" r="4.5" fill="var(--theory)"/>`+
+      `<circle cx="${lineB[0]}" cy="${lineB[1]}" r="4.5" fill="var(--theory)"/>`+
+      `<rect x="${mid[0]-34}" y="${mid[1]-36}" width="68" height="22" rx="6" fill="var(--panel)" stroke="var(--line-strong)"/>`+
+      `<text x="${mid[0]}" y="${mid[1]-21}" text-anchor="middle" font-family="JetBrains Mono" font-size="13" fill="var(--theory)">${drawnL().toFixed(2)} nm</text>`;
+  }
+  function toSvg(e){ const r=svg.getBoundingClientRect(), vb=svg.viewBox.baseVal;
+    return [ (e.clientX-r.left)/r.width*vb.width, (e.clientY-r.top)/r.height*vb.height ]; }
+  let drawing=false;
+  svg.addEventListener('pointerdown',e=>{drawing=true;lineA=toSvg(e);lineB=lineA;svg.setPointerCapture(e.pointerId);refresh();});
+  svg.addEventListener('pointermove',e=>{if(drawing){lineB=toSvg(e);refresh();}});
+  svg.addEventListener('pointerup',()=>{drawing=false;});
+  document.getElementById('clearBtn').onclick=()=>{lineA=lineB=null;refresh();};
+
+  /* ---------------- physics ---------------- */
+  function lambdaTheory(L_nm){ const L=L_nm*1e-9; return 8*M*C*L*L/(H*(dye.N+1))*1e9; }
+  function deltaE(L_nm){ const L=L_nm*1e-9; const E1=H*H/(8*M*L*L); const h=dye.N/2,l=h+1; return E1*(l*l-h*h)/EV; }
+
+  // vibronic (Franck–Condon) band shape, pinned to literature λmax
+  function fact(k){return [1,1,2,6,24][k];}
+  function bandShape(wl, lmax){
+    const nu=1e7/wl, nu0=1e7/lmax, S=0.7, dv=1300, sig=430; let A=0;
+    for(let k=0;k<=3;k++){ const w=Math.exp(-S)*Math.pow(S,k)/fact(k); const nuk=nu0+k*dv; A+=w*Math.exp(-((nu-nuk)**2)/(2*sig*sig)); }
+    return A;
+  }
+
+  /* ---------------- canvas helpers ---------------- */
+  function setup(cv,h){
+    const dpr=Math.min(window.devicePixelRatio||1,2); const w=cv.clientWidth||520;
+    cv.width=Math.round(w*dpr); cv.height=Math.round(h*dpr); cv.style.height=h+'px';
+    const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+    return {ctx,w,h};
+  }
+
+  function drawSpectrum(){
+    const {ctx,w,h}=setup(document.getElementById('spec'),250);
+    const x0=44,x1=w-14,yt=16,yb=h-60, wlMin=380,wlMax=780;
+    const X=wl=>x0+(wl-wlMin)/(wlMax-wlMin)*(x1-x0);
+    // spectral colour strip
+    for(let p=x0;p<x1;p++){const wl=wlMin+(p-x0)/(x1-x0)*(wlMax-wlMin);ctx.fillStyle=wlRGB(wl);ctx.globalAlpha=.9;ctx.fillRect(p,yb+6,1,15);}
+    ctx.globalAlpha=1;
+    // axis
+    ctx.strokeStyle='rgba(124,146,186,.4)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x0,yb);ctx.lineTo(x1,yb);ctx.stroke();
+    ctx.fillStyle=getCss('--muted');ctx.font='13px JetBrains Mono';ctx.textAlign='center';
+    for(let wl=400;wl<=750;wl+=50){ctx.fillText(wl,X(wl),yb+34);ctx.strokeStyle='rgba(124,146,186,.13)';ctx.beginPath();ctx.moveTo(X(wl),yt);ctx.lineTo(X(wl),yb);ctx.stroke();}
+    ctx.fillStyle=getCss('--muted-2');ctx.fillText('λ / nm',(x0+x1)/2,yb+54);
+    // experimental vibronic band (normalised)
+    let maxA=0; for(let wl=wlMin;wl<=wlMax;wl+=1)maxA=Math.max(maxA,bandShape(wl,dye.exp));
+    ctx.beginPath();
+    for(let p=x0;p<=x1;p++){const wl=wlMin+(p-x0)/(x1-x0)*(wlMax-wlMin);const y=yb-(bandShape(wl,dye.exp)/maxA)*(yb-yt);if(p===x0)ctx.moveTo(p,y);else ctx.lineTo(p,y);}
+    ctx.strokeStyle=getCss('--exp');ctx.lineWidth=2.6;ctx.stroke();
+    ctx.lineTo(x1,yb);ctx.lineTo(x0,yb);ctx.closePath();ctx.globalAlpha=.15;ctx.fillStyle=getCss('--exp');ctx.fill();ctx.globalAlpha=1;
+    // theory stick
+    const L=drawnL();
+    if(L>0){
+      const lt=lambdaTheory(L), xx=Math.max(x0,Math.min(x1,X(lt)));
+      ctx.strokeStyle=getCss('--theory');ctx.lineWidth=2.6;ctx.beginPath();ctx.moveTo(xx,yb);ctx.lineTo(xx,yt+6);ctx.stroke();
+      ctx.fillStyle=getCss('--theory');ctx.beginPath();ctx.arc(xx,yt+6,4,0,7);ctx.fill();
+      ctx.font='13px JetBrains Mono';ctx.textAlign='center';ctx.fillText(Math.round(lt)+' nm',xx,yt+2<14?14:yt-2);
+    }
+  }
+
+  function drawLevels(){
+    const {ctx,w,h}=setup(document.getElementById('levels'),300);
+    const L=drawnL()||dye.bestL;
+    const E1=H*H/(8*M*(L*1e-9)**2)/EV;
+    const homo=dye.N/2, lumo=homo+1, nTop=lumo, Emax=nTop*nTop*E1;
+    const x0=100,x1=w-128,yb=h-22,yt=22;
+    ctx.strokeStyle='rgba(124,146,186,.3)';ctx.beginPath();ctx.moveTo(x0-50,yb);ctx.lineTo(x0-50,yt);ctx.stroke();
+    ctx.fillStyle=getCss('--muted-2');ctx.font='14px JetBrains Mono';
+    ctx.save();ctx.translate(x0-74,(yt+yb)/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';ctx.fillText('Energie / eV',0,0);ctx.restore();
+    const Y=E=>yb-(E/Emax)*(yb-yt);
+    let homoY,lumoY;
+    for(let n=1;n<=nTop;n++){
+      const E=n*n*E1,y=Y(E),occ=n<=homo,isH=n===homo,isL=n===lumo;
+      ctx.strokeStyle=isH?getCss('--theory'):isL?getCss('--exp'):'rgba(150,168,200,.6)';
+      ctx.lineWidth=isH||isL?3:1.8;ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x1,y);ctx.stroke();
+      ctx.fillStyle=getCss('--muted');ctx.font='14px JetBrains Mono';ctx.textAlign='right';ctx.fillText('n='+n,x0-12,y+5);
+      ctx.textAlign='left';ctx.fillStyle=getCss('--muted-2');ctx.fillText(E.toFixed(2)+' eV',x1+10,y+5);
+      if(occ){const cx=(x0+x1)/2;for(const dx of [-11,11]){ctx.fillStyle=getCss('--bond');ctx.beginPath();ctx.arc(cx+dx,y,5,0,7);ctx.fill();}}
+      if(isH)homoY=y; if(isL)lumoY=y;
+    }
+    if(homoY&&lumoY){
+      const ax=x0+34;
+      ctx.strokeStyle=getCss('--accent');ctx.lineWidth=2.4;ctx.beginPath();ctx.moveTo(ax,homoY);ctx.lineTo(ax,lumoY);ctx.stroke();
+      ctx.fillStyle=getCss('--accent');ctx.beginPath();ctx.moveTo(ax,lumoY);ctx.lineTo(ax-5,lumoY+9);ctx.lineTo(ax+5,lumoY+9);ctx.fill();
+      const dE=(lumo*lumo-homo*homo)*E1;
+      ctx.font='14px JetBrains Mono';ctx.textAlign='left';
+      ctx.fillText('ΔE = '+dE.toFixed(2)+' eV', ax+10, (homoY+lumoY)/2-4);
+      ctx.fillStyle=getCss('--muted');ctx.fillText('→ '+Math.round(lambdaTheory(L))+' nm', ax+10, (homoY+lumoY)/2+14);
+    }
+    // labels for HOMO / LUMO
+    ctx.font='12px JetBrains Mono';ctx.textAlign='left';
+    ctx.fillStyle=getCss('--theory');if(homoY)ctx.fillText('HOMO',x1+10,homoY-9<yt+6?yt+12:homoY-9);
+    ctx.fillStyle=getCss('--exp');if(lumoY)ctx.fillText('LUMO',x1+10,lumoY-9);
+  }
+
+  /* ---------------- refresh ---------------- */
+  function refresh(){
+    buildStructure();
+    const L=drawnL();
+    document.getElementById('Lval').textContent = L>0? L.toFixed(2)+' nm' : '—';
+    document.getElementById('Nval').textContent = dye.N;
+    document.getElementById('lexp').textContent = dye.exp.toFixed(0)+' nm';
+    if(L>0){
+      const lt=lambdaTheory(L), dE=deltaE(L);
+      document.getElementById('ltheory').textContent=Math.round(lt)+' nm';
+      document.getElementById('dEval').textContent=dE.toFixed(2)+' eV';
+    } else {
+      document.getElementById('ltheory').textContent='—';
+      document.getElementById('dEval').textContent='—';
+    }
+    drawSpectrum(); drawLevels();
+  }
+
+  /* ---------------- dye buttons ---------------- */
+  const dbar=document.getElementById('dyes');
+  DYES.forEach((d,i)=>{
+    const b=document.createElement('button'); if(i===0)b.className='on';
+    b.innerHTML=`${d.short}<small>N = ${d.N} π e⁻ · ${d.exp.toFixed(0)} nm</small>`;
+    b.onclick=()=>{dye=d;[...dbar.children].forEach(c=>c.classList.remove('on'));b.classList.add('on');
+      lineA=lineB=null;document.getElementById('dyename').textContent=d.name;refresh();};
+    dbar.appendChild(b);
+  });
+  document.getElementById('dyename').textContent=DYES[0].name;
+
+  window.addEventListener('resize',()=>{drawSpectrum();drawLevels();});
+  refresh();
+})();
+</script>
+</body>
+</html>
