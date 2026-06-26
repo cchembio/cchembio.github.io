@@ -149,6 +149,41 @@ header {
 }
 
 /* ============================================================
+   Email reveal button
+   ============================================================ */
+.email-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--blue);
+  cursor: pointer;
+  font-size: 0.83em;
+  font-family: inherit;
+  padding: 0.1em 0.5em;
+  line-height: 1.6;
+  vertical-align: baseline;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.email-btn:hover {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+footer .email-btn {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.22);
+  color: var(--gold);
+}
+footer .email-btn:hover {
+  background: rgba(255,255,255,0.18);
+  color: #fff;
+  border-color: rgba(255,255,255,0.4);
+}
+
+/* ============================================================
    Section headings — gold accent rule
    ============================================================ */
 main h2:not(.no-rule) {
