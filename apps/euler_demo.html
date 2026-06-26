@@ -288,7 +288,7 @@ input[type=range]::-moz-range-thumb {
       <span class="r-key">|z|</span>
       <span class="r-val gold">1</span>
     </div>
-    <div class="r-row" id="r-spec-row" style="display:none">
+    <div class="r-row" id="r-spec-row" style="visibility:hidden">
       <span class="r-key">Speziell</span>
       <span class="r-val gold" id="r-spec">—</span>
     </div>
@@ -611,8 +611,8 @@ function updateReadout() {
 
   const spec = SPECS.find(s => Math.abs(phi - s.p) < s.tol);
   const sr   = $('r-spec-row');
-  if (spec) { sr.style.display = 'flex'; $('r-spec').textContent = spec.s; }
-  else       { sr.style.display = 'none'; }
+  if (spec) { sr.style.visibility = 'visible'; $('r-spec').textContent = spec.s; }
+  else       { sr.style.visibility = 'hidden'; }
 
   const eb   = $('euler-badge');
   const atPi = Math.abs(phi - Math.PI) < 0.18;
