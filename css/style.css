@@ -199,13 +199,7 @@ footer strong { color: #fff; }
   grid-template-columns: 1fr 300px;
   gap: 3rem;
   align-items: start;
-}
-
-/* Pull the contact card up so it visually connects to the hero above */
-.home-grid > aside {
-  margin-top: -3rem;
-  position: relative;
-  z-index: 2;
+  padding-top: 2.5rem;
 }
 
 .highlights {
@@ -549,8 +543,7 @@ footer strong { color: #fff; }
 
   .nav-links a.active::after { display: none; }
 
-  .home-grid { grid-template-columns: 1fr; }
-  .home-grid > aside { margin-top: 2rem; }
+  .home-grid { grid-template-columns: 1fr; padding-top: 1.5rem; }
 
   .member-grid { grid-template-columns: 1fr; }
 
@@ -688,7 +681,7 @@ footer strong { color: #fff; }
   position: relative;
   background: var(--blue);
   color: #fff;
-  padding: 5.5rem 1.5rem 7.5rem;
+  padding: 5.5rem 1.5rem 4.5rem;
   text-align: center;
   overflow: hidden;
   margin-bottom: 0;
