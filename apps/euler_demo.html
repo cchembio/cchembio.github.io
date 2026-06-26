@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Die Eulersche Formel — e^(iφ) = cos φ + i·sin φ</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  background: #0d1117;
+  color: #c9d1d9;
+}
+
+#left {
+  width: 390px;
+  min-width: 330px;
+  height: 100vh;
+  overflow-y: auto;
+  background: #161b22;
+  border-right: 1px solid #21262d;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+#right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0d1117;
+  overflow: hidden;
+}
+
+#svg-wrap {
+  flex: 1;
+  min-height: 0;
+}
+
+#svg-wrap svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  user-select: none;
+}
+
+h1 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #79c0ff;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+.card {
+  background: #1c2128;
+  border: 1px solid #30363d;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.card-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #388bfd;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  display: block;
+  margin-bottom: 8px;
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: #30363d;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  margin: 4px 0;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #388bfd;
+  cursor: pointer;
+}
+input[type=range]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #388bfd;
+  cursor: pointer;
+  border: none;
+}
+
+.phi-ticks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3px;
+  padding: 0 8px;
+}
+.phi-ticks span { font-size: 10px; color: #484f58; }
+
+.play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 7px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  color: #c9d1d9;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.play-btn:hover { border-color: #388bfd; }
+.play-btn.playing { border-color: #3fb950; color: #3fb950; }
+
+.mode-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 9px;
+}
+.mode-lbl { font-size: 10.5px; color: #6e7681; flex-shrink: 0; }
+.mode-btns { display: flex; gap: 4px; flex: 1; }
+.mode-btn {
+  flex: 1;
+  padding: 5px 2px;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 5px;
+  color: #6e7681;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.mode-btn:hover { border-color: #58a6ff; color: #8b949e; }
+.m-cos   { border-color: #3fb950 !important; color: #3fb950 !important; background: rgba(63,185,80,0.1) !important; }
+.m-sin   { border-color: #f0883e !important; color: #f0883e !important; background: rgba(240,136,62,0.1) !important; }
+.m-beide { border-color: #388bfd !important; color: #388bfd !important; background: rgba(56,139,253,0.1) !important; }
+
+.r-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 5px 0;
+  border-bottom: 1px solid #21262d;
+}
+.r-row:last-child { border-bottom: none; }
+.r-row.hi { background: rgba(227,179,65,0.08); border-radius: 4px; margin: 0 -4px; padding: 5px 4px; border-bottom: none; }
+
+.r-key { color: #6e7681; font-size: 11.5px; }
+.r-val {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: #e6edf3;
+  text-align: right;
+  flex: 1;
+  padding-left: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.r-val.pos  { color: #3fb950; }
+.r-val.neg  { color: #f85149; }
+.r-val.zero { color: #e3b341; }
+.r-val.gold { color: #e3b341; }
+.r-val.ora  { color: #f0883e; }
+
+#euler-badge {
+  display: none;
+  background: rgba(227,179,65,0.08);
+  border: 1px solid rgba(227,179,65,0.35);
+  border-left: 3px solid #e3b341;
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+}
+#euler-badge.vis { display: block; animation: pop 0.25s ease; }
+@keyframes pop { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+
+.euler-eq {
+  font-size: 21px;
+  font-weight: 700;
+  color: #e3b341;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  letter-spacing: 0.05em;
+}
+.euler-note {
+  margin-top: 5px;
+  font-size: 10px;
+  color: #8b949e;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+
+.callout {
+  background: rgba(56,139,253,0.07);
+  border: 1px solid rgba(56,139,253,0.2);
+  border-left: 3px solid #388bfd;
+  border-radius: 6px;
+  padding: 9px 11px;
+  font-size: 11.5px;
+  color: #8b949e;
+  line-height: 1.65;
+}
+.callout em { color: #79c0ff; font-style: normal; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ LEFT PANEL ═══════════════════ -->
+<div id="left">
+
+  <h1>Die Eulersche Formel<br>
+      e<sup style="font-size:11px">iφ</sup> = cos φ + i · sin φ</h1>
+
+  <div class="card">
+    <span class="card-label">Winkel φ</span>
+    <input type="range" id="phi-sl" min="0" max="6.2832" step="0.001" value="0">
+    <div class="phi-ticks">
+      <span>0</span><span>π/2</span><span>π</span><span>3π/2</span><span>2π</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Steuerung</span>
+    <button class="play-btn" id="play-btn">
+      <span id="play-ic">▶</span>
+      <span id="play-lb">Abspielen</span>
+    </button>
+    <div class="mode-row">
+      <span class="mode-lbl">Anzeigen:</span>
+      <div class="mode-btns">
+        <button class="mode-btn" id="btn-cos">cos φ</button>
+        <button class="mode-btn" id="btn-sin">sin φ</button>
+        <button class="mode-btn" id="btn-beide">Beide</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Numerische Auswertung</span>
+    <div class="r-row">
+      <span class="r-key">φ im Bogenmaß</span>
+      <span class="r-val" id="r-phi">0.000 rad</span>
+    </div>
+    <div class="r-row">
+      <span class="r-key">φ in Grad</span>
+      <span class="r-val" id="r-deg">0.0°</span>
+    </div>
+    <div class="r-row">
+      <span class="r-key">e<sup style="font-size:9px">iφ</sup></span>
+      <span class="r-val" id="r-euler">1.000 + 0.000·i</span>
+    </div>
+    <div class="r-row">
+      <span class="r-key" style="color:#3fb950">cos φ</span>
+      <span class="r-val pos" id="r-cos">1.000</span>
+    </div>
+    <div class="r-row">
+      <span class="r-key" style="color:#f0883e">sin φ</span>
+      <span class="r-val zero" id="r-sin">0.000</span>
+    </div>
+    <div class="r-row">
+      <span class="r-key">Punkt</span>
+      <span class="r-val" id="r-pt">(1.000, 0.000)</span>
+    </div>
+    <div class="r-row">
+      <span class="r-key">|z|</span>
+      <span class="r-val gold">1</span>
+    </div>
+    <div class="r-row" id="r-spec-row" style="display:none">
+      <span class="r-key">Speziell</span>
+      <span class="r-val gold" id="r-spec">—</span>
+    </div>
+  </div>
+
+  <div id="euler-badge">
+    <div class="euler-eq">e<sup style="font-size:15px">iπ</sup> + 1 = 0</div>
+    <div class="euler-note">Eulersche Identität</div>
+  </div>
+
+  <div class="callout">
+    <em>e<sup>iφ</sup></em> ist eine Drehung um den Winkel φ auf dem
+    <em>Einheitskreis</em>. Der Schatten auf der reellen Achse ist
+    <em>cos φ</em>, der auf der imaginären Achse <em>sin φ</em>.
+    Kreisbewegung und Schwingung sind damit dasselbe, nur verschieden
+    betrachtet. <em>φ</em> muss im Bogenmaß stehen — es ist die
+    <em>Bogenlänge</em> auf dem Kreis.
+  </div>
+
+</div>
+
+<!-- ═══════════════════ RIGHT PANEL ═══════════════════ -->
+<div id="right">
+  <div id="svg-wrap">
+    <svg id="plot" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="mk-ph" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#388bfd"/>
+        </marker>
+      </defs>
+      <g id="g-ab"></g>   <!-- argand background -->
+      <g id="g-cb"></g>   <!-- coplot background -->
+      <g id="g-gh"></g>   <!-- ghost curves -->
+      <g id="g-tr"></g>   <!-- trace 0→phi -->
+      <g id="g-cn"></g>   <!-- connector lines -->
+      <g id="g-af"></g>   <!-- argand foreground -->
+      <g id="g-cf"></g>   <!-- coplot foreground -->
+      <g id="g-lb"></g>   <!-- labels -->
+    </svg>
+  </div>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const NS  = 'http://www.w3.org/2000/svg';
+const TAU = 2 * Math.PI;
+const EPS = 1e-9;
+
+// ── State ──────────────────────────────────────────────────────────
+let phi   = 0;
+let mode  = 'beide';
+let animOn = false, animId = null, prevTs = null;
+const SPD  = TAU / 8000; // rad/ms → 8 s per revolution
+
+// ── Layout ─────────────────────────────────────────────────────────
+let W = 0, H = 0;
+let aX, aY, aR;           // argand: center x,y + unit radius (px)
+let cpL, cpR, cpM, cpA;   // coplot: left x, right x, y-midline, y-amplitude
+
+function computeLayout() {
+  const mid = W / 2;
+  aR  = Math.min(mid * 0.41, H * 0.37);
+  aX  = mid / 2;
+  aY  = H / 2;
+  const pL = 54, pR = 20, pT = 28, pB = 36;
+  cpL = mid + pL;
+  cpR = W   - pR;
+  cpM = H / 2;
+  cpA = (H - pT - pB) * 0.4;
+}
+
+// ── Coordinate helpers ──────────────────────────────────────────────
+const aS = (x, y)     => [aX + x * aR,                    aY - y * aR];
+const cS = (ph, val)  => [cpL + (ph / TAU) * (cpR - cpL), cpM - val * cpA];
+
+// ── SVG helpers ─────────────────────────────────────────────────────
+function mk(tag, a, t) {
+  const el = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(a)) el.setAttribute(k, v);
+  if (t !== undefined) el.textContent = t;
+  return el;
+}
+function clr(id) { const g = $(id); while (g.firstChild) g.removeChild(g.firstChild); }
+
+// ── Draw: argand background ─────────────────────────────────────────
+function drawABg() {
+  clr('g-ab');
+  const g = $('g-ab');
+  const ext = aR * 1.42;
+
+  // Light grid
+  for (let i = -2; i <= 2; i++) {
+    if (!i) continue;
+    const [gx] = aS(i, 0);
+    const [, gy] = aS(0, i);
+    g.appendChild(mk('line', { x1: gx, y1: aY - ext, x2: gx, y2: aY + ext, stroke: '#1c2128', 'stroke-width': 1 }));
+    g.appendChild(mk('line', { x1: aX - ext, y1: gy, x2: aX + ext, y2: gy, stroke: '#1c2128', 'stroke-width': 1 }));
+  }
+
+  // Unit circle (dashed)
+  g.appendChild(mk('circle', { cx: aX, cy: aY, r: aR, fill: 'none', stroke: '#2a3240', 'stroke-width': 1.5, 'stroke-dasharray': '5,3' }));
+
+  // Axes
+  g.appendChild(mk('line', { x1: aX - ext, y1: aY,      x2: aX + ext, y2: aY,      stroke: '#30363d', 'stroke-width': 1 }));
+  g.appendChild(mk('line', { x1: aX,       y1: aY + ext, x2: aX,       y2: aY - ext, stroke: '#30363d', 'stroke-width': 1 }));
+
+  // Axis labels
+  g.appendChild(mk('text', { x: aX + ext + 5,  y: aY + 4,        fill: '#484f58', 'font-size': 11, 'font-style': 'italic' }, 'Re'));
+  g.appendChild(mk('text', { x: aX + 5,        y: aY - ext - 4,  fill: '#484f58', 'font-size': 11, 'font-style': 'italic' }, 'Im'));
+
+  // Tick labels ±1, ±i
+  g.appendChild(mk('text', { x: aX + aR + 4,  y: aY + 13, 'text-anchor': 'start', fill: '#484f58', 'font-size': 10 }, '1'));
+  g.appendChild(mk('text', { x: aX - aR - 4,  y: aY + 13, 'text-anchor': 'end',   fill: '#484f58', 'font-size': 10 }, '−1'));
+  g.appendChild(mk('text', { x: aX + 7, y: aY - aR + 4,  fill: '#484f58', 'font-size': 10 }, 'i'));
+  g.appendChild(mk('text', { x: aX + 7, y: aY + aR + 4,  fill: '#484f58', 'font-size': 10 }, '−i'));
+
+  // Special angle dots at 0°, 90°, 180°, 270°
+  for (const ph of [0, Math.PI/2, Math.PI, 3*Math.PI/2]) {
+    const [sx, sy] = aS(Math.cos(ph), Math.sin(ph));
+    g.appendChild(mk('circle', { cx: sx, cy: sy, r: 3.5, fill: '#21262d', stroke: '#484f58', 'stroke-width': 1 }));
+  }
+
+  // Panel title
+  g.appendChild(mk('text', { x: aX, y: 16, 'text-anchor': 'middle', fill: '#484f58', 'font-size': 10.5 }, 'Argand-Ebene'));
+}
+
+// ── Draw: coplot background ─────────────────────────────────────────
+function drawCBg() {
+  clr('g-cb');
+  const g = $('g-cb');
+
+  // Divider
+  g.appendChild(mk('line', { x1: W/2, y1: 22, x2: W/2, y2: H - 22, stroke: '#21262d', 'stroke-width': 1 }));
+
+  // Horizontal grid
+  for (const v of [-1, -0.5, 0, 0.5, 1]) {
+    const y = cpM - v * cpA;
+    g.appendChild(mk('line', { x1: cpL, y1: y, x2: cpR, y2: y, stroke: v === 0 ? '#30363d' : '#1c2128', 'stroke-width': 1 }));
+    const lbl = v === 1 ? '1' : v === -1 ? '−1' : v === 0 ? '0' : v > 0 ? '0.5' : '−0.5';
+    g.appendChild(mk('text', { x: cpL - 6, y: y + 4, 'text-anchor': 'end', fill: '#484f58', 'font-size': 10 }, lbl));
+  }
+
+  // Vertical gridlines + x-tick labels
+  const vPts = [[0,'0'], [Math.PI/2,'π/2'], [Math.PI,'π'], [3*Math.PI/2,'3π/2'], [TAU,'2π']];
+  for (const [ph, lbl] of vPts) {
+    const [x] = cS(ph, 0);
+    const isEdge = ph === 0 || ph === TAU;
+    g.appendChild(mk('line', { x1: x, y1: cpM - cpA*1.15, x2: x, y2: cpM + cpA*1.15, stroke: isEdge ? '#30363d' : '#1c2128', 'stroke-width': 1 }));
+    g.appendChild(mk('text', { x, y: cpM + cpA + 22, 'text-anchor': 'middle', fill: '#484f58', 'font-size': 10 }, lbl));
+  }
+
+  // x-axis line + φ label
+  g.appendChild(mk('line', { x1: cpL, y1: cpM, x2: cpR, y2: cpM, stroke: '#30363d', 'stroke-width': 1 }));
+  g.appendChild(mk('text', { x: cpR + 5, y: cpM + 4, fill: '#484f58', 'font-size': 11, 'font-style': 'italic' }, 'φ'));
+
+  // Panel title
+  g.appendChild(mk('text', { x: (cpL+cpR)/2, y: 16, 'text-anchor': 'middle', fill: '#484f58', 'font-size': 10.5 }, 'cos φ  und  sin φ'));
+}
+
+// ── Draw: ghost curves (full faint 0→2π) ───────────────────────────
+function drawGhost() {
+  clr('g-gh');
+  const g  = $('g-gh');
+  const N  = 300;
+  function ghost(fn, col) {
+    let d = '';
+    for (let i = 0; i <= N; i++) {
+      const p = (i / N) * TAU;
+      const [x, y] = cS(p, fn(p));
+      d += i ? ` L${x.toFixed(1)},${y.toFixed(1)}` : `M${x.toFixed(1)},${y.toFixed(1)}`;
+    }
+    g.appendChild(mk('path', { d, fill: 'none', stroke: col, 'stroke-width': 1, opacity: 0.2 }));
+  }
+  if (mode !== 'sin') ghost(Math.cos, '#3fb950');
+  if (mode !== 'cos') ghost(Math.sin, '#f0883e');
+}
+
+// ── Draw: trace (0 → phi) ──────────────────────────────────────────
+function drawTrace() {
+  clr('g-tr');
+  if (phi < 0.005) return;
+  const g = $('g-tr');
+  const N = Math.max(3, Math.round(phi / TAU * 300));
+  function trace(fn, col) {
+    let d = '';
+    for (let i = 0; i <= N; i++) {
+      const p = (i / N) * phi;
+      const [x, y] = cS(p, fn(p));
+      d += i ? ` L${x.toFixed(1)},${y.toFixed(1)}` : `M${x.toFixed(1)},${y.toFixed(1)}`;
+    }
+    g.appendChild(mk('path', { d, fill: 'none', stroke: col, 'stroke-width': 2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+  }
+  if (mode !== 'sin') trace(Math.cos, '#3fb950');
+  if (mode !== 'cos') trace(Math.sin, '#f0883e');
+}
+
+// ── Draw: connector lines (argand tip → coplot dot) ─────────────────
+function drawConnector() {
+  clr('g-cn');
+  const cp = Math.cos(phi), sp = Math.sin(phi);
+  const [ax, ay] = aS(cp, sp);
+  function conn(val, col) {
+    const [cx, cy] = cS(phi, val);
+    $('g-cn').appendChild(mk('line', { x1: ax, y1: ay, x2: cx, y2: cy, stroke: col, 'stroke-width': 1, opacity: 0.4, 'stroke-dasharray': '3,3' }));
+  }
+  if (mode !== 'sin') conn(cp, '#3fb950');
+  if (mode !== 'cos') conn(sp, '#f0883e');
+}
+
+// ── Draw: argand foreground ─────────────────────────────────────────
+function drawAFg() {
+  clr('g-af');
+  const g  = $('g-af');
+  const cp = Math.cos(phi), sp = Math.sin(phi);
+  const [tx, ty] = aS(cp, sp);
+
+  // Cos drop line: vertical to real axis
+  if (mode !== 'sin') {
+    const [rx, ry] = aS(cp, 0);
+    g.appendChild(mk('line', { x1: tx, y1: ty, x2: rx, y2: ry, stroke: '#3fb950', 'stroke-width': 1.5, 'stroke-dasharray': '4,3', opacity: 0.75 }));
+    g.appendChild(mk('circle', { cx: rx, cy: ry, r: 4, fill: '#3fb950', opacity: 0.85 }));
+  }
+
+  // Sin drop line: horizontal to imaginary axis
+  if (mode !== 'cos') {
+    const [ix, iy] = aS(0, sp);
+    g.appendChild(mk('line', { x1: tx, y1: ty, x2: ix, y2: iy, stroke: '#f0883e', 'stroke-width': 1.5, 'stroke-dasharray': '4,3', opacity: 0.75 }));
+    g.appendChild(mk('circle', { cx: ix, cy: iy, r: 4, fill: '#f0883e', opacity: 0.85 }));
+  }
+
+  // Arc annotation from 0 to phi
+  if (phi > 0.06 && phi < TAU - 0.06) {
+    const ar = aR * 0.23;
+    const sx = aX + ar, sy = aY;
+    const ex = aX + ar * cp,     ey = aY - ar * sp;
+    const la = phi > Math.PI ? 1 : 0;
+    // sweep-flag=0 → counterclockwise on screen (= positive math direction)
+    const d  = `M${sx.toFixed(1)},${sy.toFixed(1)} A${ar.toFixed(1)},${ar.toFixed(1)} 0 ${la} 0 ${ex.toFixed(1)},${ey.toFixed(1)}`;
+    g.appendChild(mk('path', { d, fill: 'none', stroke: '#8b949e', 'stroke-width': 1.2 }));
+    // φ label near arc midpoint
+    const mp = phi / 2;
+    const lr = ar * 1.6;
+    g.appendChild(mk('text', {
+      x: (aX + lr * Math.cos(mp)).toFixed(1),
+      y: (aY - lr * Math.sin(mp) + 4).toFixed(1),
+      'text-anchor': 'middle', fill: '#8b949e', 'font-size': 11, 'font-style': 'italic',
+      'paint-order': 'stroke', stroke: '#0d1117', 'stroke-width': 2.5
+    }, 'φ'));
+  }
+
+  // Phasor arrow (with glow)
+  const dx = tx - aX, dy = ty - aY;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  if (len > 5) {
+    const s  = 11 / len;
+    const ex = tx - dx*s, ey = ty - dy*s;
+    g.appendChild(mk('line', { x1: aX, y1: aY, x2: ex, y2: ey, stroke: '#388bfd', 'stroke-width': 9, opacity: 0.12, 'stroke-linecap': 'round' }));
+    g.appendChild(mk('line', { x1: aX, y1: aY, x2: ex, y2: ey, stroke: '#388bfd', 'stroke-width': 2.5, 'stroke-linecap': 'round', 'marker-end': 'url(#mk-ph)' }));
+  }
+
+  // Tip dot
+  g.appendChild(mk('circle', { cx: tx, cy: ty, r: 5, fill: '#388bfd', stroke: '#0d1117', 'stroke-width': 1.5 }));
+}
+
+// ── Draw: coplot foreground (current dots) ──────────────────────────
+function drawCFg() {
+  clr('g-cf');
+  const cp = Math.cos(phi), sp = Math.sin(phi);
+  function dot(val, col) {
+    const [x, y] = cS(phi, val);
+    $('g-cf').appendChild(mk('circle', { cx: x, cy: y, r: 5.5, fill: col, stroke: '#0d1117', 'stroke-width': 1.5 }));
+  }
+  if (mode !== 'sin') dot(cp, '#3fb950');
+  if (mode !== 'cos') dot(sp, '#f0883e');
+}
+
+// ── Draw: curve labels (mode-dependent) ────────────────────────────
+function drawLabels() {
+  clr('g-lb');
+  const g  = $('g-lb');
+  const ls = { 'font-size': '10.5', 'font-weight': '600', 'paint-order': 'stroke', stroke: '#0d1117', 'stroke-width': '2.5' };
+  if (mode !== 'sin') {
+    const [x] = cS(TAU * 0.97, 0);
+    g.appendChild(mk('text', { x, y: cpM - cpA + 14, 'text-anchor': 'end', fill: '#3fb950', ...ls }, 'cos φ'));
+  }
+  if (mode !== 'cos') {
+    const [x] = cS(TAU * 0.25, 0);
+    g.appendChild(mk('text', { x, y: cpM - cpA + 14, 'text-anchor': 'middle', fill: '#f0883e', ...ls }, 'sin φ'));
+  }
+}
+
+// ── Readout ─────────────────────────────────────────────────────────
+const SPECS = [
+  { p: 0,             tol: 0.07, s: 'z = 1'  },
+  { p: Math.PI / 2,   tol: 0.07, s: 'z = i'  },
+  { p: Math.PI,       tol: 0.07, s: 'z = −1' },
+  { p: 3*Math.PI / 2, tol: 0.07, s: 'z = −i' },
+  { p: TAU,           tol: 0.07, s: 'z = 1'  },
+];
+
+function updateReadout() {
+  const cp = Math.cos(phi), sp = Math.sin(phi);
+
+  $('r-phi').textContent  = phi.toFixed(3) + ' rad';
+  $('r-deg').textContent  = (phi * 180 / Math.PI).toFixed(1) + '°';
+
+  const sgn = sp < -EPS ? '− ' : '+ ';
+  $('r-euler').textContent = `${cp.toFixed(3)} ${sgn}${Math.abs(sp).toFixed(3)}·i`;
+
+  const cEl = $('r-cos');
+  cEl.textContent = cp.toFixed(3);
+  cEl.className   = 'r-val ' + (cp > EPS ? 'pos' : cp < -EPS ? 'neg' : 'zero');
+
+  const sEl = $('r-sin');
+  sEl.textContent = sp.toFixed(3);
+  sEl.className   = 'r-val ' + (sp > EPS ? 'ora' : sp < -EPS ? 'neg' : 'zero');
+
+  $('r-pt').textContent = `(${cp.toFixed(3)}, ${sp.toFixed(3)})`;
+
+  const spec = SPECS.find(s => Math.abs(phi - s.p) < s.tol);
+  const sr   = $('r-spec-row');
+  if (spec) { sr.style.display = 'flex'; $('r-spec').textContent = spec.s; }
+  else       { sr.style.display = 'none'; }
+
+  const eb   = $('euler-badge');
+  const atPi = Math.abs(phi - Math.PI) < 0.18;
+  if (atPi  && !eb.classList.contains('vis')) eb.classList.add('vis');
+  if (!atPi &&  eb.classList.contains('vis')) eb.classList.remove('vis');
+}
+
+// ── Mode toggle ─────────────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  $('btn-cos').className   = 'mode-btn' + (m === 'cos'   ? ' m-cos'   : '');
+  $('btn-sin').className   = 'mode-btn' + (m === 'sin'   ? ' m-sin'   : '');
+  $('btn-beide').className = 'mode-btn' + (m === 'beide' ? ' m-beide' : '');
+  drawGhost();
+  drawLabels();
+  renderDyn();
+}
+$('btn-cos').addEventListener('click',   () => setMode('cos'));
+$('btn-sin').addEventListener('click',   () => setMode('sin'));
+$('btn-beide').addEventListener('click', () => setMode('beide'));
+
+// ── Render layers ────────────────────────────────────────────────────
+function renderDyn() {
+  drawTrace();
+  drawConnector();
+  drawAFg();
+  drawCFg();
+  updateReadout();
+}
+
+function renderAll() {
+  drawABg(); drawCBg();
+  drawGhost(); drawLabels();
+  renderDyn();
+}
+
+// ── Animation ────────────────────────────────────────────────────────
+function startAnim() {
+  animOn = true; prevTs = null;
+  $('play-btn').classList.add('playing');
+  $('play-ic').textContent = '⏸';
+  $('play-lb').textContent = 'Pause';
+  animId = requestAnimationFrame(animStep);
+}
+
+function stopAnim() {
+  animOn = false;
+  if (animId) { cancelAnimationFrame(animId); animId = null; }
+  $('play-btn').classList.remove('playing');
+  $('play-ic').textContent = '▶';
+  $('play-lb').textContent = 'Abspielen';
+}
+
+function animStep(ts) {
+  if (!prevTs) { prevTs = ts; animId = requestAnimationFrame(animStep); return; }
+  const dt = Math.min(ts - prevTs, 50);
+  prevTs = ts;
+  phi = (phi + SPD * dt) % TAU;
+  $('phi-sl').value = phi;
+  renderDyn();
+  animId = requestAnimationFrame(animStep);
+}
+
+$('play-btn').addEventListener('click', () => { if (animOn) stopAnim(); else startAnim(); });
+
+// ── Slider ───────────────────────────────────────────────────────────
+$('phi-sl').addEventListener('input', e => {
+  if (animOn) stopAnim();
+  phi = parseFloat(e.target.value);
+  renderDyn();
+});
+
+// ── Resize ───────────────────────────────────────────────────────────
+function onResize() {
+  const wrap = $('svg-wrap');
+  W = wrap.clientWidth;
+  H = wrap.clientHeight;
+  $('plot').setAttribute('viewBox', `0 0 ${W} ${H}`);
+  computeLayout();
+  renderAll();
+}
+
+new ResizeObserver(onResize).observe($('svg-wrap'));
+setMode('beide'); // sets button classes; onResize fires and calls renderAll
+</script>
+</body>
+</html>
