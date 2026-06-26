@@ -304,14 +304,6 @@ input[type=range]:focus-visible { outline-offset: 4px; }
       <span class="r-key">Punkt</span>
       <span class="r-val" id="r-pt">(1.000, 0.000)</span>
     </div>
-    <div class="r-row">
-      <span class="r-key">|z|</span>
-      <span class="r-val gold">1</span>
-    </div>
-    <div class="r-row" id="r-spec-row" style="visibility:hidden">
-      <span class="r-key">Speziell</span>
-      <span class="r-val gold" id="r-spec">—</span>
-    </div>
   </div>
 
   <div id="euler-badge">
@@ -337,6 +329,12 @@ input[type=range]:focus-visible { outline-offset: 4px; }
       <defs>
         <marker id="mk-ph" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
           <path d="M0,0 L0,6 L8,3 z" fill="#388bfd"/>
+        </marker>
+        <marker id="mk-cos" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#3fb950"/>
+        </marker>
+        <marker id="mk-sin" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#f0883e"/>
         </marker>
       </defs>
       <g id="g-ab"></g>   <!-- argand background -->
@@ -526,18 +524,52 @@ function drawAFg() {
   const cp = Math.cos(phi), sp = Math.sin(phi);
   const [tx, ty] = aS(cp, sp);
 
-  // Cos drop line: vertical to real axis
+  // Cos projection: arrow along real axis from 0 to cos φ
   if (mode !== 'sin') {
+    const [ox, oy] = aS(0, 0);
     const [rx, ry] = aS(cp, 0);
-    g.appendChild(mk('line', { x1: tx, y1: ty, x2: rx, y2: ry, stroke: '#3fb950', 'stroke-width': 1.5, 'stroke-dasharray': '4,3', opacity: 0.75 }));
-    g.appendChild(mk('circle', { cx: rx, cy: ry, r: 4, fill: '#3fb950', opacity: 0.85 }));
+    // Dashed perpendicular from vector tip down to real axis
+    g.appendChild(mk('line', { x1: tx, y1: ty, x2: rx, y2: ry,
+      stroke: '#3fb950', 'stroke-width': 1, 'stroke-dasharray': '4,3', opacity: 0.55 }));
+    // Projection arrow on real axis
+    const cosLen = Math.abs(rx - ox);
+    if (cosLen > 12) {
+      const ex = rx - Math.sign(rx - ox) * 10;
+      g.appendChild(mk('line', { x1: ox, y1: oy, x2: ex, y2: oy,
+        stroke: '#3fb950', 'stroke-width': 2.5, 'stroke-linecap': 'round',
+        'marker-end': 'url(#mk-cos)' }));
+    }
+    if (cosLen > 28) {
+      g.appendChild(mk('text', {
+        x: ((ox + rx) / 2).toFixed(1), y: (oy + 14).toFixed(1),
+        'text-anchor': 'middle', fill: '#3fb950', 'font-size': 10, 'font-weight': '600',
+        'paint-order': 'stroke', stroke: '#0d1117', 'stroke-width': 2
+      }, 'cos φ'));
+    }
   }
 
-  // Sin drop line: horizontal to imaginary axis
+  // Sin projection: arrow along imaginary axis from 0 to sin φ
   if (mode !== 'cos') {
+    const [ox, oy] = aS(0, 0);
     const [ix, iy] = aS(0, sp);
-    g.appendChild(mk('line', { x1: tx, y1: ty, x2: ix, y2: iy, stroke: '#f0883e', 'stroke-width': 1.5, 'stroke-dasharray': '4,3', opacity: 0.75 }));
-    g.appendChild(mk('circle', { cx: ix, cy: iy, r: 4, fill: '#f0883e', opacity: 0.85 }));
+    // Dashed perpendicular from vector tip across to imaginary axis
+    g.appendChild(mk('line', { x1: tx, y1: ty, x2: ix, y2: iy,
+      stroke: '#f0883e', 'stroke-width': 1, 'stroke-dasharray': '4,3', opacity: 0.55 }));
+    // Projection arrow on imaginary axis
+    const sinLen = Math.abs(iy - oy);
+    if (sinLen > 12) {
+      const ey = iy - Math.sign(iy - oy) * 10;
+      g.appendChild(mk('line', { x1: ox, y1: oy, x2: ox, y2: ey,
+        stroke: '#f0883e', 'stroke-width': 2.5, 'stroke-linecap': 'round',
+        'marker-end': 'url(#mk-sin)' }));
+    }
+    if (sinLen > 28) {
+      g.appendChild(mk('text', {
+        x: (ox + 12).toFixed(1), y: ((oy + iy) / 2 + 4).toFixed(1),
+        'text-anchor': 'start', fill: '#f0883e', 'font-size': 10, 'font-weight': '600',
+        'paint-order': 'stroke', stroke: '#0d1117', 'stroke-width': 2
+      }, 'sin φ'));
+    }
   }
 
   // Arc annotation from 0 to phi
@@ -602,13 +634,6 @@ function drawLabels() {
 }
 
 // ── Readout ─────────────────────────────────────────────────────────
-const SPECS = [
-  { p: 0,             tol: 0.07, s: 'z = 1'  },
-  { p: Math.PI / 2,   tol: 0.07, s: 'z = i'  },
-  { p: Math.PI,       tol: 0.07, s: 'z = −1' },
-  { p: 3*Math.PI / 2, tol: 0.07, s: 'z = −i' },
-  { p: TAU,           tol: 0.07, s: 'z = 1'  },
-];
 
 function updateReadout() {
   const cp = Math.cos(phi), sp = Math.sin(phi);
@@ -628,11 +653,6 @@ function updateReadout() {
   sEl.className   = 'r-val ' + (sp > EPS ? 'ora' : sp < -EPS ? 'neg' : 'zero');
 
   $('r-pt').textContent = `(${cp.toFixed(3)}, ${sp.toFixed(3)})`;
-
-  const spec = SPECS.find(s => Math.abs(phi - s.p) < s.tol);
-  const sr   = $('r-spec-row');
-  if (spec) { sr.style.visibility = 'visible'; $('r-spec').textContent = spec.s; }
-  else       { sr.style.visibility = 'hidden'; }
 
   const eb   = $('euler-badge');
   const atPi = Math.abs(phi - Math.PI) < 0.18;
@@ -660,7 +680,6 @@ $('btn-beide').addEventListener('click', () => setMode('beide'));
 // ── Render layers ────────────────────────────────────────────────────
 function renderDyn() {
   drawTrace();
-  drawConnector();
   drawAFg();
   drawCFg();
   updateReadout();
