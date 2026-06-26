@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=1440">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vom Skalarprodukt zum L²-Skalarprodukt</title>
 <style>
 /* ── Reset & base ─────────────────────────────────────────────── */
@@ -233,6 +233,24 @@ input[type=range]:active::-webkit-slider-thumb {
   color: #f85149;
   line-height: 1.55;
 }
+
+/* ── Accessibility & UX improvements ─────────────────────────────── */
+*:focus-visible { outline: 2px solid #388bfd; outline-offset: 2px; }
+input[type=range]:focus-visible { outline-offset: 4px; }
+.mode-btn { min-height: 36px; }
+.play-btn { min-height: 40px; padding-top: 9px; padding-bottom: 9px; }
+.card-label { font-size: 11px; }
+#back-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: #6e7681; font-size: 11px; font-weight: 500;
+  text-decoration: none; padding: 2px 0 6px; flex-shrink: 0;
+  transition: color 0.15s; letter-spacing: 0.01em;
+}
+#back-link:hover { color: #c9d1d9; }
+#back-link:focus-visible { border-radius: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
 </style>
 </head>
 <body>
@@ -241,6 +259,8 @@ input[type=range]:active::-webkit-slider-thumb {
      LEFT PANEL — controls
 ══════════════════════════════════════════════════════════════ -->
 <div id="left">
+
+  <a href="../teaching.html" id="back-link">&#8592; Teaching</a>
 
   <!-- Funktionenpaar -->
   <div class="card">

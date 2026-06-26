@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=1440">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Die Eulersche Formel — e^(iφ) = cos φ + i·sin φ</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -224,12 +224,32 @@ input[type=range]::-moz-range-thumb {
   line-height: 1.65;
 }
 .callout em { color: #79c0ff; font-style: normal; }
+
+/* ── Accessibility & UX improvements ─────────────────────────────── */
+*:focus-visible { outline: 2px solid #388bfd; outline-offset: 2px; }
+input[type=range]:focus-visible { outline-offset: 4px; }
+.mode-btn { min-height: 36px; }
+.play-btn { min-height: 40px; padding-top: 9px; padding-bottom: 9px; }
+.card-label { font-size: 11px; }
+#back-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: #6e7681; font-size: 11px; font-weight: 500;
+  text-decoration: none; padding: 2px 0 6px; flex-shrink: 0;
+  transition: color 0.15s; letter-spacing: 0.01em;
+}
+#back-link:hover { color: #c9d1d9; }
+#back-link:focus-visible { border-radius: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
 </style>
 </head>
 <body>
 
 <!-- ═══════════════════ LEFT PANEL ═══════════════════ -->
 <div id="left">
+
+  <a href="../teaching.html" id="back-link">&#8592; Teaching</a>
 
   <h1>Die Eulersche Formel<br>
       e<sup style="font-size:11px">iφ</sup> = cos φ + i · sin φ</h1>
@@ -244,16 +264,16 @@ input[type=range]::-moz-range-thumb {
 
   <div class="card">
     <span class="card-label">Steuerung</span>
-    <button class="play-btn" id="play-btn">
+    <button class="play-btn" id="play-btn" aria-label="Abspielen">
       <span id="play-ic">▶</span>
       <span id="play-lb">Abspielen</span>
     </button>
     <div class="mode-row">
       <span class="mode-lbl">Anzeigen:</span>
-      <div class="mode-btns">
-        <button class="mode-btn" id="btn-cos">cos φ</button>
-        <button class="mode-btn" id="btn-sin">sin φ</button>
-        <button class="mode-btn" id="btn-beide">Beide</button>
+      <div class="mode-btns" role="group" aria-label="Darstellungsmodus">
+        <button class="mode-btn" id="btn-cos" aria-pressed="false">cos φ</button>
+        <button class="mode-btn" id="btn-sin" aria-pressed="false">sin φ</button>
+        <button class="mode-btn" id="btn-beide" aria-pressed="true">Beide</button>
       </div>
     </div>
   </div>
@@ -626,6 +646,9 @@ function setMode(m) {
   $('btn-cos').className   = 'mode-btn' + (m === 'cos'   ? ' m-cos'   : '');
   $('btn-sin').className   = 'mode-btn' + (m === 'sin'   ? ' m-sin'   : '');
   $('btn-beide').className = 'mode-btn' + (m === 'beide' ? ' m-beide' : '');
+  $('btn-cos').setAttribute('aria-pressed',   m === 'cos'   ? 'true' : 'false');
+  $('btn-sin').setAttribute('aria-pressed',   m === 'sin'   ? 'true' : 'false');
+  $('btn-beide').setAttribute('aria-pressed', m === 'beide' ? 'true' : 'false');
   drawGhost();
   drawLabels();
   renderDyn();
@@ -653,6 +676,7 @@ function renderAll() {
 function startAnim() {
   animOn = true; prevTs = null;
   $('play-btn').classList.add('playing');
+  $('play-btn').setAttribute('aria-label', 'Pause');
   $('play-ic').textContent = '⏸';
   $('play-lb').textContent = 'Pause';
   animId = requestAnimationFrame(animStep);
@@ -662,6 +686,7 @@ function stopAnim() {
   animOn = false;
   if (animId) { cancelAnimationFrame(animId); animId = null; }
   $('play-btn').classList.remove('playing');
+  $('play-btn').setAttribute('aria-label', 'Abspielen');
   $('play-ic').textContent = '▶';
   $('play-lb').textContent = 'Abspielen';
 }
@@ -697,6 +722,15 @@ function onResize() {
 
 new ResizeObserver(onResize).observe($('svg-wrap'));
 setMode('beide'); // sets button classes; onResize fires and calls renderAll
+
+// Respect prefers-reduced-motion: disable auto-play animation
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const pb = $('play-btn');
+  pb.disabled = true;
+  pb.title = 'Animation bei Bewegungseinschränkung deaktiviert';
+  pb.style.opacity = '0.45';
+  pb.style.cursor = 'not-allowed';
+}
 </script>
 </body>
 </html>

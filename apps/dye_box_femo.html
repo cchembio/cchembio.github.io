@@ -64,10 +64,14 @@
   .legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:7px;vertical-align:-1px}
 
   @media (max-width:880px){ .row2{grid-template-columns:1fr} header .eq{display:none} }
+  .back-link{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;text-decoration:none;margin-bottom:10px;transition:color .15s}
+  .back-link:hover{color:var(--text)}
+  .back-link:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <a href="../teaching.html" class="back-link">&#8592; Teaching</a>
   <header>
     <h1>Farbe aus dem 1D-Kasten</h1>
     <p>Freie-Elektronen-Modell (FEMO) · Farbstoff wählen, Kasten einzeichnen, mit Experiment vergleichen</p>
