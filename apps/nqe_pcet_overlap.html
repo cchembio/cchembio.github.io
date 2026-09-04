@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCET as an overlap problem</title>
+<link rel="stylesheet" href="../css/nqe.css">
+<style>
+  #right { display: grid; grid-template-rows: 3fr 2fr; grid-template-columns: 1fr 1fr; gap: 12px; }
+  #p-overlap { grid-column: 1 / -1; }
+  .rate-big {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 26px; font-weight: 700; color: #e3b341;
+    font-variant-numeric: tabular-nums; line-height: 1.15;
+  }
+  .rate-big small { font-size: 15px; color: #8b949e; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div id="left">
+  <a href="../teaching.html" id="back-link">&#8592; Teaching</a>
+
+  <h1>PCET as an overlap problem
+    <span class="sub">Vibronic coupling and nonadiabatic proton-coupled electron transfer</span>
+  </h1>
+
+  <div class="card hero">
+    <span class="card-label">Rate</span>
+    <div class="rate-big" id="rate-big">—</div>
+    <div id="rate-rows" style="margin-top:8px"></div>
+    <p class="note" id="kie-hi-note" style="display:none;margin-top:8px;border:none;padding:0">
+      Measured PCET kinetic isotope effects rarely exceed &sim;10&sup2;. A KIE this
+      large usually means the well separation is at the far end of what a real
+      hydrogen bond would sustain.
+    </p>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Donor–acceptor distance</span>
+    <div id="r-box"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Driving force and environment</span>
+    <div id="slider-box"></div>
+    <div id="mass-box"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Preset</span>
+    <div id="preset-box"></div>
+  </div>
+
+  <div class="warn" id="warn"></div>
+
+  <div class="card">
+    <span class="card-label">Rate expression</span>
+    <math display="block" class="eq-math">
+      <mrow>
+        <mi>k</mi><mo>=</mo>
+        <munder><mo>&sum;</mo><mi>&mu;</mi></munder>
+        <msub><mi>P</mi><mi>&mu;</mi></msub>
+        <munder><mo>&sum;</mo><mi>&nu;</mi></munder>
+        <msup>
+          <mrow><mo>|</mo><msub><mi>V</mi><mrow><mi>&mu;</mi><mi>&nu;</mi></mrow></msub><mo>|</mo></mrow>
+          <mn>2</mn>
+        </msup>
+        <msqrt>
+          <mfrac><mi>&pi;</mi><mrow><mi>&lambda;</mi><msub><mi>k</mi><mi>B</mi></msub><mi>T</mi></mrow></mfrac>
+        </msqrt>
+        <mspace width="0.4em"></mspace>
+        <mi>exp</mi>
+        <mrow>
+          <mo>[</mo>
+          <mfrac>
+            <mrow>
+              <mo>&minus;</mo><msup>
+                <mrow><mo>(</mo><msub><mi>&Delta;G</mi><mrow><mi>&mu;</mi><mi>&nu;</mi></mrow></msub><mo>+</mo><mi>&lambda;</mi><mo>)</mo></mrow>
+                <mn>2</mn>
+              </msup>
+            </mrow>
+            <mrow><mn>4</mn><mi>&lambda;</mi><msub><mi>k</mi><mi>B</mi></msub><mi>T</mi></mrow>
+          </mfrac>
+          <mo>]</mo>
+        </mrow>
+      </mrow>
+    </math>
+    <table class="eq-table">
+      <thead><tr><th>term</th><th>meaning</th><th>set by</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><math><msub><mi>V</mi><mrow><mi>&mu;</mi><mi>&nu;</mi></mrow></msub></math></td>
+          <td><math><msub><mi>V</mi><mi>el</mi></msub><mo>&middot;</mo><msub><mi>S</mi><mrow><mi>&mu;</mi><mi>&nu;</mi></mrow></msub></math></td>
+          <td class="yes">Distance R</td>
+        </tr>
+        <tr>
+          <td><math><msub><mi>&Delta;G</mi><mrow><mi>&mu;</mi><mi>&nu;</mi></mrow></msub></math></td>
+          <td><math><mi>&Delta;G</mi><mo>&deg;</mo><mo>+</mo><mo>(</mo><msub><mi>E</mi><mi>&nu;</mi></msub><mo>&minus;</mo><msub><mi>E</mi><mi>&mu;</mi></msub><mo>)</mo></math></td>
+          <td class="yes">&Delta;G&deg;</td>
+        </tr>
+        <tr>
+          <td><math><mi>&lambda;</mi></math></td>
+          <td>reorganization energy</td>
+          <td class="yes">&lambda;</td>
+        </tr>
+        <tr>
+          <td><math><msub><mi>P</mi><mi>&mu;</mi></msub></math></td>
+          <td>Boltzmann population</td>
+          <td class="yes">T</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note" style="margin-top:9px;border:none;padding:0;font-size:12.5px">
+      The double sum runs over the lowest four vibrational states on each side.
+      Only the overlap S<sub>&mu;&nu;</sub> &mdash; the shaded area above &mdash;
+      depends on distance; pulling the donor and acceptor apart by a few tenths of
+      an &Aring;ngstr&ouml;m thins it toward zero and the rate falls by orders of
+      magnitude. Deuterium, being more compact, loses its overlap faster: that is
+      where the kinetic isotope effect comes from.
+    </p>
+
+    <math display="block" class="eq-math" style="font-size:14.5px;margin-top:10px">
+      <mrow>
+        <mo>&#10216;</mo><mi>k</mi><mo>&#10217;</mo><mo>=</mo>
+        <mo>&int;</mo><mi>k</mi><mo>(</mo><mi>R</mi><mo>&prime;</mo><mo>)</mo>
+        <msub><mi>G</mi><mi>&sigma;</mi></msub><mo>(</mo><mi>R</mi><mo>&prime;</mo><mo>&minus;</mo><mi>R</mi><mo>)</mo>
+        <mi>d</mi><mi>R</mi><mo>&prime;</mo>
+      </mrow>
+    </math>
+    <p class="note" style="margin-top:6px;border:none;padding:0;font-size:12.5px">
+      <em>Gating</em> stands for thermal motion in the donor&ndash;acceptor
+      distance itself &mdash; a slow heavy-atom vibration that stretches and
+      compresses the hydrogen bond. Rather than evaluate k at one fixed R, this
+      averages it over a Gaussian spread of R centred on the slider value, with
+      standard deviation &sigma; set by <strong>Gating amplitude</strong>. Because
+      k(R) falls off so steeply, that average is dominated by the shortest,
+      fastest instants in the spread &mdash; not by the mean R &mdash; which is
+      why gating raises the rate and, by partly erasing the very R-dependence
+      that separates the isotopes, collapses the KIE.
+    </p>
+  </div>
+
+  <div class="note">
+    Illustrative parameters, not fitted to a specific system. The proton wells are
+    analytic Morse potentials of fixed shape; the donor–acceptor distance only
+    moves them apart. Electronic coupling <i>V</i><sub>el</sub> is held fixed at
+    <span id="vel-note"></span>.
+  </div>
+</div>
+
+<div id="right">
+  <div class="panel" id="p-overlap">
+    <div class="panel-title">Proton wavefunction overlap &mdash; the shaded area is S<sub>00</sub></div>
+    <div class="legend" id="leg-ov"></div>
+    <canvas id="cv-ov"></canvas>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Diabatic proton potentials and levels</div>
+    <canvas id="cv-pot"></canvas>
+  </div>
+  <div class="panel">
+    <div class="panel-title">log<sub>10</sub> k against distance</div>
+    <div class="legend" id="leg-k"></div>
+    <canvas id="cv-k"></canvas>
+  </div>
+</div>
+
+<script type="module">
+import * as U from '../js/nqe/units.js';
+import { DEFAULTS, well, psiAt, rateAt, rateGated } from '../js/nqe/pcet.js';
+import { createPlot } from '../js/nqe/plot.js';
+import { slider, segmented, presetSelect, hashState, scheduleRecompute, onResize, ISOTOPE }
+  from '../js/nqe/ui.js';
+
+// ── fixed model parameters (see js/nqe/pcet.js) ────────────────
+const DE = DEFAULTS.De, VEL = DEFAULTS.Vel, NSTATE = DEFAULTS.nState;
+document.getElementById('vel-note').textContent = '20 cm⁻¹';
+
+const PRESETS = {
+  short:  { name: 'Short donor–acceptor distance', R: 2.55, dG: -20, lam: 80,  gate: 0.05, T: 298 },
+  long:   { name: 'Long donor–acceptor distance',  R: 3.00, dG: -20, lam: 80,  gate: 0.05, T: 298 },
+  gated:  { name: 'Strongly gated',                R: 3.00, dG: -20, lam: 80,  gate: 0.25, T: 298 },
+};
+
+const P = Object.assign({ preset: 'short', m: 'H' }, PRESETS.short);
+Object.assign(P, hashState.read() || {});
+
+const WELL = { H: well('H'), D: well('D') };
+
+// ── controls ───────────────────────────────────────────────────
+const preset = presetSelect(PRESETS, (key, p) => {
+  Object.assign(P, { R: p.R, dG: p.dG, lam: p.lam, gate: p.gate, T: p.T, preset: key });
+  sR.set(P.R); sG.set(P.dG); sL.set(P.lam); sA.set(P.gate); sT.set(P.T);
+  run();
+});
+preset.set(P.preset);
+document.getElementById('preset-box').appendChild(preset.el);
+const touch = (k, v) => { P[k] = v; P.preset = ''; preset.sel.selectedIndex = -1; run(); };
+
+const sR = slider({ label: 'Distance <i>R</i>', min: 2.4, max: 3.2, step: 0.005, value: P.R,
+  unit: '&Aring;', decimals: 3, onInput: (v) => touch('R', v) });
+document.getElementById('r-box').appendChild(sR.el);
+
+const sG = slider({ label: '&Delta;<i>G</i>°', min: -100, max: 50, step: 1, value: P.dG,
+  unit: 'kJ/mol', onInput: (v) => touch('dG', v) });
+const sL = slider({ label: 'Reorganization &lambda;', min: 20, max: 200, step: 1, value: P.lam,
+  unit: 'kJ/mol', onInput: (v) => touch('lam', v) });
+const sA = slider({ label: 'Gating amplitude', min: 0, max: 0.3, step: 0.005, value: P.gate,
+  unit: '&Aring;', decimals: 3, onInput: (v) => touch('gate', v) });
+const sT = slider({ label: 'Temperature', min: 200, max: 400, step: 1, value: P.T,
+  unit: 'K', onInput: (v) => touch('T', v) });
+document.getElementById('slider-box').append(sG.el, sL.el, sA.el, sT.el);
+
+const mass = segmented({
+  label: 'Show:', ariaLabel: 'Isotope shown in the plots',
+  options: [['H', 'H', 'm-h'], ['D', 'D', 'm-d']],
+  value: P.m, onChange: (v) => { P.m = v; run(); },
+});
+document.getElementById('mass-box').appendChild(mass.el);
+
+// ── plots ──────────────────────────────────────────────────────
+const pOv = createPlot(document.getElementById('cv-ov'),
+  { xlabel: 'proton position  (Å)', ylabel: 'ψ' });
+const pPot = createPlot(document.getElementById('cv-pot'),
+  { xlabel: 'proton position  (Å)', ylabel: 'energy  (kJ/mol)', pad: { l: 76, b: 42 } });
+const pK = createPlot(document.getElementById('cv-k'),
+  { xlabel: 'R  (Å)', ylabel: 'log₁₀ k / s⁻¹', pad: { l: 76, b: 42 } });
+
+let sweep = { key: null };
+
+const row = (k, v, cls = '') =>
+  `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
+
+function render() {
+  const p = { R: P.R, dG: U.kJmolToHartree(P.dG), lam: U.kJmolToHartree(P.lam), T: P.T, gate: P.gate };
+  const iso = ISOTOPE[P.m];
+  const w = WELL[P.m];
+  const cur = rateAt(P.m, P.R, p);
+
+  const kH = rateGated('H', p), kD = rateGated('D', p);
+  const kShown = P.m === 'H' ? kH : kD;
+
+  // ── panel A: the overlap itself, both psi_0 on one baseline ──
+  const xs = [], yR = [], yP = [], yMin = [];
+  const xRb = -cur.d / 2, xPb = cur.d / 2;
+  const lo = xRb - 1.5, hi = xPb + 1.5;
+  const N = 400;
+  for (let i = 0; i < N; i++) {
+    const x = lo + ((hi - lo) * i) / (N - 1);
+    const a = psiAt(w, 0, x - xRb);          // reactant well at xRb
+    const b = psiAt(w, 0, xPb - x);          // product well is the mirror image
+    xs.push(U.bohrToAng(x));
+    yR.push(a);
+    yP.push(b);
+    yMin.push(Math.min(a, b));
+  }
+  const yMax = Math.max(...yR, ...yP);
+  pOv.clear()
+     .setLimits([xs[0], xs[xs.length - 1]], [-0.06 * yMax, 1.18 * yMax])
+     .fillBetween(xs, yMin, 0, { color: '#e3b341', alpha: 0.55 })
+     .line(xs, yR, { color: ISOTOPE.H.color, width: 3 })
+     .line(xs, yP, { color: '#a371f7', width: 3, dash: [10, 6] })
+     .marker(U.bohrToAng(xRb), 0, { color: '#6e7681', r: 6 })
+     .marker(U.bohrToAng(xPb), 0, { color: '#6e7681', r: 6 })
+     .draw();
+  document.getElementById('leg-ov').innerHTML =
+    `<span><i style="border-color:${ISOTOPE.H.color}"></i>ψ₀ on the donor</span>` +
+    `<span><i style="border-color:#a371f7;border-top-style:dashed"></i>ψ₀ on the acceptor</span>` +
+    `<span><i style="border-color:#e3b341"></i>overlap, S₀₀ = ${cur.s00.toExponential(2)}</span>` +
+    `<span style="color:#6e7681">${P.m} · ${(P.R).toFixed(3)} Å</span>`;
+
+  // ── panel B: the diabatic potentials with their levels ──
+  const xs2 = [], vR = [], vP = [];
+  for (let i = 0; i < N; i++) {
+    const x = lo + ((hi - lo) * i) / (N - 1);
+    const t1 = 1 - Math.exp(-w.alpha * (x - xRb));
+    const t2 = 1 - Math.exp(w.alpha * (x - xPb));
+    xs2.push(U.bohrToAng(x));
+    vR.push(U.hartreeToKJmol(DE * t1 * t1));
+    vP.push(U.hartreeToKJmol(DE * t2 * t2 + p.dG));
+  }
+  const topK = U.hartreeToKJmol(w.E[NSTATE - 1]) * 1.5 + Math.max(0, P.dG);
+  const botK = Math.min(0, P.dG) - 0.15 * Math.abs(topK);
+  pPot.clear().setLimits([xs2[0], xs2[xs2.length - 1]], [botK, topK])
+      .line(xs2, vR, { color: ISOTOPE.H.color, width: 2.5 })
+      .line(xs2, vP, { color: '#a371f7', width: 2.5, dash: [10, 6] });
+  for (let n = 0; n < NSTATE; n++) {
+    const eR = U.hartreeToKJmol(w.E[n]);
+    const eP = U.hartreeToKJmol(w.E[n]) + P.dG;
+    pPot.levels([eR], { xrange: [xs2[0], U.bohrToAng(xRb) + 0.35], color: ISOTOPE.H.color, width: 1.8 });
+    pPot.levels([eP], { xrange: [U.bohrToAng(xPb) - 0.35, xs2[xs2.length - 1]], color: '#a371f7', width: 1.8 });
+  }
+  pPot.draw();
+
+  // ── panel C: log10 k against R, both isotopes ──
+  // The sweep does not depend on R, so dragging R only moves the marker.
+  const sweepKey = [P.dG, P.lam, P.T, P.gate].join(',');
+  if (sweep.key !== sweepKey) {
+    const Rs = [], lH = [], lD = [];
+    for (let i = 0; i <= 60; i++) {
+      const R = 2.4 + (0.8 * i) / 60;
+      const q = Object.assign({}, p, { R });
+      Rs.push(R);
+      lH.push(Math.log10(U.auToPerSecond(rateGated('H', q))));
+      lD.push(Math.log10(U.auToPerSecond(rateGated('D', q))));
+    }
+    const a = lH.concat(lD).filter(isFinite);
+    sweep = { key: sweepKey, Rs, lH, lD, ylim: [Math.min(...a) - 0.5, Math.max(...a) + 0.5] };
+  }
+  const { Rs, lH, lD } = sweep;
+  pK.clear().setLimits([2.4, 3.2], sweep.ylim)
+    .line(Rs, lH, { color: ISOTOPE.H.color, width: 3, dash: ISOTOPE.H.dash })
+    .line(Rs, lD, { color: ISOTOPE.D.color, width: 3, dash: ISOTOPE.D.dash })
+    .vline(P.R, { color: '#e3b341', width: 2, dash: [4, 4] })
+    .marker(P.R, Math.log10(U.auToPerSecond(kShown)), { color: '#e3b341', r: 7 })
+    .draw();
+  document.getElementById('leg-k').innerHTML =
+    `<span><i style="border-color:${ISOTOPE.H.color}"></i>H</span>` +
+    `<span><i style="border-color:${ISOTOPE.D.color};border-top-style:dashed"></i>D</span>`;
+
+  // ── readouts ──
+  const ks = U.auToPerSecond(kShown);
+  document.getElementById('rate-big').innerHTML =
+    (isFinite(ks) && ks > 0 ? fmtSci(ks) : '—') + ' <small>s⁻¹</small>';
+  document.getElementById('rate-rows').innerHTML =
+    row('KIE  k<sub>H</sub>/k<sub>D</sub>', (kH / kD).toFixed(2), 'gold') +
+    row('log₁₀ k', Math.log10(ks).toFixed(2)) +
+    row('Overlap S₀₀', cur.s00.toExponential(2), P.m === 'D' ? 'd' : 'h') +
+    row('Coupling V₀₀', (U.hartreeToCm(VEL * cur.s00)).toExponential(2) + ' cm⁻¹') +
+    row('Well separation', U.bohrToAng(cur.d).toFixed(3) + ' Å');
+  document.getElementById('kie-hi-note').style.display = (kH / kD) > 1000 ? '' : 'none';
+
+  const warn = document.getElementById('warn');
+  const bad = !isFinite(ks) || ks <= 0;
+  const unconverged = w.edge > 1e-4;
+  warn.classList.toggle('vis', bad || unconverged);
+  if (unconverged) {
+    warn.innerHTML = '<strong>Box too small.</strong> The proton wavefunctions have ' +
+      'amplitude ' + w.edge.toExponential(1) + ' at the edge of the grid, so these ' +
+      'levels are not converged.';
+  } else if (bad) {
+    warn.innerHTML = '<strong>Rate underflows.</strong> The overlap is below ' +
+      'what double precision can carry at this distance. Move the donor and acceptor closer.';
+  }
+
+  hashState.write(P);
+}
+
+function fmtSci(v) {
+  const e = Math.floor(Math.log10(v));
+  return (v / 10 ** e).toFixed(2) + ' × 10' + sup(e);
+}
+const SUP = { '-': '⁻', 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
+const sup = (n) => String(n).split('').map((c) => SUP[c]).join('');
+
+const run = scheduleRecompute(render);
+onResize(() => run());
+run();
+</script>
+</body>
+</html>

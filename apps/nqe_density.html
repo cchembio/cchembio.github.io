@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum vs point-particle proton</title>
+<link rel="stylesheet" href="../css/nqe.css">
+<style>
+  #right { display: grid; grid-template-rows: 3fr 2fr; gap: 12px; }
+</style>
+</head>
+<body>
+
+<div id="left">
+  <a href="../teaching.html" id="back-link">&#8592; Teaching</a>
+
+  <h1>Quantum vs point-particle proton
+    <span class="sub">Nuclear wavefunctions and the geometric isotope effect</span>
+  </h1>
+
+  <div class="card hero">
+    <span class="card-label">Geometric isotope effect</span>
+    <div style="font-family:'SF Mono',monospace;font-size:26px;font-weight:700;color:#e3b341"
+         id="gie">—</div>
+    <p class="note" style="margin-top:6px;border:none;padding:0">
+      ⟨x⟩<sub>H</sub> − ⟨x⟩<sub>D</sub>. The two isotopes sit in the same potential
+      and still have different average positions — the heavier one hugs the
+      classical minimum more closely.
+    </p>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Hydrogen bond</span>
+    <div id="preset-box"></div>
+    <div id="slider-box"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Readouts</span>
+    <div id="readout"></div>
+  </div>
+
+  <div class="warn" id="warn"></div>
+
+  <div class="callout">
+    One slider does everything: as the donor and acceptor move apart, the barrier
+    between the two proton sites rises and the wells separate. A single
+    coordinate therefore controls both the <em>shape</em> of the potential and
+    how much of it each isotope samples.
+  </div>
+
+  <div class="note">
+    Barrier and well separation are tied to R by an illustrative relation,
+    <i>V</i><sub>b</sub> = 140 (R − 2.35 Å)² kJ/mol and 2<i>a</i> = R − 2.00 Å.
+    Not fitted to a specific hydrogen bond. The real geometric isotope effect in
+    hydrogen bonds also involves the heavy-atom donor&ndash;acceptor coordinate
+    itself responding to isotopic substitution &mdash; a relaxation this 1D
+    proton model cannot represent. What is shown here is the proton's own shift
+    in an asymmetric well: a legitimate 1D analogue, but not the same observable.
+  </div>
+</div>
+
+<div id="right">
+  <div class="panel">
+    <div class="panel-title">Potential and ground-state density for H and D</div>
+    <div class="legend" id="leg"></div>
+    <canvas id="cv"></canvas>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Average proton position against R</div>
+    <canvas id="cv-r"></canvas>
+  </div>
+</div>
+
+<script type="module">
+import * as U from '../js/nqe/units.js';
+import { makeGrid, solve, edgeAmplitude, moments } from '../js/nqe/schrodinger1d.js';
+import { quarticDoubleWell } from '../js/nqe/potentials.js';
+import { createPlot } from '../js/nqe/plot.js';
+import { slider, presetSelect, hashState, scheduleRecompute, onResize, ISOTOPE } from '../js/nqe/ui.js';
+
+const PRESETS = {
+  short: { name: 'Short hydrogen bond', R: 2.45, asym: 4 },
+  long:  { name: 'Long hydrogen bond',  R: 2.85, asym: 4 },
+};
+const P = Object.assign({ preset: 'short' }, PRESETS.short);
+Object.assign(P, hashState.read() || {});
+
+/** One donor–acceptor distance sets both the barrier and the well separation. */
+const geom = (R) => ({
+  barrier: U.kJmolToHartree(Math.max(0.2, 140 * (R - 2.35) ** 2)),
+  a: U.angToBohr(Math.max(0.15, R - 2.0)) / 2,
+});
+
+function solveAt(R, asym, iso) {
+  const { barrier, a } = geom(R);
+  const grid = makeGrid({ xmin: -3 * a, xmax: 3 * a, n: 160 });
+  const q = quarticDoubleWell(grid, { barrier, a, dE: U.kJmolToHartree(asym) });
+  const { E, psi } = solve(grid, q.V, U.MASS[iso], 2);
+  const m = moments(psi[0], grid);
+  return { grid, q, E, psi, mean: m.mean, width: m.width, edge: edgeAmplitude(psi[0]),
+           minima: q.minima() };
+}
+
+// ── controls ───────────────────────────────────────────────────
+const preset = presetSelect(PRESETS, (key, p) => {
+  Object.assign(P, { R: p.R, asym: p.asym, preset: key });
+  sR.set(P.R); sA.set(P.asym); run();
+});
+preset.set(P.preset);
+document.getElementById('preset-box').appendChild(preset.el);
+const touch = (k, v) => { P[k] = v; P.preset = ''; preset.sel.selectedIndex = -1; run(); };
+
+const sR = slider({ label: 'Donor–acceptor distance <i>R</i>', min: 2.4, max: 3.0, step: 0.005,
+  value: P.R, unit: '&Aring;', decimals: 3, onInput: (v) => touch('R', v) });
+const sA = slider({ label: 'Well asymmetry', min: 0, max: 20, step: 0.5, value: P.asym,
+  unit: 'kJ/mol', onInput: (v) => touch('asym', v) });
+document.getElementById('slider-box').append(sR.el, sA.el);
+
+const pMain = createPlot(document.getElementById('cv'),
+  { xlabel: 'proton position  x  (Å)', ylabel: 'energy  (kJ/mol)', pad: { l: 88 } });
+const pR = createPlot(document.getElementById('cv-r'),
+  { xlabel: 'R  (Å)', ylabel: '⟨x⟩  (Å)', pad: { l: 88, b: 44 } });
+
+const row = (k, v, cls = '') =>
+  `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
+
+function render() {
+  const H = solveAt(P.R, P.asym, 'H'), D = solveAt(P.R, P.asym, 'D');
+  const toA = U.bohrToAng, toK = U.hartreeToKJmol;
+  const xs = Array.from(H.grid.x, toA);
+  const Vk = Array.from(H.q.V, toK);
+  const vMin = Math.min(...Vk);
+  // Leave room above the highest level for the density drawn on top of it,
+  // otherwise a shallow well clips its own wavefunction against the frame.
+  const ref = Math.max(toK(H.q.barrierTop()?.V ?? H.E[0]) - vMin, toK(H.E[0]) - vMin, 1);
+  const yBot = vMin - 0.5 * ref;
+  const top = vMin + 2.6 * ref;
+  pMain.clear().setLimits([xs[0], xs[xs.length - 1]], [yBot, top]);
+  pMain.line(xs, Vk, { color: '#8b949e', width: 3 });
+
+  // both densities share one scale so their widths compare directly
+  let dMax = 0;
+  for (const s of [H, D]) for (let i = 0; i < s.grid.n; i++) dMax = Math.max(dMax, s.psi[0][i] ** 2);
+  const scale = (0.30 * (top - yBot)) / (dMax || 1);
+
+  for (const [s, iso] of [[H, ISOTOPE.H], [D, ISOTOPE.D]]) {
+    const base = toK(s.E[0]);
+    const ys = Array.from(s.psi[0], (v) => base + v * v * scale);
+    pMain.fillBetween(xs, ys, base, { color: iso.color, alpha: 0.22 });
+    pMain.line(xs, ys, { color: iso.color, dash: iso.dash, width: 3 });
+    pMain.levels([base], { color: iso.color, width: 1.5, xrange: [xs[0], xs[xs.length - 1]] });
+    pMain.marker(toA(s.mean), base, { color: iso.color, r: 8 });
+  }
+  // the classical proton would sit exactly at the lowest minimum
+  const cmin = H.minima[0];
+  pMain.marker(toA(cmin.x), toK(cmin.V), { color: '#e3b341', r: 9 });
+  pMain.vline(toA(cmin.x), { color: '#e3b341', width: 2, dash: [4, 5] });
+  pMain.draw();
+
+  document.getElementById('leg').innerHTML =
+    `<span><i style="border-color:#8b949e"></i>V(x)</span>` +
+    `<span><i style="border-color:${ISOTOPE.H.color}"></i>|ψ₀|² for H</span>` +
+    `<span><i style="border-color:${ISOTOPE.D.color};border-top-style:dashed"></i>|ψ₀|² for D</span>` +
+    `<span style="color:#e3b341">● classical minimum</span>`;
+
+  // ── ⟨x⟩ and width against R ──
+  const Rs = [], mH = [], mD = [], cl = [];
+  for (let i = 0; i <= 40; i++) {
+    const R = 2.4 + (0.6 * i) / 40;
+    const h = solveAt(R, P.asym, 'H'), d = solveAt(R, P.asym, 'D');
+    Rs.push(R);
+    mH.push(toA(h.mean)); mD.push(toA(d.mean));
+    cl.push(toA(h.minima[0].x));
+  }
+  const allv = mH.concat(mD, cl);
+  pR.clear().setLimits([2.4, 3.0], [Math.min(...allv) - 0.05, Math.max(...allv) + 0.05])
+    .line(Rs, mH, { color: ISOTOPE.H.color, width: 3, dash: ISOTOPE.H.dash })
+    .line(Rs, mD, { color: ISOTOPE.D.color, width: 3, dash: ISOTOPE.D.dash })
+    .line(Rs, cl, { color: '#e3b341', width: 2, dash: [4, 5] })
+    .vline(P.R, { color: '#c9d1d9', width: 2, dash: [2, 4] })
+    .draw();
+
+  const gie = toA(H.mean - D.mean);
+  document.getElementById('gie').textContent =
+    (gie >= 0 ? '+' : '') + gie.toFixed(4) + ' Å';
+  document.getElementById('readout').innerHTML =
+    row('Barrier height', toK(geom(P.R).barrier).toFixed(1) + ' kJ/mol') +
+    row('Well separation 2a', (P.R - 2.0).toFixed(3) + ' Å') +
+    row('⟨x⟩ H', toA(H.mean).toFixed(4) + ' Å', 'h') +
+    row('⟨x⟩ D', toA(D.mean).toFixed(4) + ' Å', 'd') +
+    row('Classical minimum', toA(cmin.x).toFixed(4) + ' Å', 'gold') +
+    row('Width H', toA(H.width).toFixed(4) + ' Å', 'h') +
+    row('Width D', toA(D.width).toFixed(4) + ' Å', 'd') +
+    row('Width ratio H/D', (H.width / D.width).toFixed(3));
+
+  const edge = Math.max(H.edge, D.edge);
+  const warn = document.getElementById('warn');
+  warn.classList.toggle('vis', edge > 1e-4);
+  warn.innerHTML = '<strong>Box too small.</strong> Edge amplitude ' +
+    edge.toExponential(1) + ': the ground state is not converged at this distance.';
+
+  hashState.write(P);
+}
+
+const run = scheduleRecompute(render);
+onResize(() => run());
+run();
+</script>
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Model prediction vs measurement</title>
+<link rel="stylesheet" href="../css/nqe.css">
+<style>
+  #right { display: grid; grid-template-rows: 1fr 1fr; gap: 12px; }
+  .num-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .num-row label { font-size: 14.5px; color: #8b949e; flex: 1; }
+  .num-row input {
+    width: 96px; padding: 7px 9px; background: #21262d; color: #e6edf3;
+    border: 1px solid #30363d; border-radius: 6px;
+    font-family: 'SF Mono', 'Fira Code', monospace; font-size: 15px;
+  }
+  .num-row input:hover { border-color: #388bfd; }
+</style>
+</head>
+<body>
+
+<div id="left">
+  <a href="../teaching.html" id="back-link">&#8592; Teaching</a>
+
+  <h1>Model prediction vs measurement
+    <span class="sub">Kinetic isotope effects predicted from a vibronic model</span>
+  </h1>
+
+  <div class="card hero">
+    <span class="card-label">Predicted KIE</span>
+    <div style="font-family:'SF Mono',monospace;font-size:30px;font-weight:700;color:#e3b341"
+         id="kie-big">—</div>
+    <div id="kie-rows" style="margin-top:8px"></div>
+    <p class="note" id="kie-hi-note" style="display:none;margin-top:8px;border:none;padding:0">
+      Measured PCET kinetic isotope effects rarely exceed &sim;10&sup2;. A prediction
+      this large usually means the parameters push the model beyond what a real
+      hydrogen bond would sustain.
+    </p>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Model parameters</span>
+    <div id="preset-box"></div>
+    <div id="model-box"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Environment</span>
+    <div id="env-box"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Your measurement</span>
+    <div class="num-row">
+      <label for="mk">Measured KIE k<sub>H</sub>/k<sub>D</sub></label>
+      <input type="number" id="mk" min="0.1" max="1000" step="0.1" value="12">
+    </div>
+    <div class="num-row">
+      <label for="mt">measured at T (K)</label>
+      <input type="number" id="mt" min="150" max="500" step="1" value="298">
+    </div>
+    <div class="num-row">
+      <label for="mr">measured at R (Å)</label>
+      <input type="number" id="mr" min="2.4" max="3.2" step="0.01" value="2.70">
+    </div>
+  </div>
+
+  <div class="warn" id="warn"></div>
+
+  <div class="callout">
+    This runs in <em>one direction only</em>: parameters in, predicted observables
+    out. Read it as &ldquo;a model with these parameters would give this KIE&rdquo;.
+    It deliberately does not run backwards. A measured number that matches the
+    prediction does not establish the mechanism &mdash; many parameter sets give
+    the same KIE, as you can confirm by moving two sliders against each other.
+  </div>
+
+  <div class="note">
+    Same vibronic model as the overlap app, with illustrative parameters.
+    Electronic coupling is fixed and cancels entirely from the isotope ratio.
+  </div>
+</div>
+
+<div id="right">
+  <div class="panel">
+    <div class="panel-title">Predicted KIE against temperature</div>
+    <div class="legend" id="leg-t"></div>
+    <canvas id="cv-t"></canvas>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Predicted KIE against donor–acceptor distance</div>
+    <div class="legend" id="leg-r"></div>
+    <canvas id="cv-r"></canvas>
+  </div>
+</div>
+
+<script type="module">
+import * as U from '../js/nqe/units.js';
+import { kie, rateGated, well } from '../js/nqe/pcet.js';
+import { createPlot } from '../js/nqe/plot.js';
+import { slider, presetSelect, hashState, scheduleRecompute, onResize } from '../js/nqe/ui.js';
+
+const PRESETS = {
+  moderate: { name: 'Moderate KIE, gated',   De: 440, nu: 3000, R: 2.70, dG: -20, lam: 80,  gate: 0.12 },
+  large:    { name: 'Large tunneling KIE',   De: 440, nu: 3200, R: 2.95, dG: -20, lam: 80,  gate: 0.04 },
+  weak:     { name: 'Weak KIE, short bond',  De: 440, nu: 2800, R: 2.50, dG: -40, lam: 120, gate: 0.10 },
+};
+const P = Object.assign({ preset: 'moderate', T: 298, mk: 12, mt: 298, mr: 2.70 },
+                        PRESETS.moderate, hashState.read() || {});
+delete P.name;
+
+const opts = () => ({ De: U.kJmolToHartree(P.De), omegaH: U.cmToHartree(P.nu) });
+const env  = (over = {}) => Object.assign({
+  R: P.R, dG: U.kJmolToHartree(P.dG), lam: U.kJmolToHartree(P.lam), gate: P.gate, T: P.T,
+}, over);
+
+const preset = presetSelect(PRESETS, (key, q) => {
+  Object.assign(P, q, { preset: key });
+  delete P.name;
+  sD.set(P.De); sN.set(P.nu); sR.set(P.R); sG.set(P.dG); sL.set(P.lam); sA.set(P.gate);
+  run();
+});
+preset.set(P.preset);
+document.getElementById('preset-box').appendChild(preset.el);
+
+const touch = (k) => (v) => {
+  P[k] = v;
+  P.preset = '';
+  preset.sel.selectedIndex = -1;
+  run();
+};
+
+const sD = slider({ label: 'Proton well depth', min: 200, max: 600, step: 10, value: P.De,
+  unit: 'kJ/mol', onInput: touch('De') });
+const sN = slider({ label: 'X–H stretch &nu;', min: 2000, max: 3600, step: 20, value: P.nu,
+  unit: 'cm⁻¹', onInput: touch('nu') });
+const sR = slider({ label: 'Distance <i>R</i>', min: 2.4, max: 3.2, step: 0.005, value: P.R,
+  unit: '&Aring;', decimals: 3, onInput: touch('R') });
+document.getElementById('model-box').append(sD.el, sN.el, sR.el);
+
+const sG = slider({ label: '&Delta;<i>G</i>°', min: -100, max: 50, step: 1, value: P.dG,
+  unit: 'kJ/mol', onInput: touch('dG') });
+const sL = slider({ label: 'Reorganization &lambda;', min: 20, max: 200, step: 1, value: P.lam,
+  unit: 'kJ/mol', onInput: touch('lam') });
+const sA = slider({ label: 'Gating amplitude', min: 0, max: 0.3, step: 0.005, value: P.gate,
+  unit: '&Aring;', decimals: 3, onInput: touch('gate') });
+const sT = slider({ label: 'Temperature', min: 200, max: 400, step: 1, value: P.T,
+  unit: 'K', onInput: touch('T') });
+document.getElementById('env-box').append(sG.el, sL.el, sA.el, sT.el);
+
+for (const id of ['mk', 'mt', 'mr']) {
+  const el = document.getElementById(id);
+  el.value = P[id];
+  el.addEventListener('input', () => { P[id] = Number(el.value); run(); });
+}
+
+const pT = createPlot(document.getElementById('cv-t'),
+  { xlabel: 'temperature  (K)', ylabel: 'log₁₀ ( k_H / k_D )', pad: { l: 88, b: 44 } });
+const pR = createPlot(document.getElementById('cv-r'),
+  { xlabel: 'R  (Å)', ylabel: 'log₁₀ ( k_H / k_D )', pad: { l: 88, b: 44 } });
+
+const row = (k, v, cls = '') =>
+  `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
+const GOLD = '#e3b341', MEAS = '#f85149';
+const pad = (vs) => { const a = Math.min(...vs), b = Math.max(...vs), m = 0.08 * (b - a) + 0.05;
+                      return [a - m, b + m]; };
+
+function render() {
+  const o = opts();
+  const now = kie(env(), o);
+
+  // ── KIE(T) ──
+  const Ts = [], kT = [];
+  for (let i = 0; i <= 40; i++) {
+    const T = 200 + (200 * i) / 40;
+    Ts.push(T);
+    kT.push(Math.log10(kie(env({ T }), o)));
+  }
+  const spanT = [...kT.filter(isFinite), Math.log10(P.mk), 0];
+  pT.clear().setLimits([200, 400], pad(spanT))
+    .line(Ts, kT, { color: GOLD, width: 3 })
+    .marker(P.T, Math.log10(now), { color: GOLD, r: 7 });
+  if (P.mk > 0 && P.mt >= 200 && P.mt <= 400) {
+    pT.marker(P.mt, Math.log10(P.mk), { color: MEAS, r: 9, shape: 'square', hollow: true });
+  }
+  pT.draw();
+
+  // ── KIE(R) ──
+  const Rs = [], kR = [];
+  for (let i = 0; i <= 40; i++) {
+    const R = 2.4 + (0.8 * i) / 40;
+    Rs.push(R);
+    kR.push(Math.log10(kie(env({ R }), o)));
+  }
+  const spanR = [...kR.filter(isFinite), Math.log10(P.mk), 0];
+  pR.clear().setLimits([2.4, 3.2], pad(spanR))
+    .line(Rs, kR, { color: GOLD, width: 3 })
+    .marker(P.R, Math.log10(now), { color: GOLD, r: 7 });
+  if (P.mk > 0 && P.mr >= 2.4 && P.mr <= 3.2) {
+    pR.marker(P.mr, Math.log10(P.mk), { color: MEAS, r: 9, shape: 'square', hollow: true });
+  }
+  pR.draw();
+
+  const leg = `<span><i style="border-color:${GOLD}"></i>model prediction</span>` +
+    `<span style="color:${MEAS}">□ your measurement</span>`;
+  document.getElementById('leg-t').innerHTML = leg;
+  document.getElementById('leg-r').innerHTML = leg;
+
+  const kH = rateGated('H', env(), o);
+  document.getElementById('kie-big').textContent = isFinite(now) ? now.toFixed(2) : '—';
+  document.getElementById('kie-hi-note').style.display = (isFinite(now) && now > 1000) ? '' : 'none';
+  document.getElementById('kie-rows').innerHTML =
+    row('at ' + P.T.toFixed(0) + ' K, R = ' + P.R.toFixed(3) + ' Å', '') +
+    row('Measured', P.mk.toFixed(2), 'neg') +
+    row('Predicted / measured', (now / P.mk).toFixed(2)) +
+    row('k<sub>H</sub>', fmt(U.auToPerSecond(kH)) + ' s⁻¹') +
+    row('KIE without gating', kie(env({ gate: 0 }), o).toFixed(2));
+
+  const edge = Math.max(well('H', o).edge, well('D', o).edge);
+  const warn = document.getElementById('warn');
+  warn.classList.toggle('vis', edge > 1e-4);
+  warn.innerHTML = '<strong>Box too small.</strong> The proton wavefunctions have ' +
+    'amplitude ' + edge.toExponential(1) + ' at the edge of the grid; these levels ' +
+    'are not converged at this well depth.';
+
+  hashState.write(P);
+}
+
+function fmt(v) {
+  if (!isFinite(v) || v <= 0) return '—';
+  const e = Math.floor(Math.log10(v));
+  return (v / 10 ** e).toFixed(2) + 'e' + e;
+}
+
+const run = scheduleRecompute(render);
+onResize(() => run());
+run();
+</script>
+</body>
+</html>

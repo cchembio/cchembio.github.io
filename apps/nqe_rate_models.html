@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rate models compared</title>
+<link rel="stylesheet" href="../css/nqe.css">
+<style>
+  #right { display: grid; grid-template-rows: 3fr 2fr; gap: 12px; }
+  .rate-big {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 26px; font-weight: 700; color: #e3b341;
+    font-variant-numeric: tabular-nums; line-height: 1.15;
+  }
+</style>
+</head>
+<body>
+
+<div id="left">
+  <a href="../teaching.html" id="back-link">&#8592; Teaching</a>
+
+  <h1>Rate models compared
+    <span class="sub">Transition state theory and its tunneling corrections</span>
+  </h1>
+
+  <div class="card hero">
+    <span class="card-label">Semiclassical KIE &mdash; no tunneling</span>
+    <div class="rate-big" id="kie-semi">—</div>
+    <p class="note" style="margin-top:8px;border:none;padding:0">
+      k<sub>H</sub>/k<sub>D</sub> from zero-point energy alone, at the X&ndash;H
+      stretch frequency and temperature set below. The classical prefactor
+      <i>k</i><sub>B</sub><i>T</i>/<i>h</i> carries no isotope mass at all, so
+      this whole number is exp[(ZPE<sub>H</sub> &minus; ZPE<sub>D</sub>)/<i>k</i><sub>B</sub><i>T</i>]
+      &mdash; independent of the barrier height, its width and the asymmetry.
+      Tunneling only adds to it.
+    </p>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Preset</span>
+    <div id="preset-box"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Barrier</span>
+    <div id="bar-box"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Modes and temperature</span>
+    <div id="mode-sliders"></div>
+    <div id="mass-box"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">At <span id="tref-lab">298 K</span></span>
+    <div id="readout"></div>
+    <p class="note" style="margin-top:9px;border:none;padding:0;font-size:12.5px">
+      <strong>Crossover temperature</strong> T<sub>c</sub> = &#295;|&omega;<sup>&Dagger;</sup>|/2&pi;k<sub>B</sub>
+      (set by the barrier frequency) is where the reaction stops behaving
+      classically. Above it, passage over the barrier top dominates and a simple
+      correction like Wigner's is a good approximation. Below it, the dominant
+      path tunnels well beneath the top &mdash; Wigner then badly underestimates
+      the rate, and only the full Eckart transmission captures it. It only
+      appears as the dashed red line when it falls inside the T range set below
+      &mdash; the "Above the crossover" preset keeps T<sub>c</sub> off the bottom
+      of the plot on purpose, since every plotted temperature is meant to sit
+      above it.
+    </p>
+  </div>
+
+  <div class="warn" id="warn"></div>
+</div>
+
+<div id="right">
+  <div class="panel">
+    <div class="panel-title">Arrhenius plot &mdash; ln k against 1000/T</div>
+    <div class="legend" id="leg-a"></div>
+    <canvas id="cv-arr"></canvas>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Kinetic isotope effect k<sub>H</sub>/k<sub>D</sub> against temperature</div>
+    <canvas id="cv-kie"></canvas>
+  </div>
+</div>
+
+<script type="module">
+import * as U from '../js/nqe/units.js';
+import { eckart } from '../js/nqe/potentials.js';
+import { tstClassical, wignerKappa, thermalTransmission, crossoverT } from '../js/nqe/rates.js';
+import { createPlot } from '../js/nqe/plot.js';
+import { slider, segmented, presetSelect, hashState, scheduleRecompute, onResize, ISOTOPE }
+  from '../js/nqe/ui.js';
+
+const PRESETS = {
+  above: { name: 'Above the crossover',  Vb: 60, wb: 350,  asym: 0,  ws: 3000, Tmin: 200, Tmax: 500 },
+  below: { name: 'Below the crossover',  Vb: 60, wb: 1800, asym: 0,  ws: 3000, Tmin: 200, Tmax: 500 },
+  bigk:  { name: 'Large tunneling KIE',  Vb: 45, wb: 1500, asym: -20, ws: 3200, Tmin: 200, Tmax: 400 },
+};
+const P = Object.assign({ preset: 'above', m: 'H' }, PRESETS.above);
+Object.assign(P, hashState.read() || {});
+
+const MODELS = [
+  { key: 'cls',  name: 'classical TST',  color: '#6e7681', dash: [] },
+  { key: 'zpe',  name: 'ZPE-corrected',  color: '#3fb950', dash: [] },
+  { key: 'wig',  name: 'Wigner',         color: '#a371f7', dash: [11, 6] },
+  { key: 'eck',  name: 'Eckart (exact)', color: '#e3b341', dash: [] },
+];
+
+/**
+ * All four rates at one temperature for one isotope.
+ * The potential is fixed, so the barrier frequency scales as 1/sqrt(mass);
+ * eckart() then returns the same width L for every isotope, as it must.
+ */
+function rates(iso, T) {
+  const mass = U.MASS[iso];
+  const scale = Math.sqrt(U.MASS.H / mass);
+  const V1 = U.kJmolToHartree(P.Vb);
+  const V2 = Math.max(U.kJmolToHartree(2), V1 - U.kJmolToHartree(P.asym));
+  const omegaB = U.cmToHartree(P.wb) * scale;
+  const dZPE = -0.5 * U.cmToHartree(P.ws) * scale;   // stretch lost at the barrier top
+
+  const V1e = Math.max(U.kJmolToHartree(1), V1 + dZPE);
+  const V2e = Math.max(U.kJmolToHartree(1), V2 + dZPE);
+
+  const cls = tstClassical({ barrier: V1, T });
+  const zpe = tstClassical({ barrier: V1e, T });
+  const kW = wignerKappa({ omegaB, T });
+  const e = eckart(null, { V1: V1e, V2: V2e, omegaB, mass });
+  const kE = thermalTransmission({ transmission: e.transmission, barrier: V1e, T });
+  return { cls, zpe, wig: kW * zpe, eck: kE * zpe, kW, kE, Tc: crossoverT({ omegaB }), V1e, L: e.L };
+}
+
+// ── controls ───────────────────────────────────────────────────
+const preset = presetSelect(PRESETS, (key, p) => {
+  Object.assign(P, p, { preset: key, name: undefined });
+  delete P.name;
+  sV.set(P.Vb); sW.set(P.wb); sA.set(P.asym); sS.set(P.ws); sT0.set(P.Tmin); sT1.set(P.Tmax);
+  run();
+});
+preset.set(P.preset);
+document.getElementById('preset-box').appendChild(preset.el);
+const touch = (k, v) => { P[k] = v; P.preset = ''; preset.sel.selectedIndex = -1; run(); };
+
+const sV = slider({ label: 'Barrier height', min: 20, max: 120, step: 1, value: P.Vb,
+  unit: 'kJ/mol', onInput: (v) => touch('Vb', v) });
+const sW = slider({ label: 'Barrier frequency |&omega;<sup>&Dagger;</sup>|', min: 200, max: 2000, step: 10,
+  value: P.wb, unit: 'cm⁻¹', onInput: (v) => touch('wb', v) });
+const sA = slider({ label: 'Reaction asymmetry', min: -40, max: 40, step: 1, value: P.asym,
+  unit: 'kJ/mol', onInput: (v) => touch('asym', v) });
+document.getElementById('bar-box').append(sV.el, sW.el, sA.el);
+
+const sS = slider({ label: 'X–H stretch &nu;', min: 500, max: 3500, step: 10, value: P.ws,
+  unit: 'cm⁻¹', onInput: (v) => touch('ws', v) });
+const sT0 = slider({ label: 'T from', min: 150, max: 350, step: 5, value: P.Tmin,
+  unit: 'K', onInput: (v) => touch('Tmin', Math.min(v, P.Tmax - 50)) });
+const sT1 = slider({ label: 'T to', min: 300, max: 700, step: 5, value: P.Tmax,
+  unit: 'K', onInput: (v) => touch('Tmax', Math.max(v, P.Tmin + 50)) });
+document.getElementById('mode-sliders').append(sS.el, sT0.el, sT1.el);
+
+const mass = segmented({
+  label: 'Arrhenius for:', ariaLabel: 'Isotope shown on the Arrhenius plot',
+  options: [['H', 'H', 'm-h'], ['D', 'D', 'm-d']],
+  value: P.m, onChange: (v) => { P.m = v; run(); },
+});
+document.getElementById('mass-box').appendChild(mass.el);
+
+// ── plots ──────────────────────────────────────────────────────
+const pArr = createPlot(document.getElementById('cv-arr'),
+  { xlabel: '1000 / T   (K⁻¹)', ylabel: 'ln ( k / s⁻¹ )', pad: { l: 82 } });
+const pKie = createPlot(document.getElementById('cv-kie'),
+  { xlabel: '1000 / T   (K⁻¹)', ylabel: 'log₁₀ ( k_H / k_D )', pad: { l: 82, b: 44 } });
+
+const row = (k, v, cls = '') =>
+  `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
+
+// The dashed line only appears when T_c falls inside the plotted range;
+// say so explicitly instead of leaving the reader to guess why it's missing.
+function tcRangeNote(Tc) {
+  if (Tc < P.Tmin) return ' (below plotted range)';
+  if (Tc > P.Tmax) return ' (above plotted range)';
+  return '';
+}
+
+function render() {
+  const NT = 70;
+  const Ts = [], xs = [];
+  for (let i = 0; i < NT; i++) {
+    const T = P.Tmin + ((P.Tmax - P.Tmin) * i) / (NT - 1);
+    Ts.push(T);
+    xs.push(1000 / T);
+  }
+  const H = Ts.map((T) => rates('H', T));
+  const D = Ts.map((T) => rates('D', T));
+  const shown = P.m === 'H' ? H : D;
+
+  // ── Arrhenius ──
+  const lines = MODELS.map((m) => ({
+    m, ys: shown.map((r) => Math.log(U.auToPerSecond(r[m.key]))),
+  }));
+  const all = lines.flatMap((l) => l.ys).filter(isFinite);
+  pArr.clear().setLimits([Math.min(...xs), Math.max(...xs)],
+                         [Math.min(...all) - 1, Math.max(...all) + 1]);
+  for (const l of lines) pArr.line(xs, l.ys, { color: l.m.color, dash: l.m.dash, width: 3 });
+  const Tc = shown[0].Tc;
+  if (Tc > P.Tmin && Tc < P.Tmax) {
+    pArr.vline(1000 / Tc, { color: '#f85149', width: 2.5, dash: [7, 5],
+      label: 'T_c = ' + Tc.toFixed(0) + ' K' });
+  }
+  pArr.draw();
+  document.getElementById('leg-a').innerHTML = MODELS.map((m) =>
+    `<span><i style="border-color:${m.color};border-top-style:${m.dash.length ? 'dashed' : 'solid'}"></i>${m.name}</span>`
+  ).join('') + `<span style="color:#f85149">┆ crossover T</span>`;
+
+  // ── KIE ──
+  const kieLines = MODELS.map((m) => ({
+    m, ys: Ts.map((_, i) => Math.log10(H[i][m.key] / D[i][m.key])),
+  }));
+  const allK = kieLines.flatMap((l) => l.ys).filter(isFinite);
+  pKie.clear().setLimits([Math.min(...xs), Math.max(...xs)],
+                         [Math.min(0, Math.min(...allK)) - 0.1, Math.max(...allK) + 0.2]);
+  for (const l of kieLines) pKie.line(xs, l.ys, { color: l.m.color, dash: l.m.dash, width: 3 });
+  if (Tc > P.Tmin && Tc < P.Tmax) pKie.vline(1000 / Tc, { color: '#f85149', width: 2.5, dash: [7, 5] });
+  pKie.draw();
+
+  // ── readouts at the reference temperature ──
+  const Tref = Math.min(Math.max(298, P.Tmin), P.Tmax);
+  document.getElementById('tref-lab').textContent = Tref.toFixed(0) + ' K';
+  const rH = rates('H', Tref), rD = rates('D', Tref);
+  const r = P.m === 'H' ? rH : rD;
+  document.getElementById('kie-semi').textContent = (rH.zpe / rD.zpe).toFixed(2);
+  document.getElementById('readout').innerHTML =
+    row('k classical', fmt(U.auToPerSecond(r.cls)) + ' s⁻¹') +
+    row('k ZPE-corrected', fmt(U.auToPerSecond(r.zpe)) + ' s⁻¹', 'pos') +
+    row('k Eckart (exact)', fmt(U.auToPerSecond(r.eck)) + ' s⁻¹', 'gold') +
+    row('&kappa; Wigner', r.kW.toFixed(2)) +
+    row('&kappa; Eckart', r.kE.toFixed(2), 'gold') +
+    row('KIE, ZPE only', (rH.zpe / rD.zpe).toFixed(2), 'pos') +
+    row('KIE, exact', (rH.eck / rD.eck).toFixed(2), 'gold') +
+    row('Crossover T (H)', rH.Tc.toFixed(0) + ' K' + tcRangeNote(rH.Tc),
+      rH.Tc > P.Tmin && rH.Tc < P.Tmax ? 'neg' : '') +
+    row('Effective barrier', U.hartreeToKJmol(r.V1e).toFixed(1) + ' kJ/mol');
+
+  const warn = document.getElementById('warn');
+  const clamped = P.Vb - P.asym < 2;
+  const zeroed = U.kJmolToHartree(P.Vb) - 0.5 * U.cmToHartree(P.ws) < U.kJmolToHartree(1);
+  warn.classList.toggle('vis', clamped || zeroed);
+  warn.innerHTML = zeroed
+    ? '<strong>Zero-point energy exceeds the barrier.</strong> The effective barrier has ' +
+      'been clamped to 1 kJ/mol; lower the stretch frequency or raise the barrier.'
+    : '<strong>Reverse barrier clamped.</strong> The asymmetry is larger than the ' +
+      'forward barrier, so the reverse barrier was held at 2 kJ/mol.';
+
+  hashState.write(P);
+}
+
+function fmt(v) {
+  if (!isFinite(v) || v === 0) return '—';
+  const e = Math.floor(Math.log10(Math.abs(v)));
+  return (v / 10 ** e).toFixed(2) + 'e' + e;
+}
+
+const run = scheduleRecompute(render);
+onResize(() => run());
+run();
+</script>
+</body>
+</html>

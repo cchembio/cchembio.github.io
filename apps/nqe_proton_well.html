@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A proton in a double-well potential</title>
+<link rel="stylesheet" href="../css/nqe.css">
+</head>
+<body>
+
+<div id="left">
+  <a href="../teaching.html" id="back-link">&#8592; Teaching</a>
+
+  <h1>Proton in a potential
+    <span class="sub">Zero-point energy, delocalization and tunneling splitting</span>
+  </h1>
+
+  <div class="card hero">
+    <span class="card-label">The particle is a &hellip;</span>
+    <div class="hero-btns" id="mode-box"></div>
+    <p class="note" style="margin-top:10px;border:none;padding:0" id="mode-note"></p>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Potential</span>
+    <div id="preset-box"></div>
+    <div id="slider-box"></div>
+    <div id="mass-box"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Results</span>
+    <div id="readout"></div>
+  </div>
+
+  <div class="card" id="show-card">
+    <span class="card-label">Show densities</span>
+    <div id="show-box"></div>
+  </div>
+
+  <div class="warn" id="warn"></div>
+</div>
+
+<div id="right">
+  <div class="panel">
+    <div class="panel-title">Potential, levels and probability density</div>
+    <div class="legend" id="legend"></div>
+    <canvas id="cv"></canvas>
+  </div>
+</div>
+
+<script type="module">
+import * as U from '../js/nqe/units.js';
+import { makeGrid, solve, edgeAmplitude, moments } from '../js/nqe/schrodinger1d.js';
+import { quarticDoubleWell } from '../js/nqe/potentials.js';
+import { createPlot } from '../js/nqe/plot.js';
+import { slider, segmented, presetSelect, hashState, scheduleRecompute, onResize, ISOTOPE }
+  from '../js/nqe/ui.js';
+
+const PRESETS = {
+  deep:      { name: 'Symmetric, deep barrier', b: 45, s: 1.10, dE: 0 },
+  shallow:   { name: 'Symmetric, shallow barrier', b: 8, s: 0.60, dE: 0 },
+  asym:      { name: 'Strongly asymmetric', b: 30, s: 0.95, dE: 14 },
+};
+
+const P = Object.assign({ preset: 'deep', m: 'H', mode: 'q', show: 1 }, PRESETS.deep);
+Object.assign(P, hashState.read() || {});
+
+// ── controls ───────────────────────────────────────────────────
+const preset = presetSelect(PRESETS, (key, p) => {
+  Object.assign(P, { b: p.b, s: p.s, dE: p.dE, preset: key });
+  sB.set(P.b); sS.set(P.s); sA.set(P.dE);
+  run();
+});
+preset.set(P.preset);
+document.getElementById('preset-box').appendChild(preset.el);
+
+const touch = (k, v) => { P[k] = v; P.preset = ''; preset.sel.selectedIndex = -1; run(); };
+
+const sB = slider({ label: 'Barrier height', min: 0, max: 60, step: 0.5, value: P.b,
+  unit: 'kJ/mol', onInput: (v) => touch('b', v) });
+const sS = slider({ label: 'Well separation 2<i>a</i>', min: 0.4, max: 1.6, step: 0.01, value: P.s,
+  unit: '&Aring;', onInput: (v) => touch('s', v) });
+const sA = slider({ label: 'Asymmetry &Delta;<i>E</i>', min: -20, max: 20, step: 0.5, value: P.dE,
+  unit: 'kJ/mol', onInput: (v) => touch('dE', v) });
+const box = document.getElementById('slider-box');
+box.append(sB.el, sS.el, sA.el);
+
+const mass = segmented({
+  label: 'Isotope:', ariaLabel: 'Isotope',
+  options: [['H', 'H', 'm-h'], ['D', 'D', 'm-d'], ['T', 'T', 'm-t']],
+  value: P.m, onChange: (v) => { P.m = v; run(); },
+});
+document.getElementById('mass-box').appendChild(mass.el);
+
+const mode = segmented({
+  label: '', ariaLabel: 'Classical or quantum proton',
+  options: [['c', 'Classical point', 'm-c'], ['q', 'Quantum wave', 'm-q']],
+  value: P.mode, onChange: (v) => { P.mode = v; run(); },
+});
+mode.el.classList.remove('mode-row');
+mode.el.querySelector('.mode-lbl').remove();
+document.getElementById('mode-box').appendChild(mode.el.querySelector('.mode-btns'));
+document.getElementById('mode-box').className = 'hero-btns';
+
+const show = segmented({
+  label: '', ariaLabel: 'How many densities to show',
+  options: [[1, '&nu; = 0'], [2, '&nu; = 0, 1'], [6, 'all six']],
+  value: P.show, onChange: (v) => { P.show = Number(v); run(); },
+});
+show.el.querySelector('.mode-lbl').remove();
+document.getElementById('show-box').appendChild(show.el);
+
+// ── plot ───────────────────────────────────────────────────────
+const plot = createPlot(document.getElementById('cv'), {
+  xlabel: 'proton position  x  (Å)', ylabel: 'energy  (kJ/mol)', pad: { l: 88 },
+});
+
+const COL = { pot: '#8b949e', lvl: '#484f58', occ: '#e3b341' };
+
+function compute() {
+  const a = U.angToBohr(P.s) / 2;
+  const barrier = U.kJmolToHartree(P.b);
+  const dE = U.kJmolToHartree(P.dE);
+  const W = 3 * a;
+  const grid = makeGrid({ xmin: -W, xmax: W, n: 160 });
+  const q = quarticDoubleWell(grid, { barrier, a, dE });
+  const m = U.MASS[P.m];
+  const { E, psi } = solve(grid, q.V, m, 6);
+  return { grid, q, E, psi, m, a, minima: q.minima(), maxTop: q.barrierTop() };
+}
+
+function render() {
+  const { grid, q, E, psi, minima, maxTop } = compute();
+  const toA = U.bohrToAng, toK = U.hartreeToKJmol;
+  const xs = Array.from(grid.x, toA);
+  const Vk = Array.from(q.V, toK);
+
+  const vMin = Math.min(...Vk);
+  const eTop = Math.max(toK(E[5]), maxTop ? toK(maxTop.V) : 0, 1);
+  const yTop = eTop * 1.25;
+  const yBot = vMin - 0.12 * (yTop - vMin);
+  plot.clear().setLimits([xs[0], xs[xs.length - 1]], [yBot, yTop]);
+
+  plot.line(xs, Vk, { color: COL.pot, width: 3 });
+
+  const iso = ISOTOPE[P.m];
+  const warn = document.getElementById('warn');
+  const rd = document.getElementById('readout');
+  document.getElementById('show-card').style.display = P.mode === 'q' ? '' : 'none';
+
+  if (P.mode === 'c') {
+    // A classical proton sits still at the bottom of the deepest well.
+    const m0 = minima[0];
+    plot.marker(toA(m0.x), toK(m0.V), { color: COL.occ, r: 11 });
+    plot.text(toA(m0.x), toK(m0.V) + 0.06 * (yTop - yBot),
+      'E = 0, at rest', { color: COL.occ, align: 'center', font: "16px system-ui" });
+    if (minima[1]) {
+      plot.marker(toA(minima[1].x), toK(minima[1].V), { color: '#484f58', r: 9, hollow: true });
+    }
+    document.getElementById('mode-note').textContent =
+      'A point particle at rest in the lowest minimum. No zero-point energy, ' +
+      'no width, and no way through the barrier.';
+    rd.innerHTML = row('Energy', '0.00 kJ/mol') +
+      row('Position ⟨x⟩', toA(m0.x).toFixed(4) + ' Å') +
+      row('Width', '0.0000 Å') +
+      row('Tunneling', 'impossible', 'neg');
+    warn.classList.remove('vis');
+  } else {
+    document.getElementById('mode-note').textContent =
+      'A delocalized wave. Its lowest energy is the zero-point energy, and the ' +
+      'level pattern below the barrier comes in tunneling doublets.';
+
+    const nShow = Number(P.show);
+    let dMax = 0;
+    for (let n = 0; n < nShow; n++) {
+      for (let i = 0; i < grid.n; i++) dMax = Math.max(dMax, psi[n][i] ** 2);
+    }
+    const scale = (0.30 * (yTop - yBot)) / (dMax || 1);
+
+    // Tunneling doublets sit closer than a label is tall, so group near-degenerate
+    // levels under one label rather than overprinting them.
+    const near = 0.012 * (yTop - yBot);
+    let group = [];
+    for (let n = 0; n < 6; n++) {
+      const Ek = toK(E[n]);
+      // draw the level only across its classically allowed region
+      let lo = xs[0], hi = xs[xs.length - 1];
+      for (let i = 0; i < grid.n; i++) if (Vk[i] <= Ek) { lo = xs[i]; break; }
+      for (let i = grid.n - 1; i >= 0; i--) if (Vk[i] <= Ek) { hi = xs[i]; break; }
+      const on = n < nShow;
+      plot.levels([Ek], { xrange: [lo, hi], color: on ? COL.occ : COL.lvl, width: on ? 2.5 : 1.5 });
+
+      group.push({ n, Ek, on });
+      const nextE = n < 5 ? toK(E[n + 1]) : Infinity;
+      if (nextE - Ek > near) {
+        const lab = 'ν=' + group.map((g) => g.n).join(',');
+        const anyOn = group.some((g) => g.on);
+        const yLab = group.reduce((a, g) => a + g.Ek, 0) / group.length;
+        plot.text(xs[xs.length - 1], yLab, lab + '  ',
+          { color: anyOn ? COL.occ : COL.lvl, baseline: 'middle', align: 'right' });
+        group = [];
+      }
+    }
+    for (let n = nShow - 1; n >= 0; n--) {
+      const base = toK(E[n]);
+      const ys = Array.from(psi[n], (v) => base + v * v * scale);
+      plot.fillBetween(xs, ys, base, { color: iso.color, alpha: 0.28 });
+      plot.line(xs, ys, { color: iso.color, dash: iso.dash, width: 2.5 });
+    }
+
+    const split = U.hartreeToCm(E[1] - E[0]);
+    const zpeK = toK(E[0]) - vMin;
+    const mm = moments(psi[0], grid);
+    const dx0 = toA(mm.mean) - toA(minima[0].x);
+    rd.innerHTML =
+      row('Zero-point energy', zpeK.toFixed(2) + ' kJ/mol', 'gold') +
+      row('E<sub>1</sub> − E<sub>0</sub>', fmtCm(split) + ' cm⁻¹', 'gold') +
+      row('… as a period', fmtTime(split)) +
+      row('Density width', toA(mm.width).toFixed(3) + ' Å', P.m === 'D' ? 'd' : 'h') +
+      row('⟨x⟩ − x<sub>min</sub>', (dx0 >= 0 ? '+' : '') + dx0.toFixed(4) + ' Å');
+
+    const edge = Math.max(...psi.slice(0, nShow).map((p) => edgeAmplitude(p)));
+    warn.classList.toggle('vis', edge > 1e-4);
+    if (edge > 1e-4) {
+      warn.innerHTML = '<strong>Box too small.</strong> The wavefunction has ' +
+        'amplitude ' + edge.toExponential(1) + ' at the edge of the grid, so these ' +
+        'levels are not converged. Increase the barrier or reduce the well separation.';
+    }
+  }
+
+  const L = document.getElementById('legend');
+  L.innerHTML = `<span><i style="border-color:${COL.pot}"></i>V(x)</span>` +
+    (P.mode === 'q'
+      ? `<span><i style="border-color:${iso.color};border-top-style:${iso.dash.length ? 'dashed' : 'solid'}"></i>|ψ|² for ${iso.label}</span>` +
+        `<span><i style="border-color:${COL.occ}"></i>energy levels</span>`
+      : `<span><i style="border-color:${COL.occ}"></i>classical proton</span>`);
+
+  plot.draw();
+  hashState.write(P);
+}
+
+const row = (k, v, cls = '') => `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
+const fmtCm = (v) => (v >= 100 ? v.toFixed(0) : v >= 1 ? v.toFixed(2) : v.toExponential(2));
+function fmtTime(cm) {
+  if (cm <= 0) return '—';
+  const t = 1 / (2 * cm * 2.99792458e10);            // half a Rabi period, seconds
+  if (t < 1e-12) return (t * 1e15).toFixed(1) + ' fs';
+  if (t < 1e-9) return (t * 1e12).toFixed(1) + ' ps';
+  if (t < 1e-6) return (t * 1e9).toFixed(1) + ' ns';
+  if (t < 1) return (t * 1e6).toFixed(1) + ' µs';
+  return t.toExponential(1) + ' s';
+}
+
+const run = scheduleRecompute(render);
+onResize(() => plot.draw());
+run();
+</script>
+</body>
+</html>
