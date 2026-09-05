@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instanton paths</title>
+<link rel="stylesheet" href="../css/nqe.css">
+<style>
+  #right { display: grid; grid-template-rows: 3fr 2fr; gap: 12px; }
+  #cv-surface { background: #0d1117; }
+</style>
+</head>
+<body>
+
+<div id="left">
+  <a href="../teaching.html" id="back-link">&#8592; Teaching</a>
+
+  <h1>Instanton paths
+    <span class="sub">Deep tunneling and the crossover temperature</span>
+  </h1>
+
+  <div class="card hero">
+    <span class="card-label">Regime</span>
+    <div class="rate-big" id="regime" style="font-size:20px">—</div>
+    <p class="note" style="margin-top:8px;border:none;padding:0">
+      A ring of 32 beads represents the imaginary-time tunneling path. Its
+      action is minimized by plain steepest descent &mdash; no dedicated
+      saddle search &mdash; which only finds the true instanton because the
+      ring starts, and stays, exactly mirror-symmetric between the two wells.
+    </p>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Preset</span>
+    <div id="preset-box"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Controls</span>
+    <div id="slider-box"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Readouts</span>
+    <div id="readout"></div>
+  </div>
+
+  <div class="note">
+    Standalone model, illustrative rather than fitted: a symmetric double
+    well coupled to a transverse mode whose equilibrium position bulges near
+    the barrier top. The bulge height (skew) bends the minimum-energy path
+    without moving the saddle or either minimum &mdash; both always sit
+    exactly on that curve, whatever the skew.
+  </div>
+</div>
+
+<div id="right">
+  <div class="panel">
+    <div class="panel-title">Model surface and the converged ring-polymer path</div>
+    <div class="legend" id="legend"></div>
+    <canvas id="cv-surface"></canvas>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Path extent against temperature</div>
+    <canvas id="cv-extent"></canvas>
+  </div>
+</div>
+
+<script type="module">
+import { potential, crossoverT, relaxInstanton } from '../js/nqe/instanton.js';
+import { createPlot } from '../js/nqe/plot.js';
+import { slider, presetSelect, hashState, scheduleRecompute, onResize } from '../js/nqe/ui.js';
+
+const a = 1, A = Math.PI * Math.PI;   // T_c = 1 exactly, by construction
+const PARAMS = { A, a, ky: 20, w: 0.5 };
+const Tc = crossoverT(PARAMS);
+
+const PRESETS = {
+  above: { name: 'Above the crossover',        T: 1.6, skew: 0.8 },
+  deep:  { name: 'Deep tunneling, corner-cutting', T: 0.3, skew: 1.2 },
+  flat:  { name: 'Flat valley (no cutting)',    T: 0.3, skew: 0.0 },
+};
+const P = Object.assign({ preset: 'above' }, PRESETS.above);
+Object.assign(P, hashState.read() || {});
+
+const preset = presetSelect(PRESETS, (key, p) => {
+  Object.assign(P, { T: p.T, skew: p.skew, preset: key });
+  sT.set(P.T); sS.set(P.skew);
+  run();
+});
+preset.set(P.preset);
+document.getElementById('preset-box').appendChild(preset.el);
+const touch = (k, v) => { P[k] = v; P.preset = ''; preset.sel.selectedIndex = -1; run(); };
+
+const sT = slider({ label: 'Temperature', min: 0.1, max: 2.5, step: 0.02, value: P.T,
+  unit: '', decimals: 2, onInput: (v) => touch('T', v) });
+const sS = slider({ label: 'Surface skew', min: 0, max: 1.5, step: 0.02, value: P.skew,
+  unit: '', decimals: 2, onInput: (v) => touch('skew', v) });
+document.getElementById('slider-box').append(sT.el, sS.el);
+
+// ── surface heatmap, precomputed once (doesn't depend on T or skew) ──
+const surfCanvas = document.getElementById('cv-surface');
+const XMIN = -1.7 * a, XMAX = 1.7 * a;
+const RES_X = 220, RES_Y = 160;
+let raster = null, yMinPlot, yMaxPlot;
+
+function buildRaster(skew) {
+  yMinPlot = Math.min(-0.35, -0.35 - skew * 0.1);
+  yMaxPlot = Math.max(0.9, skew + 0.5);
+  const off = document.createElement('canvas');
+  off.width = RES_X; off.height = RES_Y;
+  const octx = off.getContext('2d');
+  const img = octx.createImageData(RES_X, RES_Y);
+  const p = { ...PARAMS, skew };
+  const vMax = 3.2 * A;   // clip: the double-well walls shoot up fast, don't wash out the valley
+  for (let j = 0; j < RES_Y; j++) {
+    const y = yMaxPlot - ((yMaxPlot - yMinPlot) * j) / (RES_Y - 1);
+    for (let i = 0; i < RES_X; i++) {
+      const x = XMIN + ((XMAX - XMIN) * i) / (RES_X - 1);
+      const v = Math.min(potential(x, y, p), vMax);
+      const t = v / vMax;
+      const idx = (j * RES_X + i) * 4;
+      // dark blue (low) -> teal -> gold (high), matching the app's palette
+      const r = Math.round(20 + t * 215);
+      const g = Math.round(30 + (1 - Math.abs(t - 0.5) * 2) * 90 + t * 60);
+      const b = Math.round(60 + (1 - t) * 90);
+      img.data[idx] = r; img.data[idx + 1] = g; img.data[idx + 2] = b; img.data[idx + 3] = 255;
+    }
+  }
+  octx.putImageData(img, 0, 0);
+  return off;
+}
+
+const surf = createPlot(surfCanvas, { xlabel: 'reaction coordinate x', ylabel: 'transverse coordinate y' });
+const row = (k, v, cls = '') =>
+  `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
+
+const pExtent = createPlot(document.getElementById('cv-extent'),
+  { xlabel: 'temperature', ylabel: 'path extent', pad: { l: 66, b: 44 } });
+
+function render() {
+  if (!raster || raster._skew !== P.skew) { raster = buildRaster(P.skew); raster._skew = P.skew; }
+  surf.setLimits([XMIN, XMAX], [yMinPlot, yMaxPlot]);
+
+  const r = relaxInstanton({ ...PARAMS, skew: P.skew }, { T: P.T, N: 32, steps: 10000, step: 0.004 });
+
+  // MEP reference curve y = g(x)
+  const gx = [], gy = [];
+  for (let i = 0; i <= 150; i++) {
+    const x = XMIN + ((XMAX - XMIN) * i) / 150;
+    gx.push(x);
+    gy.push(P.skew * Math.exp(-((x / PARAMS.w) ** 2)));
+  }
+
+  surf.clear();
+  surf.line(gx, gy, { color: '#8b949e', dash: [3, 5], width: 2 });
+  const path = r.path.concat([r.path[0]]);
+  surf.line(path.map((p) => p.x), path.map((p) => p.y), { color: '#e3b341', width: 3 });
+  for (const p of r.path) surf.marker(p.x, p.y, { color: '#e3b341', r: 4 });
+  const yMin = P.skew * Math.exp(-((a / PARAMS.w) ** 2));
+  surf.marker(0, P.skew, { color: '#f85149', r: 7, shape: 'square', hollow: true });
+  surf.marker(a, yMin, { color: '#58a6ff', r: 7 });
+  surf.marker(-a, yMin, { color: '#58a6ff', r: 7 });
+  surf.draw();
+
+  // createPlot has no heatmap primitive, and its draw() clears the canvas
+  // unconditionally, so the raster has to go in *after* draw() — composited
+  // behind everything already drawn, onto the transparent backdrop it left.
+  const ctx = surfCanvas.getContext('2d');
+  const [px0, py0] = surf.toPixel(XMIN, yMaxPlot);
+  const [px1, py1] = surf.toPixel(XMAX, yMinPlot);
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-over';
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(raster, px0, py0, px1 - px0, py1 - py0);
+  ctx.restore();
+
+  document.getElementById('legend').innerHTML =
+    `<span><i style="border-color:#8b949e;border-top-style:dashed"></i>minimum-energy path</span>` +
+    `<span><i style="border-color:#e3b341"></i>ring-polymer instanton (32 beads)</span>` +
+    `<span style="color:#f85149">&#9633; saddle</span>` +
+    `<span style="color:#58a6ff">&#9679; minima</span>`;
+
+  const above = P.T > Tc;
+  const regime = document.getElementById('regime');
+  regime.textContent = above ? 'Above T_c — collapsed to the saddle' : 'Below T_c — extended tunneling path';
+  regime.style.color = above ? '#f85149' : '#3fb950';
+
+  document.getElementById('readout').innerHTML =
+    row('T_c', Tc.toFixed(3)) +
+    row('Current T / T_c', (P.T / Tc).toFixed(2)) +
+    row('Path extent', r.extent.toFixed(4), above ? '' : 'gold') +
+    row('Corner-cutting (max dev.)', r.maxDeviation.toFixed(4), P.skew > 0 && !above ? 'gold' : '') +
+    row('Discretized action', r.action.toFixed(3));
+
+  // ── extent vs T curve, cheap enough to redo on every slider change ──
+  const Ts = [], ext = [];
+  for (let i = 0; i <= 40; i++) {
+    const T = 0.1 + (2.4 * i) / 40;
+    Ts.push(T);
+    ext.push(relaxInstanton({ ...PARAMS, skew: P.skew }, { T, N: 32, steps: 4000, step: 0.004 }).extent);
+  }
+  pExtent.clear().setLimits([0.1, 2.5], [0, Math.max(...ext) * 1.15 || 1])
+    .line(Ts, ext, { color: '#e3b341', width: 3 })
+    .vline(Tc, { color: '#f85149', width: 2.5, dash: [7, 5], label: 'T_c' })
+    .marker(P.T, r.extent, { color: '#e3b341', r: 6 })
+    .draw();
+
+  hashState.write(P);
+}
+
+const run = scheduleRecompute(render);
+onResize(() => run());
+run();
+</script>
+</body>
+</html>

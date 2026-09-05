@@ -125,6 +125,8 @@ const pR = createPlot(document.getElementById('cv-r'),
 const row = (k, v, cls = '') =>
   `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
 
+let sweep = { asym: null };
+
 function render() {
   const H = solveAt(P.R, P.asym, 'H'), D = solveAt(P.R, P.asym, 'D');
   const toA = U.bohrToAng, toK = U.hartreeToKJmol;
@@ -165,14 +167,22 @@ function render() {
     `<span style="color:#e3b341">● classical minimum</span>`;
 
   // ── ⟨x⟩ and width against R ──
-  const Rs = [], mH = [], mD = [], cl = [];
-  for (let i = 0; i <= 40; i++) {
-    const R = 2.4 + (0.6 * i) / 40;
-    const h = solveAt(R, P.asym, 'H'), d = solveAt(R, P.asym, 'D');
-    Rs.push(R);
-    mH.push(toA(h.mean)); mD.push(toA(d.mean));
-    cl.push(toA(h.minima[0].x));
+  // This curve depends only on asym, not on R itself (R only says where the
+  // marker sits on it), so cache it — resweeping 41 points x 2 isotopes
+  // costs ~800ms and dragging R alone shouldn't pay for it every frame.
+  if (sweep.asym !== P.asym) {
+    const Rs = [], mH = [], mD = [], cl = [];
+    const N_SWEEP = 20;   // curve is smooth; 21 points reads identically to 41 and halves the cost
+    for (let i = 0; i <= N_SWEEP; i++) {
+      const R = 2.4 + (0.6 * i) / N_SWEEP;
+      const h = solveAt(R, P.asym, 'H'), d = solveAt(R, P.asym, 'D');
+      Rs.push(R);
+      mH.push(toA(h.mean)); mD.push(toA(d.mean));
+      cl.push(toA(h.minima[0].x));
+    }
+    sweep = { asym: P.asym, Rs, mH, mD, cl };
   }
+  const { Rs, mH, mD, cl } = sweep;
   const allv = mH.concat(mD, cl);
   pR.clear().setLimits([2.4, 3.0], [Math.min(...allv) - 0.05, Math.max(...allv) + 0.05])
     .line(Rs, mH, { color: ISOTOPE.H.color, width: 3, dash: ISOTOPE.H.dash })

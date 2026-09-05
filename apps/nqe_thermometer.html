@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum thermometer</title>
+<link rel="stylesheet" href="../css/nqe.css">
+<style>
+  #right { display: grid; grid-template-rows: 1fr 1fr; gap: 12px; }
+  .rate-big {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 26px; font-weight: 700; color: #e3b341;
+    font-variant-numeric: tabular-nums; line-height: 1.15;
+  }
+  #compute-note.computing { color: #e3b341; border-left-color: #e3b341; }
+  #compute-note.computing::before { content: 'Computing… '; font-weight: 700; }
+  #right { position: relative; }
+  #right.computing::after {
+    content: ''; position: absolute; inset: 0; cursor: progress;
+    background: rgba(13,17,23,0.15);
+  }
+</style>
+</head>
+<body>
+
+<div id="left">
+  <a href="../teaching.html" id="back-link">&#8592; Teaching</a>
+
+  <h1>Quantum thermometer
+    <span class="sub">Zero-point delocalization and the classical limit</span>
+  </h1>
+
+  <div class="card hero">
+    <span class="card-label">Zero-point radius of gyration (T &rarr; 0)</span>
+    <div class="rate-big" id="rg0">—</div>
+    <p class="note" style="margin-top:8px;border:none;padding:0">
+      A classical bead cloud would shrink to a point as T &rarr; 0. This ring
+      polymer's radius of gyration instead saturates at a nonzero floor &mdash;
+      the zero-point spread &mdash; and that floor shrinks as the isotope
+      gets heavier.
+    </p>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Preset</span>
+    <div id="preset-box"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Well and isotope</span>
+    <div id="kind-box"></div>
+    <div id="mass-box"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">Temperature</span>
+    <div id="slider-box"></div>
+  </div>
+
+  <div class="card">
+    <span class="card-label">At this temperature</span>
+    <div id="readout"></div>
+  </div>
+
+  <div class="note" id="compute-note">
+    Sampled by ring-polymer path-integral Langevin dynamics (32 beads), the
+    same classical isomorphism used in real quantum simulation packages —
+    not fitted, and not exact: each point carries genuine Monte Carlo noise.
+    Switching well or isotope recomputes the curves (a moment); dragging
+    temperature just reads a point off them.
+  </div>
+</div>
+
+<div id="right">
+  <div class="panel">
+    <div class="panel-title">Radius of gyration against temperature, H / D / T</div>
+    <div class="legend" id="leg-t"></div>
+    <canvas id="cv-t"></canvas>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Bead cloud at the current temperature</div>
+    <canvas id="cv-cloud"></canvas>
+  </div>
+</div>
+
+<script type="module">
+import { simulate, potential } from '../js/nqe/thermometer.js';
+import { createPlot } from '../js/nqe/plot.js';
+import { slider, segmented, presetSelect, hashState, scheduleRecompute, onResize, ISOTOPE }
+  from '../js/nqe/ui.js';
+
+// Real isotope mass ratios (H = 1), used here as plain numbers since this
+// app is standalone and doesn't pull in the shared unit registry.
+const MASS = { H: 1, D: 1.9968, T: 2.9901 };
+const K = 1;               // fixed well stiffness (harmonic); tuned quartic stiffness below
+const K_QUARTIC = 0.35;
+const TMIN = 0.05, TMAX = 3.0, NPOINTS = 11;
+const TSTEP = (TMAX - TMIN) / (NPOINTS - 1);   // the T slider only ever lands on a curve grid point
+
+const PRESETS = {
+  cold: { name: 'Cold, deep quantum regime', T: 0.05, kind: 'harmonic' },
+  warm: { name: 'Warm, near-classical', T: 2.115, kind: 'harmonic' },
+  quartic: { name: 'Quartic well', T: 0.345, kind: 'quartic' },
+};
+const P = Object.assign({ preset: 'cold', m: 'H' }, PRESETS.cold);
+Object.assign(P, hashState.read() || {});
+
+function kFor(kind) { return kind === 'quartic' ? K_QUARTIC : K; }
+
+// Curves depend only on {kind}; cached and rebuilt only when it changes.
+let curves = { kind: null };
+function buildCurves(kind) {
+  const k = kFor(kind);
+  const Ts = Array.from({ length: NPOINTS }, (_, i) => TMIN + ((TMAX - TMIN) * i) / (NPOINTS - 1));
+  const rg = {};
+  for (const iso of ['H', 'D', 'T']) {
+    rg[iso] = Ts.map((T) =>
+      Math.sqrt(simulate({ kind, k, T, mass: MASS[iso], N: 32, targetTime: 900, seed: 7 }).Rg2)
+    );
+  }
+  return { kind, Ts, rg };
+}
+
+// ── controls ───────────────────────────────────────────────────
+const preset = presetSelect(PRESETS, (key, p) => {
+  Object.assign(P, { T: p.T, kind: p.kind, preset: key });
+  sT.set(P.T); kind.set(P.kind);
+  run();
+});
+preset.set(P.preset);
+document.getElementById('preset-box').appendChild(preset.el);
+const touch = (k, v) => { P[k] = v; P.preset = ''; preset.sel.selectedIndex = -1; run(); };
+
+const kind = segmented({
+  label: 'Well:', ariaLabel: 'Harmonic or quartic well',
+  options: [['harmonic', 'Harmonic'], ['quartic', 'Quartic']],
+  value: P.kind, onChange: (v) => touch('kind', v),
+});
+document.getElementById('kind-box').appendChild(kind.el);
+
+const mass = segmented({
+  label: 'Isotope:', ariaLabel: 'Isotope shown as the highlighted curve',
+  options: [['H', 'H', 'm-h'], ['D', 'D', 'm-d'], ['T', 'T', 'm-t']],
+  value: P.m, onChange: (v) => { P.m = v; run(); },
+});
+document.getElementById('mass-box').appendChild(mass.el);
+
+const sT = slider({ label: 'Temperature', min: TMIN, max: TMAX, step: TSTEP, value: P.T,
+  unit: '', decimals: 2, onInput: (v) => touch('T', v) });
+document.getElementById('slider-box').appendChild(sT.el);
+
+const pT = createPlot(document.getElementById('cv-t'),
+  { xlabel: 'temperature', ylabel: 'radius of gyration', pad: { l: 76, b: 44 } });
+const pCloud = createPlot(document.getElementById('cv-cloud'),
+  { xlabel: 'x', ylabel: 'energy', pad: { l: 66, b: 44 } });
+
+const row = (k, v, cls = '') =>
+  `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
+
+function render() {
+  if (curves.kind !== P.kind) { curves = buildCurves(P.kind); }
+  const { Ts, rg } = curves;
+  const k = kFor(P.kind);
+
+  const allRg = ['H', 'D', 'T'].flatMap((iso) => rg[iso]);
+  pT.clear().setLimits([TMIN, TMAX], [0, Math.max(...allRg) * 1.15]);
+  for (const iso of ['H', 'D', 'T']) {
+    const dim = iso !== P.m;
+    pT.line(Ts, rg[iso], { color: ISOTOPE[iso].color, dash: ISOTOPE[iso].dash, width: dim ? 1.6 : 3.2 });
+  }
+  const idx = Math.round((P.T - TMIN) / TSTEP);
+  pT.marker(Ts[idx], rg[P.m][idx], { color: ISOTOPE[P.m].color, r: 7 });
+  pT.draw();
+  document.getElementById('leg-t').innerHTML = ['H', 'D', 'T'].map((iso) =>
+    `<span><i style="border-color:${ISOTOPE[iso].color};border-top-style:${ISOTOPE[iso].dash.length ? 'dashed' : 'solid'}"></i>${iso}</span>`
+  ).join('');
+
+  // ── bead cloud: the actual final bead configuration from one fresh sample ──
+  const T = Ts[idx];
+  const cloud = simulate({ kind: P.kind, k, T, mass: MASS[P.m], N: 32, targetTime: 900, seed: 11 });
+  const xMax = Math.sqrt(Math.max(...allRg) ** 2 + cloud.meanX2) * 2.2 + 0.3;
+  const xs = [], vs = [];
+  for (let i = 0; i <= 150; i++) {
+    const x = -xMax + (2 * xMax * i) / 150;
+    xs.push(x);
+    vs.push(potential(x, { kind: P.kind, k }));
+  }
+  const vMax = Math.max(...vs.filter((v) => isFinite(v))) * 0.6 || 1;
+  pCloud.clear().setLimits([-xMax, xMax], [0, vMax]);
+  pCloud.line(xs, vs, { color: '#8b949e', width: 2.5 });
+  const beadY = vMax * 0.08;
+  for (const x of cloud.beads) pCloud.marker(x, beadY, { color: ISOTOPE[P.m].color, r: 5 });
+  pCloud.draw();
+
+  document.getElementById('rg0').textContent = rg[P.m][0].toFixed(4);
+  document.getElementById('readout').innerHTML =
+    row('Radius of gyration', Math.sqrt(cloud.Rg2).toFixed(4), P.m === 'D' ? 'd' : P.m === 'T' ? '' : 'h') +
+    row('&#10216;x&sup2;&#10217; (total)', cloud.meanX2.toFixed(4));
+
+  hashState.write(P);
+}
+
+// render() blocks the main thread for anywhere from ~100ms (a slider drag,
+// one bead-cloud sample) to a few seconds (a well/isotope change, rebuilding
+// all three curves). Button/segmented-control state updates synchronously
+// the instant they're clicked, but the browser can't actually repaint that
+// until the current script finishes — so without a deferral, a slow render()
+// makes the whole page look frozen/unresponsive for its entire duration, as
+// if the click hadn't registered. Showing "Computing…" and deferring the
+// heavy work by one macrotask (setTimeout, not requestAnimationFrame — rAF
+// runs before paint, so a slow callback there still delays the paint) lets
+// the browser paint the click's feedback first.
+let pending = null;
+function run() {
+  document.getElementById('compute-note').classList.add('computing');
+  document.getElementById('right').classList.add('computing');
+  if (pending) clearTimeout(pending);
+  pending = setTimeout(() => {
+    pending = null;
+    render();
+    document.getElementById('compute-note').classList.remove('computing');
+    document.getElementById('right').classList.remove('computing');
+  }, 15);
+}
+onResize(() => run());
+document.getElementById('compute-note').style.display = '';
+run();
+</script>
+</body>
+</html>
