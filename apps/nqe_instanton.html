@@ -46,6 +46,22 @@
   </div>
 
   <div class="note">
+    Temperature is given in units of <i>T</i><sub>c</sub> &mdash; the slider's
+    value already <em>is</em> <i>T</i>/<i>T</i><sub>c</sub>, so <i>T</i><sub>c</sub>
+    itself always reads 1.000.
+  </div>
+
+  <div class="note">
+    The path is not the reaction coordinate &mdash; it is a closed loop in
+    <em>imaginary time</em>, with period 1/<i>T</i>. Close to <i>T</i><sub>c</sub>
+    that period is short, so the beads don't have enough imaginary time to
+    swing all the way out to the classical minima before looping back; the
+    ring only grows to meet them as <i>T</i> &rarr; 0. A gap between the path
+    and the minima markers is expected well below <i>T</i><sub>c</sub>, not a
+    sign the path is cut off.
+  </div>
+
+  <div class="note">
     Standalone model, illustrative rather than fitted: a symmetric double
     well coupled to a transverse mode whose equilibrium position bulges near
     the barrier top. The bulge height (skew) bends the minimum-energy path
@@ -92,7 +108,7 @@ preset.set(P.preset);
 document.getElementById('preset-box').appendChild(preset.el);
 const touch = (k, v) => { P[k] = v; P.preset = ''; preset.sel.selectedIndex = -1; run(); };
 
-const sT = slider({ label: 'Temperature', min: 0.1, max: 2.5, step: 0.02, value: P.T,
+const sT = slider({ label: 'Temperature  (<i>T</i> / <i>T</i><sub>c</sub>)', min: 0.1, max: 2.5, step: 0.02, value: P.T,
   unit: '', decimals: 2, onInput: (v) => touch('T', v) });
 const sS = slider({ label: 'Surface skew', min: 0, max: 1.5, step: 0.02, value: P.skew,
   unit: '', decimals: 2, onInput: (v) => touch('skew', v) });
@@ -131,12 +147,13 @@ function buildRaster(skew) {
   return off;
 }
 
-const surf = createPlot(surfCanvas, { xlabel: 'reaction coordinate x', ylabel: 'transverse coordinate y' });
+const surf = createPlot(surfCanvas,
+  { xlabel: 'reaction coordinate x', ylabel: 'transverse coordinate y', pad: { l: 92 } });
 const row = (k, v, cls = '') =>
   `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
 
 const pExtent = createPlot(document.getElementById('cv-extent'),
-  { xlabel: 'temperature', ylabel: 'path extent', pad: { l: 66, b: 44 } });
+  { xlabel: 'temperature  (T / T_c)', ylabel: 'path extent', pad: { l: 92, b: 44 } });
 
 function render() {
   if (!raster || raster._skew !== P.skew) { raster = buildRaster(P.skew); raster._skew = P.skew; }
@@ -188,7 +205,6 @@ function render() {
 
   document.getElementById('readout').innerHTML =
     row('T_c', Tc.toFixed(3)) +
-    row('Current T / T_c', (P.T / Tc).toFixed(2)) +
     row('Path extent', r.extent.toFixed(4), above ? '' : 'gold') +
     row('Corner-cutting (max dev.)', r.maxDeviation.toFixed(4), P.skew > 0 && !above ? 'gold' : '') +
     row('Discretized action', r.action.toFixed(3));

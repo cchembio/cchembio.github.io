@@ -62,6 +62,13 @@
     <div id="readout"></div>
   </div>
 
+  <div class="note">
+    Temperature is given in units of &#295;&omega;<sub>H</sub>/<i>k</i><sub>B</sub>
+    &mdash; the harmonic well's quantum of energy for hydrogen, a fixed
+    reference regardless of which well or isotope is currently selected, so
+    a temperature of 1.00 always means the same physical scale.
+  </div>
+
   <div class="note" id="compute-note">
     Sampled by ring-polymer path-integral Langevin dynamics (32 beads), the
     same classical isomorphism used in real quantum simulation packages —
@@ -88,10 +95,18 @@ import { simulate, potential } from '../js/nqe/thermometer.js';
 import { createPlot } from '../js/nqe/plot.js';
 import { slider, segmented, presetSelect, hashState, scheduleRecompute, onResize, ISOTOPE }
   from '../js/nqe/ui.js';
+import { MASS as NUCLEAR_MASS } from '../js/nqe/units.js';
 
-// Real isotope mass ratios (H = 1), used here as plain numbers since this
-// app is standalone and doesn't pull in the shared unit registry.
-const MASS = { H: 1, D: 1.9968, T: 2.9901 };
+// Only the isotope mass *ratios* matter here (everything is normalized to
+// H = 1), so derive them from the same bare-nucleus masses the solver-based
+// apps use, rather than maintaining a separate hand-typed approximation.
+// This app stays standalone in the sense that matters — no dependency on
+// the Schrödinger solver — but there's no reason to duplicate constants.
+const MASS = {
+  H: 1,
+  D: NUCLEAR_MASS.D / NUCLEAR_MASS.H,
+  T: NUCLEAR_MASS.T / NUCLEAR_MASS.H,
+};
 const K = 1;               // fixed well stiffness (harmonic); tuned quartic stiffness below
 const K_QUARTIC = 0.35;
 const TMIN = 0.05, TMAX = 3.0, NPOINTS = 11;
@@ -145,14 +160,15 @@ const mass = segmented({
 });
 document.getElementById('mass-box').appendChild(mass.el);
 
-const sT = slider({ label: 'Temperature', min: TMIN, max: TMAX, step: TSTEP, value: P.T,
+const sT = slider({ label: 'Temperature  (<i>k</i><sub>B</sub><i>T</i> / &#295;&omega;<sub>H</sub>)',
+  min: TMIN, max: TMAX, step: TSTEP, value: P.T,
   unit: '', decimals: 2, onInput: (v) => touch('T', v) });
 document.getElementById('slider-box').appendChild(sT.el);
 
 const pT = createPlot(document.getElementById('cv-t'),
-  { xlabel: 'temperature', ylabel: 'radius of gyration', pad: { l: 76, b: 44 } });
+  { xlabel: 'temperature  (k_B T / ħω_H)', ylabel: 'radius of gyration', pad: { l: 94, b: 44 } });
 const pCloud = createPlot(document.getElementById('cv-cloud'),
-  { xlabel: 'x', ylabel: 'energy', pad: { l: 66, b: 44 } });
+  { xlabel: 'x', ylabel: 'energy', pad: { l: 82, b: 44 } });
 
 const row = (k, v, cls = '') =>
   `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
