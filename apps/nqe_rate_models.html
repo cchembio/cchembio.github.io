@@ -229,7 +229,7 @@ document.getElementById('mass-box').appendChild(mass.el);
 const pArr = createPlot(document.getElementById('cv-arr'),
   { xlabel: '1000 / T   (K⁻¹)', ylabel: 'ln ( k / s⁻¹ )', pad: { l: 82 } });
 const pKie = createPlot(document.getElementById('cv-kie'),
-  { xlabel: '1000 / T   (K⁻¹)', ylabel: 'log₁₀ ( k_H / k_D )', pad: { l: 82, b: 44 } });
+  { xlabel: 'T   (K)', ylabel: 'log₁₀ ( k_H / k_D )', pad: { l: 82, b: 44 } });
 
 const row = (k, v, cls = '') =>
   `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
@@ -277,10 +277,11 @@ function render() {
     m, ys: Ts.map((_, i) => Math.log10(H[i][m.key] / D[i][m.key])),
   }));
   const allK = kieLines.flatMap((l) => l.ys).filter(isFinite);
-  pKie.clear().setLimits([Math.min(...xs), Math.max(...xs)],
+  // Plotted against T itself, not 1000/T, so a KIE can be read off at a given temperature.
+  pKie.clear().setLimits([P.Tmin, P.Tmax],
                          [Math.min(0, Math.min(...allK)) - 0.1, Math.max(...allK) + 0.2]);
-  for (const l of kieLines) pKie.line(xs, l.ys, { color: l.m.color, dash: l.m.dash, width: 3 });
-  if (Tc > P.Tmin && Tc < P.Tmax) pKie.vline(1000 / Tc, { color: '#f85149', width: 2.5, dash: [7, 5] });
+  for (const l of kieLines) pKie.line(Ts, l.ys, { color: l.m.color, dash: l.m.dash, width: 3 });
+  if (Tc > P.Tmin && Tc < P.Tmax) pKie.vline(Tc, { color: '#f85149', width: 2.5, dash: [7, 5] });
   pKie.draw();
 
   // ── readouts at the reference temperature ──
