@@ -69,8 +69,8 @@ export function overlapAt(w, mu, nu, d) {
 }
 
 /**
- * k = SUM_mu P_mu SUM_nu |V_el S_mu_nu|^2 sqrt(pi/(lambda kB T)) exp(-(dG_mu_nu + lambda)^2 / (4 lambda kB T))
- * R in Å; dG and lam in hartree. Returns the rate in atomic units.
+ * k = SUM_mu P_mu SUM_nu (|V_el S_mu_nu|^2 / hbar) sqrt(pi/(lambda kB T)) exp(-(dG_mu_nu + lambda)^2 / (4 lambda kB T))
+ * R in Å; dG and lam in hartree. Returns the rate in atomic units (hbar = 1).
  */
 export function rateAt(iso, R, { dG, lam, T }, opt = {}) {
   const { d0, geomSlope, Vel, nState } = Object.assign({}, DEFAULTS, opt);
