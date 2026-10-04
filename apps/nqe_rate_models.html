@@ -26,13 +26,15 @@
   <div class="card hero">
     <span class="card-label">Semiclassical KIE &mdash; no tunneling</span>
     <div class="rate-big" id="kie-semi">—</div>
+    <span class="card-label" style="margin-top:10px">with tunneling</span>
+    <div class="rate-big" id="kie-tun">—</div>
     <p class="note" style="margin-top:8px;border:none;padding:0">
-      k<sub>H</sub>/k<sub>D</sub> from zero-point energy alone, at the X&ndash;H
-      stretch frequency and temperature set below. The classical prefactor
-      <i>k</i><sub>B</sub><i>T</i>/<i>h</i> carries no isotope mass at all, so
-      this whole number is exp[(ZPE<sub>H</sub> &minus; ZPE<sub>D</sub>)/<i>k</i><sub>B</sub><i>T</i>]
+      The upper number is k<sub>H</sub>/k<sub>D</sub> from zero-point energy
+      alone, at the X&ndash;H stretch frequency and temperature set below. The
+      classical prefactor <i>k</i><sub>B</sub><i>T</i>/<i>h</i> carries no isotope
+      mass at all, so it is exp[(ZPE<sub>H</sub> &minus; ZPE<sub>D</sub>)/<i>k</i><sub>B</sub><i>T</i>]
       &mdash; independent of the barrier height, its width and the asymmetry.
-      Tunneling only adds to it.
+      The lower number adds tunneling through the Eckart barrier.
     </p>
   </div>
 
@@ -290,6 +292,7 @@ function render() {
   const rH = rates('H', Tref), rD = rates('D', Tref);
   const r = P.m === 'H' ? rH : rD;
   document.getElementById('kie-semi').textContent = (rH.zpe / rD.zpe).toFixed(2);
+  document.getElementById('kie-tun').textContent = (rH.eck / rD.eck).toFixed(2);
   document.getElementById('readout').innerHTML =
     row('k classical', fmt(U.auToPerSecond(r.cls)) + ' s⁻¹') +
     row('k ZPE-corrected', fmt(U.auToPerSecond(r.zpe)) + ' s⁻¹', 'pos') +
