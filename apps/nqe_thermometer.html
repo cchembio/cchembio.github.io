@@ -258,7 +258,10 @@ function drawCloud() {
   const yTop = 0.6 * Math.max(...vs);
 
   // Quantum density from the bead histogram, classical one from the Boltzmann
-  // factor; both are probability densities, drawn on one shared scale.
+  // factor; both are probability densities, drawn on one shared scale. The
+  // scale is set by the classical curve alone, which is fixed: tying it to the
+  // noisy, still-building histogram made the classical curve jump around.
+  // Headroom above it lets a taller quantum peak (quartic well) fit.
   const bw = (2 * xMax) / NBINS;
   const hx = [], hy = [];
   for (let b = 0; b < NBINS; b++) {
@@ -266,7 +269,7 @@ function drawCloud() {
     hy.push(live.nHist ? live.hist[b] / (live.nHist * bw) : 0);
   }
   const cl = classicalDensity(xs, P.kind, k, P.T);
-  const scale = (0.85 * yTop) / Math.max(...cl, ...hy, 1e-9);
+  const scale = (0.6 * yTop) / Math.max(...cl);
 
   pCloud.clear().setLimits([-xMax, xMax], [0, yTop])
     .line(xs, vs, { color: '#8b949e', width: 2.5 })
