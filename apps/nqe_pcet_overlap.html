@@ -154,7 +154,7 @@
 
 <div id="right">
   <div class="panel" id="p-overlap">
-    <div class="panel-title">Proton wells and wavefunction overlap along the proton coordinate &mdash; the shaded area is S<sub>00</sub></div>
+    <div class="panel-title">Proton wells and wavefunction overlap along the proton coordinate &mdash; the shaded area under &psi;<sub>0</sub>&middot;&psi;<sub>0</sub> is S<sub>00</sub></div>
     <div class="legend" id="leg-ov"></div>
     <canvas id="cv-ov"></canvas>
   </div>
@@ -270,13 +270,15 @@ function render() {
   const amp = (0.55 * (eTop - e0)) / psiMax;
   const yR = raw.map(([a]) => e0 + a * amp);
   const yP = raw.map(([, b]) => e0 + b * amp);
-  const yMin = raw.map(([a, b]) => e0 + Math.min(a, b) * amp);
+  // The product psi_D * psi_A, whose area is S_00. Scaled so that two coincident
+  // wells (product = psi_0^2) would reach the same height as the psi curves.
+  const yProd = raw.map(([a, b]) => e0 + (a * b * amp) / psiMax);
   pOv.clear()
      .setLimits([xs[0], xs[xs.length - 1]], [-0.06 * eTop, eTop])
      .line(xs, vR, { color: ISOTOPE.H.color + '66', width: 2 })
      .line(xs, vP, { color: '#a371f766', width: 2, dash: [10, 6] })
      .levels([e0], { color: '#6e7681', width: 1.5 })
-     .fillBetween(xs, yMin, e0, { color: '#e3b341', alpha: 0.55 })
+     .fillBetween(xs, yProd, e0, { color: '#e3b341', alpha: 0.55 })
      .line(xs, yR, { color: ISOTOPE.H.color, width: 3 })
      .line(xs, yP, { color: '#a371f7', width: 3, dash: [10, 6] })
      .marker(U.bohrToAng(xRb), 0, { color: '#6e7681', r: 6 })
@@ -285,7 +287,7 @@ function render() {
   document.getElementById('leg-ov').innerHTML =
     `<span><i style="border-color:${ISOTOPE.H.color}"></i>donor well and ψ₀</span>` +
     `<span><i style="border-color:#a371f7;border-top-style:dashed"></i>acceptor well and ψ₀</span>` +
-    `<span><i style="border-color:#e3b341"></i>overlap, S₀₀ = ${cur.s00.toExponential(2)}</span>` +
+    `<span><i style="border-color:#e3b341"></i>ψ₀ · ψ₀, area S₀₀ = ${cur.s00.toExponential(2)}</span>` +
     `<span style="color:#6e7681">${P.m} · ${(P.R).toFixed(3)} Å</span>`;
 
   // ── panel B: Marcus free-energy parabolas, one product parabola per vibronic channel ──
