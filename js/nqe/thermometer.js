@@ -80,11 +80,10 @@ function makeModes(N) {
 }
 
 /**
- * Ring-polymer sampling at temperature T, mass `mass`, in a harmonic or
- * quartic well, accumulating <x^2> and the radius of gyration about the
- * centroid over `targetTime` of (imaginary-time-sampling) simulation.
+ * A ring-polymer Langevin sampler that can be advanced a few steps at a time,
+ * so the app can animate it. `x` is the live bead array (read, don't write).
  */
-export function simulate({ kind, k, T, mass, N = 32, targetTime = 400, dt = 0.05, friction = 1, seed = 1 }) {
+export function createSampler({ kind, k, T, mass, N = 32, dt = 0.05, friction = 1, seed = 1 }) {
   const dtau = 1 / (N * T);
   const modes = makeModes(N);
   const springK = modes.lambda.map((l) => (mass * l) / dtau);   // per-mode spring stiffness; springK[0] = 0
@@ -114,11 +113,7 @@ export function simulate({ kind, k, T, mass, N = 32, targetTime = 400, dt = 0.05
   }
 
   const x = new Float64Array(N), q = new Float64Array(N);
-  const burnIn = Math.ceil((0.25 * targetTime) / dt);
-  const steps = Math.ceil(targetTime / dt);
-  let sumX2 = 0, sumRg2 = 0, nSamp = 0;
-
-  for (let it = 0; it < steps + burnIn; it++) {
+  function step() {
     modes.toModes(x, q);
     springHalfStep(q, dt / 2);
     modes.toReal(q, x);
@@ -126,19 +121,57 @@ export function simulate({ kind, k, T, mass, N = 32, targetTime = 400, dt = 0.05
     modes.toModes(x, q);
     springHalfStep(q, dt / 2);
     modes.toReal(q, x);
-
-    if (it >= burnIn) {
-      let mean = 0;
-      for (let i = 0; i < N; i++) mean += x[i];
-      mean /= N;
-      let x2 = 0, rg2 = 0;
-      for (let i = 0; i < N; i++) { x2 += x[i] * x[i]; rg2 += (x[i] - mean) ** 2; }
-      sumX2 += x2 / N;
-      sumRg2 += rg2 / N;
-      nSamp++;
-    }
   }
-  return { meanX2: sumX2 / nSamp, Rg2: sumRg2 / nSamp, beads: Array.from(x) };
+  return { x, step, dt };
+}
+
+/** Instantaneous <x^2> and squared radius of gyration (about the centroid) of a ring. */
+export function ringStats(x) {
+  const N = x.length;
+  let mean = 0;
+  for (let i = 0; i < N; i++) mean += x[i];
+  mean /= N;
+  let x2 = 0, rg2 = 0;
+  for (let i = 0; i < N; i++) { x2 += x[i] * x[i]; rg2 += (x[i] - mean) ** 2; }
+  return { centroid: mean, x2: x2 / N, rg2: rg2 / N };
+}
+
+/**
+ * Ring-polymer sampling at temperature T, mass `mass`, in a harmonic or
+ * quartic well, accumulating <x^2> and the radius of gyration about the
+ * centroid over `targetTime` of simulation (after a 25% burn-in).
+ *
+ * Incremental form: advance(maxSteps) runs at most that many steps and returns
+ * true once finished, so a caller can spread the work over several tasks.
+ */
+export function startSimulation({ kind, k, T, mass, N = 32, targetTime = 400, dt = 0.05, friction = 1, seed = 1 }) {
+  const sampler = createSampler({ kind, k, T, mass, N, dt, friction, seed });
+  const burnIn = Math.ceil((0.25 * targetTime) / dt);
+  const total = Math.ceil(targetTime / dt) + burnIn;
+  let it = 0, sumX2 = 0, sumRg2 = 0, nSamp = 0;
+  return {
+    advance(maxSteps = Infinity) {
+      const end = Math.min(total, it + maxSteps);
+      for (; it < end; it++) {
+        sampler.step();
+        if (it >= burnIn) {
+          const st = ringStats(sampler.x);
+          sumX2 += st.x2;
+          sumRg2 += st.rg2;
+          nSamp++;
+        }
+      }
+      return it >= total;
+    },
+    result: () => ({ meanX2: sumX2 / nSamp, Rg2: sumRg2 / nSamp, beads: Array.from(sampler.x) }),
+  };
+}
+
+/** One-shot form of startSimulation. */
+export function simulate(opts) {
+  const run = startSimulation(opts);
+  run.advance();
+  return run.result();
 }
 
 /** Exact quantum canonical <x^2> for a 1D harmonic oscillator (hbar=kB=1). */
