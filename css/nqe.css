@@ -85,6 +85,8 @@ h1 .sub { display: block; font-size: 14px; font-weight: 500; color: #8b949e; mar
 
 /* ── sliders ───────────────────────────────────────────────── */
 .sl-row + .sl-row { margin-top: 12px; }
+/* preset and sliders live in separate boxes, so the rule above can't reach across */
+#preset-box + #slider-box { margin-top: 16px; }
 .sl-head {
   display: flex; justify-content: space-between; align-items: baseline;
   font-size: 14.5px; color: #8b949e; margin-bottom: 2px; cursor: pointer;
