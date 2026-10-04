@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quantum thermometer</title>
+<title>1D quantum thermometer</title>
 <link rel="stylesheet" href="../css/nqe.css">
 <style>
   #right { display: grid; grid-template-rows: 1fr 1fr; gap: 12px; }
@@ -20,7 +20,7 @@
 <div id="left">
   <a href="../teaching.html" id="back-link">&#8592; Teaching</a>
 
-  <h1>Quantum thermometer
+  <h1>1D quantum thermometer
     <span class="sub">Zero-point delocalization and the classical limit</span>
   </h1>
 
@@ -64,6 +64,9 @@
     Temperature is given in units of &#295;&omega;<sub>H</sub>/<i>k</i><sub>B</sub>,
     the harmonic well's energy quantum for hydrogen. Below about 0.3 quantum
     effects dominate; above about 1 the particle is nearly classical.
+    In the lower panel, energies are in the same units and positions in
+    units of &radic;(&#295;/<i>m</i><sub>H</sub>&omega;<sub>H</sub>), the
+    length scale of hydrogen's zero-point motion in the harmonic well.
   </div>
 
   <div class="note" id="compute-note">
@@ -211,7 +214,7 @@ document.getElementById('slider-box').appendChild(sT.el);
 const pT = createPlot(document.getElementById('cv-t'),
   { xlabel: 'temperature', ylabel: 'ring size  Rg', pad: { l: 94, b: 50 } });
 const pCloud = createPlot(document.getElementById('cv-cloud'),
-  { xlabel: 'position  x', ylabel: 'energy', pad: { l: 82, b: 50 } });
+  { xlabel: 'position  x   (units of √(ħ/mω) for H)', ylabel: 'energy   (units of ħω for H)', pad: { l: 82, b: 50 } });
 
 const row = (k, v, cls = '') =>
   `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
