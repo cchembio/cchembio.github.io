@@ -127,11 +127,15 @@ function compute() {
   const q = quarticDoubleWell(grid, { barrier, a, dE });
   const m = U.MASS[P.m];
   const { E, psi } = solve(grid, q.V, m, 6);
-  return { grid, q, E, psi, m, a, minima: q.minima(), maxTop: q.barrierTop() };
+  // Tunneling splitting is a property of the symmetric well; with an
+  // asymmetry, E1 - E0 is mostly the asymmetry, so solve the dE = 0 well too.
+  const Es = P.dE === 0 ? E
+    : solve(grid, quarticDoubleWell(grid, { barrier, a, dE: 0 }).V, m, 2).E;
+  return { grid, q, E, psi, m, a, tunnel: Es[1] - Es[0], minima: q.minima(), maxTop: q.barrierTop() };
 }
 
 function render() {
-  const { grid, q, E, psi, minima, maxTop } = compute();
+  const { grid, q, E, psi, tunnel, minima, maxTop } = compute();
   const toA = U.bohrToAng, toK = U.hartreeToKJmol;
   const xs = Array.from(grid.x, toA);
   const Vk = Array.from(q.V, toK);
@@ -214,6 +218,7 @@ function render() {
     const mm = moments(psi[0], grid);
     rd.innerHTML =
       row('Zero-point energy', zpeK.toFixed(2) + ' kJ/mol', 'gold') +
+      row('Tunneling splitting', fmtCm(U.hartreeToCm(tunnel)) + ' cm⁻¹', 'gold') +
       row('E<sub>1</sub> − E<sub>0</sub>', fmtCm(split) + ' cm⁻¹', 'gold') +
       row('Density width of ψ<sub>0</sub>', toA(mm.width).toFixed(3) + ' Å', P.m === 'D' ? 'd' : 'h');
 
