@@ -214,7 +214,7 @@ document.getElementById('slider-box').appendChild(sT.el);
 const pT = createPlot(document.getElementById('cv-t'),
   { xlabel: 'temperature', ylabel: 'ring size  Rg', pad: { l: 94, b: 50 } });
 const pCloud = createPlot(document.getElementById('cv-cloud'),
-  { xlabel: 'position  x   (units of √(ħ/mω) for H)', ylabel: 'energy   (units of ħω for H)', pad: { l: 82, b: 50 } });
+  { xlabel: 'position  x', ylabel: 'energy', pad: { l: 82, b: 50 } });
 
 const row = (k, v, cls = '') =>
   `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
