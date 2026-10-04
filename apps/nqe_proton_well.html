@@ -212,13 +212,10 @@ function render() {
     const split = U.hartreeToCm(E[1] - E[0]);
     const zpeK = toK(E[0]) - vMin;
     const mm = moments(psi[0], grid);
-    const dx0 = toA(mm.mean) - toA(minima[0].x);
     rd.innerHTML =
       row('Zero-point energy', zpeK.toFixed(2) + ' kJ/mol', 'gold') +
       row('E<sub>1</sub> − E<sub>0</sub>', fmtCm(split) + ' cm⁻¹', 'gold') +
-      row('… as a period', fmtTime(split)) +
-      row('Density width', toA(mm.width).toFixed(3) + ' Å', P.m === 'D' ? 'd' : 'h') +
-      row('⟨x⟩ − x<sub>min</sub>', (dx0 >= 0 ? '+' : '') + dx0.toFixed(4) + ' Å');
+      row('Density width of ψ<sub>0</sub>', toA(mm.width).toFixed(3) + ' Å', P.m === 'D' ? 'd' : 'h');
 
     const edge = Math.max(...psi.slice(0, nShow).map((p) => edgeAmplitude(p)));
     warn.classList.toggle('vis', edge > 1e-4);
@@ -242,15 +239,6 @@ function render() {
 
 const row = (k, v, cls = '') => `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
 const fmtCm = (v) => (v >= 100 ? v.toFixed(0) : v >= 1 ? v.toFixed(2) : v.toExponential(2));
-function fmtTime(cm) {
-  if (cm <= 0) return '—';
-  const t = 1 / (2 * cm * 2.99792458e10);            // half a Rabi period, seconds
-  if (t < 1e-12) return (t * 1e15).toFixed(1) + ' fs';
-  if (t < 1e-9) return (t * 1e12).toFixed(1) + ' ps';
-  if (t < 1e-6) return (t * 1e9).toFixed(1) + ' ns';
-  if (t < 1) return (t * 1e6).toFixed(1) + ' µs';
-  return t.toExponential(1) + ' s';
-}
 
 const run = scheduleRecompute(render);
 onResize(() => plot.draw());
