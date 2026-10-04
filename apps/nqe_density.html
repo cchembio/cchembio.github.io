@@ -193,9 +193,9 @@ function render() {
     row('⟨x⟩ H', toA(H.mean).toFixed(4) + ' Å', 'h') +
     row('⟨x⟩ D', toA(D.mean).toFixed(4) + ' Å', 'd') +
     row('Classical minimum', toA(cmin.x).toFixed(4) + ' Å', 'gold') +
-    row('Width H', toA(H.width).toFixed(4) + ' Å', 'h') +
-    row('Width D', toA(D.width).toFixed(4) + ' Å', 'd') +
-    row('Width ratio H/D', (H.width / D.width).toFixed(3));
+    // zero-point vibrational energy: ground level above the lowest minimum
+    row('ZPVE H', toK(H.E[0] - H.minima[0].V).toFixed(2) + ' kJ/mol', 'h') +
+    row('ZPVE D', toK(D.E[0] - D.minima[0].V).toFixed(2) + ' kJ/mol', 'd');
 
   const edge = Math.max(H.edge, D.edge);
   const warn = document.getElementById('warn');
