@@ -23,10 +23,17 @@
     <span class="card-label">Regime</span>
     <div class="rate-big" id="regime" style="font-size:20px">—</div>
     <p class="note" style="margin-top:8px;border:none;padding:0">
-      A ring of 32 beads represents the imaginary-time tunneling path. Its
-      action is minimized by plain steepest descent &mdash; no dedicated
+      A ring of 32 beads represents the tunneling path, stretched between the
+      two wells. Its action is minimized by plain gradient descent &mdash; no dedicated
       saddle search &mdash; which only finds the true instanton because the
       ring starts, and stays, exactly mirror-symmetric between the two wells.
+    </p>
+    <p class="note" style="margin-top:8px;border:none;padding:0">
+      Each bead is a copy of the same proton; together, the ring describes how
+      the proton is spread out in space &mdash; its delocalization (see
+      <em>Quantum thermometer</em>). The instanton is the single ring shape that
+      dominates tunneling: the most likely way for the delocalized proton to
+      reach across the barrier. It is not a route the proton travels along.
     </p>
   </div>
 
@@ -43,6 +50,14 @@
   <div class="card">
     <span class="card-label">Readouts</span>
     <div id="readout"></div>
+    <p class="note" style="margin-top:9px;border:none;padding:0;font-size:12.5px">
+      <strong>Effective barrier</strong>: the classical barrier height that would
+      give the same rate exponent as the tunneling path. Above
+      <i>T</i><sub>c</sub> the ring sits on the saddle and this equals the true
+      barrier <i>V</i><sup>&Dagger;</sup>; below <i>T</i><sub>c</sub> it drops
+      under it &mdash; tunneling makes the barrier look lower. Energies in units
+      of <i>k</i><sub>B</sub><i>T</i><sub>c</sub>.
+    </p>
   </div>
 
   <div class="note">
@@ -52,11 +67,11 @@
   </div>
 
   <div class="note">
-    The path is not the reaction coordinate &mdash; it is a closed loop in
-    <em>imaginary time</em>, with period 1/<i>T</i>. Close to <i>T</i><sub>c</sub>
-    that period is short, so the beads don't have enough imaginary time to
-    swing all the way out to the classical minima before looping back; the
-    ring only grows to meet them as <i>T</i> &rarr; 0. A gap between the path
+    The path is not the reaction coordinate. The beads are joined by springs
+    whose stiffness grows with temperature: near <i>T</i><sub>c</sub> the
+    springs are tight and hold the ring compact, so it cannot reach out to the
+    classical minima; as <i>T</i> &rarr; 0 they slacken and the ring stretches
+    until it does. A gap between the path
     and the minima markers is expected well below <i>T</i><sub>c</sub>, not a
     sign the path is cut off.
   </div>
@@ -90,6 +105,7 @@ import { slider, presetSelect, hashState, scheduleRecompute, onResize } from '..
 const a = 1, A = Math.PI * Math.PI;   // T_c = 1 exactly, by construction
 const PARAMS = { A, a, ky: 20, w: 0.5 };
 const Tc = crossoverT(PARAMS);
+const V0 = potential(0, 0, { ...PARAMS, skew: 0 });   // barrier height, independent of skew
 
 const PRESETS = {
   above: { name: 'Above the crossover',        T: 1.6, skew: 0.8 },
@@ -207,7 +223,9 @@ function render() {
     row('T_c', Tc.toFixed(3)) +
     row('Path extent', r.extent.toFixed(4), above ? '' : 'gold') +
     row('Corner-cutting (max dev.)', r.maxDeviation.toFixed(4), P.skew > 0 && !above ? 'gold' : '') +
-    row('Discretized action', r.action.toFixed(3));
+    row('Barrier height V<sup>‡</sup>', V0.toFixed(2)) +
+    // k_B T * S / hbar in model units; a collapsed ring gives exactly V0
+    row('Effective barrier', (r.action * P.T).toFixed(2), above ? '' : 'gold');
 
   // ── extent vs T curve, cheap enough to redo on every slider change ──
   const Ts = [], ext = [];
