@@ -154,12 +154,13 @@
 
 <div id="right">
   <div class="panel" id="p-overlap">
-    <div class="panel-title">Proton wavefunction overlap &mdash; the shaded area is S<sub>00</sub></div>
+    <div class="panel-title">Proton wells and wavefunction overlap along the proton coordinate &mdash; the shaded area is S<sub>00</sub></div>
     <div class="legend" id="leg-ov"></div>
     <canvas id="cv-ov"></canvas>
   </div>
   <div class="panel">
-    <div class="panel-title">Diabatic proton potentials and levels</div>
+    <div class="panel-title">Free energy along the solvent coordinate</div>
+    <div class="legend" id="leg-pot"></div>
     <canvas id="cv-pot"></canvas>
   </div>
   <div class="panel">
@@ -171,7 +172,7 @@
 
 <script type="module">
 import * as U from '../js/nqe/units.js';
-import { DEFAULTS, well, psiAt, rateAt, rateGated } from '../js/nqe/pcet.js';
+import { DEFAULTS, well, psiAt, overlapAt, rateAt, rateGated } from '../js/nqe/pcet.js';
 import { createPlot } from '../js/nqe/plot.js';
 import { slider, segmented, presetSelect, hashState, scheduleRecompute, onResize, ISOTOPE }
   from '../js/nqe/ui.js';
@@ -224,11 +225,12 @@ document.getElementById('mass-box').appendChild(mass.el);
 
 // ── plots ──────────────────────────────────────────────────────
 const pOv = createPlot(document.getElementById('cv-ov'),
-  { xlabel: 'proton position  (Å)', ylabel: 'ψ' });
+  { xlabel: 'proton position  (Å)', ylabel: 'energy  (kJ/mol)', pad: { l: 76 } });
 const pPot = createPlot(document.getElementById('cv-pot'),
-  { xlabel: 'proton position  (Å)', ylabel: 'energy  (kJ/mol)', pad: { l: 76, b: 42 } });
+  { xlabel: 'solvent coordinate  (0 = donor, 1 = acceptor)', ylabel: 'free energy  (kJ/mol)',
+    pad: { l: 76, b: 52 } });
 const pK = createPlot(document.getElementById('cv-k'),
-  { xlabel: 'R  (Å)', ylabel: 'log₁₀ k / s⁻¹', pad: { l: 76, b: 42 } });
+  { xlabel: 'R  (Å)', ylabel: 'log₁₀ k / s⁻¹', pad: { l: 76, b: 52 } });
 
 let sweep = { key: null };
 
@@ -244,57 +246,96 @@ function render() {
   const kH = rateGated('H', p), kD = rateGated('D', p);
   const kShown = P.m === 'H' ? kH : kD;
 
-  // ── panel A: the overlap itself, both psi_0 on one baseline ──
-  const xs = [], yR = [], yP = [], yMin = [];
+  // ── panel A: both Morse wells, with psi_0 drawn at its zero-point level ──
+  // Along the proton coordinate the two diabatic wells are mirror images with
+  // the same zero-point energy; the driving force lives on the solvent axis.
+  const toK = U.hartreeToKJmol;
   const xRb = -cur.d / 2, xPb = cur.d / 2;
   const lo = xRb - 1.5, hi = xPb + 1.5;
   const N = 400;
+  const e0 = toK(w.E[0]);
+  const vCross = toK(DE * (1 - Math.exp(-w.alpha * cur.d / 2)) ** 2);
+  const eTop = Math.max(2.5 * e0, 1.15 * vCross);
+  const xs = [], vR = [], vP = [], raw = [];
   for (let i = 0; i < N; i++) {
     const x = lo + ((hi - lo) * i) / (N - 1);
-    const a = psiAt(w, 0, x - xRb);          // reactant well at xRb
-    const b = psiAt(w, 0, xPb - x);          // product well is the mirror image
+    const t1 = 1 - Math.exp(-w.alpha * (x - xRb));
+    const t2 = 1 - Math.exp(w.alpha * (x - xPb));
     xs.push(U.bohrToAng(x));
-    yR.push(a);
-    yP.push(b);
-    yMin.push(Math.min(a, b));
+    vR.push(toK(DE * t1 * t1));
+    vP.push(toK(DE * t2 * t2));
+    raw.push([psiAt(w, 0, x - xRb), psiAt(w, 0, xPb - x)]);   // product well is the mirror image
   }
-  const yMax = Math.max(...yR, ...yP);
+  const psiMax = Math.max(...raw.map(([a, b]) => Math.max(a, b)));
+  const amp = (0.55 * (eTop - e0)) / psiMax;
+  const yR = raw.map(([a]) => e0 + a * amp);
+  const yP = raw.map(([, b]) => e0 + b * amp);
+  const yMin = raw.map(([a, b]) => e0 + Math.min(a, b) * amp);
   pOv.clear()
-     .setLimits([xs[0], xs[xs.length - 1]], [-0.06 * yMax, 1.18 * yMax])
-     .fillBetween(xs, yMin, 0, { color: '#e3b341', alpha: 0.55 })
+     .setLimits([xs[0], xs[xs.length - 1]], [-0.06 * eTop, eTop])
+     .line(xs, vR, { color: ISOTOPE.H.color + '66', width: 2 })
+     .line(xs, vP, { color: '#a371f766', width: 2, dash: [10, 6] })
+     .levels([e0], { color: '#6e7681', width: 1.5 })
+     .fillBetween(xs, yMin, e0, { color: '#e3b341', alpha: 0.55 })
      .line(xs, yR, { color: ISOTOPE.H.color, width: 3 })
      .line(xs, yP, { color: '#a371f7', width: 3, dash: [10, 6] })
      .marker(U.bohrToAng(xRb), 0, { color: '#6e7681', r: 6 })
      .marker(U.bohrToAng(xPb), 0, { color: '#6e7681', r: 6 })
      .draw();
   document.getElementById('leg-ov').innerHTML =
-    `<span><i style="border-color:${ISOTOPE.H.color}"></i>ψ₀ on the donor</span>` +
-    `<span><i style="border-color:#a371f7;border-top-style:dashed"></i>ψ₀ on the acceptor</span>` +
+    `<span><i style="border-color:${ISOTOPE.H.color}"></i>donor well and ψ₀</span>` +
+    `<span><i style="border-color:#a371f7;border-top-style:dashed"></i>acceptor well and ψ₀</span>` +
     `<span><i style="border-color:#e3b341"></i>overlap, S₀₀ = ${cur.s00.toExponential(2)}</span>` +
     `<span style="color:#6e7681">${P.m} · ${(P.R).toFixed(3)} Å</span>`;
 
-  // ── panel B: the diabatic potentials with their levels ──
-  const xs2 = [], vR = [], vP = [];
-  for (let i = 0; i < N; i++) {
-    const x = lo + ((hi - lo) * i) / (N - 1);
-    const t1 = 1 - Math.exp(-w.alpha * (x - xRb));
-    const t2 = 1 - Math.exp(w.alpha * (x - xPb));
-    xs2.push(U.bohrToAng(x));
-    vR.push(U.hartreeToKJmol(DE * t1 * t1));
-    vP.push(U.hartreeToKJmol(DE * t2 * t2 + p.dG));
+  // ── panel B: Marcus free-energy parabolas, one product parabola per vibronic channel ──
+  // Reactant in its proton ground state (excited donor levels have ~e^-14 population
+  // at 3000 cm^-1); product parabolas are lifted by the acceptor's vibrational
+  // excitation E_nu - E_0. Each channel's share of the rate (at this R, no gating)
+  // is |S_0nu|^2 times its Marcus factor; V_el and the prefactor are common.
+  const lam = P.lam, kTk = toK(U.kT(P.T));
+  const ch = [];
+  for (let nu = 0; nu < NSTATE; nu++) {
+    const S = overlapAt(w, 0, nu, cur.d);
+    const D = P.dG + toK(w.E[nu] - w.E[0]);
+    const Ga = (D + lam) ** 2 / (4 * lam);
+    ch.push({ nu, D, Ga, q: 0.5 * (1 + D / lam), wt: S * S * Math.exp(-Ga / kTk) });
   }
-  const topK = U.hartreeToKJmol(w.E[NSTATE - 1]) * 1.5 + Math.max(0, P.dG);
-  const botK = Math.min(0, P.dG) - 0.15 * Math.abs(topK);
-  pPot.clear().setLimits([xs2[0], xs2[xs2.length - 1]], [botK, topK])
-      .line(xs2, vR, { color: ISOTOPE.H.color, width: 2.5 })
-      .line(xs2, vP, { color: '#a371f7', width: 2.5, dash: [10, 6] });
-  for (let n = 0; n < NSTATE; n++) {
-    const eR = U.hartreeToKJmol(w.E[n]);
-    const eP = U.hartreeToKJmol(w.E[n]) + P.dG;
-    pPot.levels([eR], { xrange: [xs2[0], U.bohrToAng(xRb) + 0.35], color: ISOTOPE.H.color, width: 1.8 });
-    pPot.levels([eP], { xrange: [U.bohrToAng(xPb) - 0.35, xs2[xs2.length - 1]], color: '#a371f7', width: 1.8 });
+  const tot = ch.reduce((a, c) => a + c.wt, 0);
+  for (const c of ch) c.share = tot > 0 ? c.wt / tot : (c.nu === 0 ? 1 : 0);
+  const dom = ch.reduce((a, c) => (c.share > a.share ? c : a));
+  const shown = ch.filter((c) => c.nu === 0 || c.share >= 1e-3);
+
+  const gTop = 1.12 * Math.max(lam, ...shown.map((c) => c.Ga), ...shown.map((c) => c.D + 0.15 * lam));
+  const gLo = Math.min(0, ...shown.map((c) => c.D));
+  const gBot = gLo - 0.1 * (gTop - gLo);
+  const qs = [];
+  for (let i = 0; i < N; i++) qs.push(-0.6 + (2.2 * i) / (N - 1));
+  pPot.clear().setLimits([-0.6, 1.6], [gBot, gTop])
+      .line([0, 1], [0, 0], { color: '#6e7681', width: 1.5, dash: [3, 4] })
+      .line([1, 1], [0, lam], { color: '#6e7681', width: 1.5, dash: [3, 4] })
+      .text(0.97, lam / 2, 'λ', { color: '#8b949e', align: 'right', baseline: 'middle' })
+      .line(qs, qs.map((q) => lam * q * q), { color: ISOTOPE.H.color, width: 3 });
+  for (const c of [...ch].reverse()) {
+    const a = Math.round(255 * (0.22 + 0.78 * c.share)).toString(16).padStart(2, '0');
+    pPot.line(qs, qs.map((q) => lam * (q - 1) ** 2 + c.D),
+      { color: '#a371f7' + a, width: 2 + 1.5 * c.share, dash: [10, 6] });
+    if (c.D > gBot && c.D < gTop) {
+      pPot.text(1.04, c.D, `ν=${c.nu}  ${fmtPct(c.share)}`,
+        { color: '#a371f7' + a, baseline: 'top' });
+    }
   }
-  pPot.draw();
+  for (const c of shown) {
+    if (c !== dom) pPot.marker(c.q, c.Ga, { color: '#a371f7', r: 5, hollow: true });
+  }
+  pPot.marker(dom.q, dom.Ga, { color: '#e3b341', r: 7 })
+      .text(dom.q, dom.Ga + 0.04 * (gTop - gBot), `ΔG‡ = ${dom.Ga.toFixed(1)} kJ/mol`,
+        { color: '#e3b341', align: 'center' })
+      .draw();
+  document.getElementById('leg-pot').innerHTML =
+    `<span><i style="border-color:${ISOTOPE.H.color}"></i>donor, ν=0</span>` +
+    `<span><i style="border-color:#a371f7;border-top-style:dashed"></i>acceptor, ν=0…${NSTATE - 1}</span>` +
+    `<span style="color:#e3b341">● main channel</span>`;
 
   // ── panel C: log10 k against R, both isotopes ──
   // The sweep does not depend on R, so dragging R only moves the marker.
@@ -331,6 +372,8 @@ function render() {
     row('log₁₀ k', Math.log10(ks).toFixed(2)) +
     row('Overlap S₀₀', cur.s00.toExponential(2), P.m === 'D' ? 'd' : 'h') +
     row('Coupling V₀₀', (U.hartreeToCm(VEL * cur.s00)).toExponential(2) + ' cm⁻¹') +
+    row('Dominant channel', `0 → ${dom.nu}  (${fmtPct(dom.share)})`) +
+    row('Its activation ΔG‡', dom.Ga.toFixed(1) + ' kJ/mol') +
     row('Well separation', U.bohrToAng(cur.d).toFixed(3) + ' Å');
   document.getElementById('kie-hi-note').style.display = (kH / kD) > 1000 ? '' : 'none';
 
@@ -349,6 +392,8 @@ function render() {
 
   hashState.write(P);
 }
+
+const fmtPct = (f) => (f >= 0.995 ? '100%' : f >= 0.01 ? (100 * f).toFixed(0) + '%' : '<1%');
 
 function fmtSci(v) {
   const e = Math.floor(Math.log10(v));
