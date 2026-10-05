@@ -129,8 +129,9 @@ const NBINS = 120;
 const BURN_IN_FRAMES = 15;
 // Enough steps per frame (~2 ms in all) for both averages to settle within
 // seconds: the ring drifts slowly at high T, and a single classical particle
-// needs many oscillations before its histogram is smooth.
-const Q_STEPS = 200, C_STEPS = 40;
+// needs many oscillations before its histogram is smooth (more for heavier
+// isotopes, which oscillate more slowly). A classical step is nearly free.
+const Q_STEPS = 200, C_STEPS = 3000;
 
 function newRun(sampler) {
   return { sampler, hist: new Float64Array(NBINS), nHist: 0, sumX2: 0, sumRg2: 0, nAvg: 0 };
