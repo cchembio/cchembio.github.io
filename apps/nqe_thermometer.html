@@ -28,10 +28,11 @@
     <div class="rate-big" id="ratio">—</div>
     <p class="note" style="margin-top:8px;border:none;padding:0">
       How much more spread out the quantum particle is than a classical one at
-      the same temperature. At high temperature the two agree. As the
-      temperature falls, the classical particle settles into the bottom of the
-      well while the quantum one keeps its zero-point spread, so the ratio
-      grows. Heavier isotopes stay closer to classical.
+      the same temperature. When <i>k</i><sub>B</sub><i>T</i> is well above
+      the vibrational quantum &#295;&omega; the two agree. Below it, the
+      classical particle settles into the bottom of the well while the quantum
+      one keeps its zero-point spread, so the ratio grows. Heavier isotopes
+      stay closer to classical.
     </p>
   </div>
 
@@ -47,7 +48,7 @@
   </div>
 
   <div class="card">
-    <span class="card-label">Temperature</span>
+    <span class="card-label">Vibration and temperature</span>
     <div id="slider-box"></div>
   </div>
 
@@ -58,15 +59,16 @@
       Averages over the live simulations &mdash; they settle within a few
       seconds and restart whenever a control changes.
     </p>
+    <p class="note" id="gs-note" style="margin-top:6px;border:none;padding:0;font-size:12.5px;display:none"></p>
   </div>
 
   <div class="note">
-    Temperature is given in units of &#295;&omega;<sub>H</sub>/<i>k</i><sub>B</sub>,
-    the harmonic well's energy quantum for hydrogen. Below about 0.3 quantum
-    effects dominate; above about 1 the particle is nearly classical.
-    In the panels, energies are in the same units and positions in
-    units of &radic;(&#295;/<i>m</i><sub>H</sub>&omega;<sub>H</sub>), the
-    length scale of hydrogen's zero-point motion in the harmonic well.
+    The well is set by the vibrational wavenumber of H. D and T feel the same
+    force constant, so they vibrate at &omega;&#771;/&radic;2 and
+    &omega;&#771;/&radic;3. Quantum effects dominate when
+    <i>k</i><sub>B</sub><i>T</i> is below about a third of &#295;&omega;; well
+    above &#295;&omega; the particle is nearly classical. For the quartic
+    well, &omega;&#771; sets the energy and length scales in the same way.
   </div>
 
   <div class="note">
@@ -96,36 +98,57 @@ import { createSampler, createClassicalSampler, ringStats, potential } from '../
 import { createPlot } from '../js/nqe/plot.js';
 import { slider, segmented, presetSelect, hashState, onResize, ISOTOPE }
   from '../js/nqe/ui.js';
-import { MASS as NUCLEAR_MASS } from '../js/nqe/units.js';
+import * as U from '../js/nqe/units.js';
 
-// Only the isotope mass *ratios* matter here (everything is normalized to
-// H = 1), so derive them from the same bare-nucleus masses the solver-based
-// apps use, rather than maintaining a separate hand-typed approximation.
-const MASS = {
-  H: 1,
-  D: NUCLEAR_MASS.D / NUCLEAR_MASS.H,
-  T: NUCLEAR_MASS.T / NUCLEAR_MASS.H,
-};
-const K = 1;               // fixed well stiffness (harmonic); tuned quartic stiffness below
+// The simulations run in reduced units (hbar = kB = m_H = 1, harmonic omega_H = 1)
+// and are converted to physical units only for display: the H vibrational
+// wavenumber sets the energy unit hbar*omega_H and the length unit
+// sqrt(hbar / m_H omega_H); temperature enters as T* = kB T / hbar*omega_H.
+// Only isotope mass *ratios* matter inside the simulation.
+const MASS = { H: 1, D: U.MASS.D / U.MASS.H, T: U.MASS.T / U.MASS.H };
+const K = 1;               // harmonic well in reduced units; tuned quartic stiffness below
 const K_QUARTIC = 0.35;
-const TMIN = 0.05, TMAX = 3.0;
-const X_MAX = { harmonic: 4.5, quartic: 3.0 };   // fixed per well so temperatures and isotopes compare
+// 32 beads are accurate down to T* ~ 0.05; below that every isotope is in its
+// ground state to better than 0.01%, so the ring is simulated at T* = 0.05.
+const TQ_MIN = 0.05;
 
 const PRESETS = {
-  cold: { name: 'Cold, deep quantum regime', T: 0.05, kind: 'harmonic' },
-  warm: { name: 'Warm, near-classical', T: 2.1, kind: 'harmonic' },
-  quartic: { name: 'Quartic well', T: 0.35, kind: 'quartic' },
+  oh:    { name: 'O–H stretch at room temperature',       w: 3600, TK: 298,  kind: 'harmonic' },
+  ohhot: { name: 'O–H stretch at 1000 K',                  w: 3600, TK: 1000, kind: 'harmonic' },
+  bend:  { name: 'Bending mode at room temperature',       w: 1500, TK: 298,  kind: 'harmonic' },
+  soft:  { name: 'Low-frequency mode at room temperature', w: 200,  TK: 298,  kind: 'harmonic' },
+  quartic: { name: 'Quartic well at room temperature',     w: 1000, TK: 298,  kind: 'quartic' },
 };
-const P = Object.assign({ preset: 'cold', m: 'H' }, PRESETS.cold);
+const P = Object.assign({ preset: 'oh', m: 'H' }, PRESETS.oh);
 Object.assign(P, hashState.read() || {});
+delete P.name;
 
 const kFor = (kind) => (kind === 'quartic' ? K_QUARTIC : K);
 // The classical regime is gold throughout, as in "Proton in a potential".
 const CLASSICAL = '#e3b341';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/** Physical scales for the current settings. */
+function scales() {
+  const wAu = U.cmToHartree(P.w);                    // hbar*omega_H in hartree
+  const Tstar = U.kT(P.TK) / wAu;
+  return {
+    Tstar,
+    Tq: Math.max(Tstar, TQ_MIN),
+    eKJ: U.hartreeToKJmol(wAu),                       // energy unit, kJ/mol
+    lenA: U.bohrToAng(1 / Math.sqrt(U.MASS.H * wAu)), // length unit, Å
+    groundK: (TQ_MIN * wAu) / U.KB_HARTREE,           // below this the ring is clamped
+  };
+}
+/** Half-width of the plotted range (reduced units): zero-point or thermal spread, whichever is larger. */
+function xRange(kind, Tstar) {
+  return kind === 'quartic'
+    ? Math.max(2.5, 2.2 * (Tstar / K_QUARTIC) ** 0.25)
+    : Math.max(3.5, 4 * Math.sqrt(Tstar));
+}
+
 // ── live simulations: stepped every frame, with running averages and histograms ──
-const NBINS = 120;
+const NBINS = 200;
 const BURN_IN_FRAMES = 15;
 // Enough steps per frame (~2 ms in all) for both averages to settle within
 // seconds: the ring drifts slowly at high T, and a single classical particle
@@ -136,16 +159,17 @@ const Q_STEPS = 200, C_STEPS = 3000;
 function newRun(sampler) {
   return { sampler, hist: new Float64Array(NBINS), nHist: 0, sumX2: 0, sumRg2: 0, nAvg: 0 };
 }
-let Q = null, C = null, frameNo = 0;
+let Q = null, C = null, S = null, xMax = 1, frameNo = 0;
 function resetLive() {
-  const opts = { kind: P.kind, k: kFor(P.kind), T: P.T, mass: MASS[P.m] };
-  Q = newRun(createSampler({ ...opts, N: 32, seed: 11, centroidMobility: Math.max(1, 16 * P.T) }));
-  C = newRun(createClassicalSampler({ ...opts, seed: 5 }));
+  S = scales();
+  xMax = xRange(P.kind, S.Tstar);
+  const opts = { kind: P.kind, k: kFor(P.kind), mass: MASS[P.m] };
+  Q = newRun(createSampler({ ...opts, T: S.Tq, N: 32, seed: 11, centroidMobility: Math.max(1, 16 * S.Tq) }));
+  C = newRun(createClassicalSampler({ ...opts, T: S.Tstar, seed: 5 }));
   frameNo = 0;
 }
 
 function advance(run, steps) {
-  const xMax = X_MAX[P.kind];
   for (let s = 0; s < steps; s++) {
     run.sampler.step();
     if (frameNo < BURN_IN_FRAMES) continue;
@@ -161,8 +185,8 @@ function advance(run, steps) {
 
 // ── controls ───────────────────────────────────────────────────
 const preset = presetSelect(PRESETS, (key, p) => {
-  Object.assign(P, { T: p.T, kind: p.kind, preset: key });
-  sT.set(P.T); kind.set(P.kind);
+  Object.assign(P, { w: p.w, TK: p.TK, kind: p.kind, preset: key });
+  sW.set(P.w); sT.set(P.TK); kind.set(P.kind);
   changed();
 });
 preset.set(P.preset);
@@ -183,21 +207,25 @@ const mass = segmented({
 });
 document.getElementById('mass-box').appendChild(mass.el);
 
-const sT = slider({ label: 'Temperature  (<i>k</i><sub>B</sub><i>T</i> / &#295;&omega;<sub>H</sub>)',
-  min: TMIN, max: TMAX, step: 0.01, value: P.T,
-  unit: '', decimals: 2, onInput: (v) => touch('T', v) });
-document.getElementById('slider-box').appendChild(sT.el);
+const sW = slider({ label: 'Vibrational wavenumber &omega;&#771; of H',
+  min: 100, max: 4000, step: 10, value: P.w,
+  unit: 'cm⁻¹', decimals: 0, onInput: (v) => touch('w', v) });
+const sT = slider({ label: 'Temperature',
+  min: 10, max: 1000, step: 1, value: P.TK,
+  unit: 'K', decimals: 0, onInput: (v) => touch('TK', v) });
+document.getElementById('slider-box').append(sW.el, sT.el);
 
 const pCl = createPlot(document.getElementById('cv-cl'),
-  { xlabel: 'position  x', ylabel: 'energy', pad: { l: 82, b: 50 } });
+  { xlabel: 'position  x  (Å)', ylabel: 'energy  (kJ/mol)', pad: { l: 82, b: 50 } });
 const pQ = createPlot(document.getElementById('cv-q'),
-  { xlabel: 'position  x', ylabel: 'energy', pad: { l: 82, b: 50 } });
+  { xlabel: 'position  x  (Å)', ylabel: 'energy  (kJ/mol)', pad: { l: 82, b: 50 } });
 
 const row = (k, v, cls = '') =>
   `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
 
 function classicalDensity(xs, kind, k, T) {
-  const w = xs.map((x) => Math.exp(-potential(x, { kind, k }) / T));
+  const vmin = Math.min(...xs.map((x) => potential(x, { kind, k })));
+  const w = xs.map((x) => Math.exp(-(potential(x, { kind, k }) - vmin) / T));
   const dx = xs[1] - xs[0], Z = w.reduce((a, b) => a + b, 0) * dx;
   return w.map((v) => v / Z);
 }
@@ -206,13 +234,14 @@ function classicalDensity(xs, kind, k, T) {
  * One panel: the well, the histogram of where the run's particle (or beads)
  * have been, the classical Boltzmann density, and the particle(s) now. Both
  * panels share axes and a vertical scale set by the classical curve alone,
- * which is fixed, so they compare directly.
+ * which is fixed, so they compare directly. Computed in reduced units and
+ * drawn in Å and kJ/mol.
  */
 function drawPanel(plot, run, markerR, col) {
-  const k = kFor(P.kind), xMax = X_MAX[P.kind];
+  const k = kFor(P.kind), L = S.lenA, E = S.eKJ;
   const xs = [], vs = [];
-  for (let i = 0; i <= 200; i++) {
-    const x = -xMax + (2 * xMax * i) / 200;
+  for (let i = 0; i <= 800; i++) {
+    const x = -xMax + (2 * xMax * i) / 800;
     xs.push(x);
     vs.push(potential(x, { kind: P.kind, k }));
   }
@@ -220,19 +249,20 @@ function drawPanel(plot, run, markerR, col) {
   const bw = (2 * xMax) / NBINS;
   const hx = [], hy = [];
   for (let b = 0; b < NBINS; b++) {
-    hx.push(-xMax + (b + 0.5) * bw);
+    hx.push((-xMax + (b + 0.5) * bw) * L);
     hy.push(run.nHist ? run.hist[b] / (run.nHist * bw) : 0);
   }
-  const cl = classicalDensity(xs, P.kind, k, P.T);
+  const cl = classicalDensity(xs, P.kind, k, S.Tstar);
   // Headroom above the classical peak lets a taller quantum peak (quartic) fit.
   const scale = (0.6 * yTop) / Math.max(...cl);
 
-  plot.clear().setLimits([-xMax, xMax], [0, yTop])
-    .line(xs, vs, { color: '#8b949e', width: 2.5 })
-    .fillBetween(hx, hy.map((v) => v * scale), 0, { color: col, alpha: 0.35 })
-    .line(xs, cl.map((v) => v * scale), { color: '#e6edf3', width: 1.8, dash: [5, 5] });
-  const y = 0.05 * yTop;
-  for (const x of run.sampler.x) plot.marker(x, y, { color: col, r: markerR });
+  const xA = xs.map((x) => x * L);
+  plot.clear().setLimits([-xMax * L, xMax * L], [0, yTop * E])
+    .line(xA, vs.map((v) => v * E), { color: '#8b949e', width: 2.5 })
+    .fillBetween(hx, hy.map((v) => v * scale * E), 0, { color: col, alpha: 0.35 })
+    .line(xA, cl.map((v) => v * scale * E), { color: '#e6edf3', width: 1.8, dash: [5, 5] });
+  const y = 0.05 * yTop * E;
+  for (const x of run.sampler.x) plot.marker(x * L, y, { color: col, r: markerR });
   plot.draw();
 }
 
@@ -240,22 +270,38 @@ function drawLegends() {
   const rest = (col) =>
     `<span><i style="border-color:${col};border-top-width:6px;opacity:.5"></i>where it has been</span>` +
     `<span><i style="border-color:#e6edf3;border-top-style:dashed"></i>classical particle at temperature T</span>` +
+    `<span style="color:#6e7681">(probabilities, height not to scale)</span>` +
     `<span><i style="border-color:#8b949e"></i>well V(x)</span>`;
   const q = ISOTOPE[P.m].color;
   document.getElementById('leg-cl').innerHTML = `<span style="color:${CLASSICAL}">● the particle now</span>` + rest(CLASSICAL);
   document.getElementById('leg-q').innerHTML = `<span style="color:${q}">● the 32 beads now</span>` + rest(q);
+
+  const gs = document.getElementById('gs-note');
+  const clamped = S.Tstar < TQ_MIN;
+  gs.style.display = clamped ? '' : 'none';
+  gs.textContent = clamped
+    ? `Below ${S.groundK.toFixed(0)} K this quantum particle is in its ground state; the ring is ` +
+      `simulated at ${S.groundK.toFixed(0)} K, which gives the same result.`
+    : '';
 }
 
 function drawReadout() {
   const cls = P.m === 'D' ? 'd' : P.m === 'T' ? '' : 'h';
-  const cX2 = C.nAvg ? C.sumX2 / C.nAvg : null;
-  const qX2 = Q.nAvg ? Q.sumX2 / Q.nAvg : null;
+  const L = S.lenA;
+  const cR = C.nAvg ? Math.sqrt(C.sumX2 / C.nAvg) * L : null;
+  const qR = Q.nAvg ? Math.sqrt(Q.sumX2 / Q.nAvg) * L : null;
+  const kT = U.hartreeToKJmol(U.kT(P.TK));
+  const vib = P.kind === 'harmonic'
+    ? row(`Vibrational quantum &#295;&omega; (${P.m})`,
+        `${(S.eKJ / Math.sqrt(MASS[P.m])).toFixed(2)} kJ/mol`)
+    : '';
   document.getElementById('readout').innerHTML =
-    row('Classical spread &#10216;x&sup2;&#10217;', cX2 != null ? cX2.toFixed(3) : '…', 'gold') +
-    row('Quantum spread &#10216;x&sup2;&#10217;', qX2 != null ? qX2.toFixed(3) : '…', cls) +
-    row('Ring size R<sub>g</sub>', Q.nAvg ? Math.sqrt(Q.sumRg2 / Q.nAvg).toFixed(3) : '…', cls);
+    row('Thermal energy <i>k</i><sub>B</sub><i>T</i>', `${kT.toFixed(2)} kJ/mol`) + vib +
+    row('Classical spread &radic;&#10216;x&sup2;&#10217;', cR != null ? cR.toFixed(3) + ' Å' : '…', 'gold') +
+    row('Quantum spread &radic;&#10216;x&sup2;&#10217;', qR != null ? qR.toFixed(3) + ' Å' : '…', cls) +
+    row('Ring size R<sub>g</sub>', Q.nAvg ? (Math.sqrt(Q.sumRg2 / Q.nAvg) * L).toFixed(3) + ' Å' : '…', cls);
   document.getElementById('ratio').textContent =
-    cX2 && qX2 != null ? (qX2 / cX2).toFixed(2) + '×' : '…';
+    cR && qR != null ? (qR / cR).toFixed(2) + '×' : '…';
 }
 
 function frame() {
