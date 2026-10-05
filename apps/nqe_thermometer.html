@@ -80,7 +80,7 @@
 
 <div id="right">
   <div class="panel">
-    <div class="panel-title">Classical particle in the well, live</div>
+    <div class="panel-title" style="color:#e3b341">Classical particle in the well, live</div>
     <div class="legend" id="leg-cl"></div>
     <canvas id="cv-cl"></canvas>
   </div>
@@ -120,6 +120,8 @@ const P = Object.assign({ preset: 'cold', m: 'H' }, PRESETS.cold);
 Object.assign(P, hashState.read() || {});
 
 const kFor = (kind) => (kind === 'quartic' ? K_QUARTIC : K);
+// The classical regime is gold throughout, as in "Proton in a potential".
+const CLASSICAL = '#e3b341';
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ── live simulations: stepped every frame, with running averages and histograms ──
@@ -205,7 +207,7 @@ function classicalDensity(xs, kind, k, T) {
  * panels share axes and a vertical scale set by the classical curve alone,
  * which is fixed, so they compare directly.
  */
-function drawPanel(plot, run, markerR) {
+function drawPanel(plot, run, markerR, col) {
   const k = kFor(P.kind), xMax = X_MAX[P.kind];
   const xs = [], vs = [];
   for (let i = 0; i <= 200; i++) {
@@ -223,7 +225,6 @@ function drawPanel(plot, run, markerR) {
   const cl = classicalDensity(xs, P.kind, k, P.T);
   // Headroom above the classical peak lets a taller quantum peak (quartic) fit.
   const scale = (0.6 * yTop) / Math.max(...cl);
-  const col = ISOTOPE[P.m].color;
 
   plot.clear().setLimits([-xMax, xMax], [0, yTop])
     .line(xs, vs, { color: '#8b949e', width: 2.5 })
@@ -235,13 +236,13 @@ function drawPanel(plot, run, markerR) {
 }
 
 function drawLegends() {
-  const col = ISOTOPE[P.m].color;
-  const common =
+  const rest = (col) =>
     `<span><i style="border-color:${col};border-top-width:6px;opacity:.5"></i>where it has been</span>` +
     `<span><i style="border-color:#e6edf3;border-top-style:dashed"></i>classical particle at temperature T</span>` +
     `<span><i style="border-color:#8b949e"></i>well V(x)</span>`;
-  document.getElementById('leg-cl').innerHTML = `<span style="color:${col}">● the particle now</span>` + common;
-  document.getElementById('leg-q').innerHTML = `<span style="color:${col}">● the 32 beads now</span>` + common;
+  const q = ISOTOPE[P.m].color;
+  document.getElementById('leg-cl').innerHTML = `<span style="color:${CLASSICAL}">● the particle now</span>` + rest(CLASSICAL);
+  document.getElementById('leg-q').innerHTML = `<span style="color:${q}">● the 32 beads now</span>` + rest(q);
 }
 
 function drawReadout() {
@@ -249,7 +250,7 @@ function drawReadout() {
   const cX2 = C.nAvg ? C.sumX2 / C.nAvg : null;
   const qX2 = Q.nAvg ? Q.sumX2 / Q.nAvg : null;
   document.getElementById('readout').innerHTML =
-    row('Classical spread &#10216;x&sup2;&#10217;', cX2 != null ? cX2.toFixed(3) : '…') +
+    row('Classical spread &#10216;x&sup2;&#10217;', cX2 != null ? cX2.toFixed(3) : '…', 'gold') +
     row('Quantum spread &#10216;x&sup2;&#10217;', qX2 != null ? qX2.toFixed(3) : '…', cls) +
     row('Ring size R<sub>g</sub>', Q.nAvg ? Math.sqrt(Q.sumRg2 / Q.nAvg).toFixed(3) : '…', cls);
   document.getElementById('ratio').textContent =
@@ -261,8 +262,8 @@ function frame() {
   advance(C, C_STEPS);
   frameNo++;
   if (!reducedMotion || frameNo % 30 === 0) {
-    drawPanel(pCl, C, 8);
-    drawPanel(pQ, Q, 5);
+    drawPanel(pCl, C, 8, CLASSICAL);
+    drawPanel(pQ, Q, 5, ISOTOPE[P.m].color);
     if (frameNo % 10 === 0) drawReadout();
   }
   requestAnimationFrame(frame);
@@ -275,7 +276,7 @@ function changed() {
   hashState.write(P);
 }
 
-onResize(() => { drawPanel(pCl, C, 8); drawPanel(pQ, Q, 5); });
+onResize(() => { drawPanel(pCl, C, 8, CLASSICAL); drawPanel(pQ, Q, 5, ISOTOPE[P.m].color); });
 changed();
 requestAnimationFrame(frame);
 </script>
