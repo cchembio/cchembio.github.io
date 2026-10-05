@@ -83,8 +83,12 @@ function makeModes(N) {
  * A ring-polymer Langevin sampler that can be advanced a few steps at a time,
  * so the app can animate it. `x` is the live bead array (read, don't write).
  */
-export function createSampler({ kind, k, T, mass, N = 32, dt = 0.05, friction = 1, seed = 1 }) {
+export function createSampler({ kind, k, T, mass, N = 32, dt = 0.05, friction = 1, seed = 1, centroidMobility = 1 }) {
   const dtau = 1 / (N * T);
+  // The centroid only feels the potential, scaled by dtau, so at high T it
+  // relaxes on a ~N*T/k timescale. A larger centroid mobility (applied to both
+  // its drift and its noise) speeds that up without changing the distribution.
+  const M0 = centroidMobility;
   const modes = makeModes(N);
   const springK = modes.lambda.map((l) => (mass * l) / dtau);   // per-mode spring stiffness; springK[0] = 0
 
@@ -102,7 +106,7 @@ export function createSampler({ kind, k, T, mass, N = 32, dt = 0.05, friction = 
     for (let kk = 0; kk < N; kk++) {
       const kap = springK[kk];
       if (kap === 0) {
-        q[kk] += Math.sqrt(2 * halfdt / friction) * gauss();          // free centroid: pure diffusion
+        q[kk] += Math.sqrt(2 * M0 * halfdt / friction) * gauss();     // free centroid: pure diffusion
       } else {
         const gamma = kap / friction;
         const decay = Math.exp(-gamma * halfdt);
@@ -113,14 +117,48 @@ export function createSampler({ kind, k, T, mass, N = 32, dt = 0.05, friction = 
   }
 
   const x = new Float64Array(N), q = new Float64Array(N);
+  const f = new Float64Array(N), fq = new Float64Array(N);
   function step() {
     modes.toModes(x, q);
     springHalfStep(q, dt / 2);
     modes.toReal(q, x);
-    for (let i = 0; i < N; i++) x[i] += (dt / friction) * dtau * force(x[i], { kind, k });
+    for (let i = 0; i < N; i++) f[i] = dtau * force(x[i], { kind, k });
+    if (M0 !== 1) {                       // scale only the centroid's share of the force
+      modes.toModes(f, fq);
+      fq[0] *= M0;
+      modes.toReal(fq, f);
+    }
+    for (let i = 0; i < N; i++) x[i] += (dt / friction) * f[i];
     modes.toModes(x, q);
     springHalfStep(q, dt / 2);
     modes.toReal(q, x);
+  }
+  return { x, step, dt };
+}
+
+/**
+ * A single classical particle at temperature T in the same well: underdamped
+ * Langevin dynamics (BAOAB splitting), so it visibly oscillates in the well
+ * while the random kicks and friction keep it at temperature T. Its position
+ * distribution is the Boltzmann one, exp(-V/T), whatever the mass; the mass
+ * only sets how fast it moves. `x` is a length-1 array (read, don't write).
+ */
+export function createClassicalSampler({ kind, k, T, mass, dt = 0.05, friction = 1, seed = 1 }) {
+  let s = seed >>> 0 || 1;
+  function rand() { s ^= s << 13; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; }
+  function gauss() {
+    const u1 = Math.max(rand(), 1e-12), u2 = rand();
+    return Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+  }
+  const c = Math.exp(-friction * dt), noise = Math.sqrt((1 - c * c) * T / mass);
+  const x = new Float64Array(1);
+  let v = Math.sqrt(T / mass) * gauss();
+  function step() {
+    v += (0.5 * dt * force(x[0], { kind, k })) / mass;
+    x[0] += 0.5 * dt * v;
+    v = c * v + noise * gauss();
+    x[0] += 0.5 * dt * v;
+    v += (0.5 * dt * force(x[0], { kind, k })) / mass;
   }
   return { x, step, dt };
 }

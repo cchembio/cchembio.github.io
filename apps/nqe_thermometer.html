@@ -12,7 +12,6 @@
     font-size: 26px; font-weight: 700; color: #e3b341;
     font-variant-numeric: tabular-nums; line-height: 1.15;
   }
-  #compute-note.computing { color: #e3b341; border-left-color: #e3b341; }
 </style>
 </head>
 <body>
@@ -25,13 +24,14 @@
   </h1>
 
   <div class="card hero">
-    <span class="card-label">Zero-point spread (T &rarr; 0)</span>
-    <div class="rate-big" id="rg0">—</div>
+    <span class="card-label">Quantum spread / classical spread</span>
+    <div class="rate-big" id="ratio">—</div>
     <p class="note" style="margin-top:8px;border:none;padding:0">
-      The size of the ring is how far the particle is spread out. A classical
-      particle has no spread at all. Here the spread grows as the temperature
-      falls and is largest at <i>T</i> = 0: the zero-point spread, which never
-      goes away. Heavier isotopes are spread out less.
+      How much more spread out the quantum particle is than a classical one at
+      the same temperature. At high temperature the two agree. As the
+      temperature falls, the classical particle settles into the bottom of the
+      well while the quantum one keeps its zero-point spread, so the ratio
+      grows. Heavier isotopes stay closer to classical.
     </p>
   </div>
 
@@ -55,7 +55,7 @@
     <span class="card-label">At this temperature</span>
     <div id="readout"></div>
     <p class="note" style="margin-top:9px;border:none;padding:0;font-size:12.5px">
-      Averages over the live simulation below &mdash; they settle within a few
+      Averages over the live simulations &mdash; they settle within a few
       seconds and restart whenever a control changes.
     </p>
   </div>
@@ -64,33 +64,35 @@
     Temperature is given in units of &#295;&omega;<sub>H</sub>/<i>k</i><sub>B</sub>,
     the harmonic well's energy quantum for hydrogen. Below about 0.3 quantum
     effects dominate; above about 1 the particle is nearly classical.
-    In the lower panel, energies are in the same units and positions in
+    In the panels, energies are in the same units and positions in
     units of &radic;(&#295;/<i>m</i><sub>H</sub>&omega;<sub>H</sub>), the
     length scale of hydrogen's zero-point motion in the harmonic well.
   </div>
 
-  <div class="note" id="compute-note">
-    The particle is simulated as a ring of 32 beads joined by springs and
-    jostled by random thermal kicks &mdash; the same method used in real
-    quantum simulations. Its results carry a little statistical noise.
+  <div class="note">
+    Both particles are jostled by the same kind of random thermal kicks. The
+    classical one is a single point; where it is found does not depend on its
+    mass, only how fast it moves. The quantum one is a ring of 32 beads joined
+    by springs &mdash; the same method used in real quantum simulations. Both
+    results carry a little statistical noise.
   </div>
 </div>
 
 <div id="right">
   <div class="panel">
-    <div class="panel-title">Size of the ring against temperature, H / D / T</div>
-    <div class="legend" id="leg-t"></div>
-    <canvas id="cv-t"></canvas>
+    <div class="panel-title">Classical particle in the well, live</div>
+    <div class="legend" id="leg-cl"></div>
+    <canvas id="cv-cl"></canvas>
   </div>
   <div class="panel">
-    <div class="panel-title">The ring in the well, live</div>
-    <div class="legend" id="leg-c"></div>
-    <canvas id="cv-cloud"></canvas>
+    <div class="panel-title">Quantum particle as a ring of 32 beads, live</div>
+    <div class="legend" id="leg-q"></div>
+    <canvas id="cv-q"></canvas>
   </div>
 </div>
 
 <script type="module">
-import { createSampler, ringStats, startSimulation, potential } from '../js/nqe/thermometer.js';
+import { createSampler, createClassicalSampler, ringStats, potential } from '../js/nqe/thermometer.js';
 import { createPlot } from '../js/nqe/plot.js';
 import { slider, segmented, presetSelect, hashState, onResize, ISOTOPE }
   from '../js/nqe/ui.js';
@@ -107,9 +109,6 @@ const MASS = {
 const K = 1;               // fixed well stiffness (harmonic); tuned quartic stiffness below
 const K_QUARTIC = 0.35;
 const TMIN = 0.05, TMAX = 3.0;
-// Denser at low T, where the ring is largest and changes fastest.
-const T_GRID = [0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.55, 0.7, 0.9, 1.2, 1.6, 2.0, 2.5, 3.0];
-const ISOS = ['H', 'D', 'T'];
 const X_MAX = { harmonic: 4.5, quartic: 3.0 };   // fixed per well so temperatures and isotopes compare
 
 const PRESETS = {
@@ -123,63 +122,38 @@ Object.assign(P, hashState.read() || {});
 const kFor = (kind) => (kind === 'quartic' ? K_QUARTIC : K);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// ── curves: each point (~90 ms of work) is computed in short slices, one per
-//    macrotask, so the animation and controls stay smooth while they build;
-//    cached per well, since isotope and T only pick from them ──
-const SLICE_STEPS = 300;    // ≈ 1.5 ms; repeated until the task's time budget is used
-const TASK_BUDGET_MS = 10;
-// A MessageChannel post queues a task with no delay; chained setTimeout(0)
-// is clamped to >= 4 ms by browsers, which would nearly double the build time.
-const queue = new MessageChannel();
-let queued = null;
-queue.port1.onmessage = () => { const f = queued; queued = null; f && f(); };
-const nextTask = (f) => { queued = f; queue.port2.postMessage(0); return 1; };
-const curveCache = {};
-let buildTimer = null;
-function ensureCurves(kind) {
-  if (!curveCache[kind]) {
-    curveCache[kind] = { rg: { H: [], D: [], T: [] }, next: 0, run: null };
-  }
-  const c = curveCache[kind];
-  const total = T_GRID.length * ISOS.length;
-  if (c.next >= total || buildTimer) return;
-  const note = document.getElementById('compute-note');
-  const tick = () => {
-    if (c.next >= total || P.kind !== kind) {
-      buildTimer = null;
-      note.classList.remove('computing');
-      if (P.kind !== kind) ensureCurves(P.kind);
-      return;
-    }
-    note.classList.add('computing');
-    const t0 = performance.now();
-    while (c.next < total && performance.now() - t0 < TASK_BUDGET_MS) {
-      const i = Math.floor(c.next / ISOS.length), iso = ISOS[c.next % ISOS.length];
-      c.run ??= startSimulation({ kind, k: kFor(kind), T: T_GRID[i], mass: MASS[iso],
-        N: 32, targetTime: 900, seed: 7 });
-      if (c.run.advance(SLICE_STEPS)) {
-        c.rg[iso][i] = Math.sqrt(c.run.result().Rg2);
-        c.run = null;
-        c.next++;
-        drawCurves();
-      }
-    }
-    buildTimer = nextTask(tick);
-  };
-  buildTimer = nextTask(tick);
+// ── live simulations: stepped every frame, with running averages and histograms ──
+const NBINS = 120;
+const BURN_IN_FRAMES = 15;
+// Enough steps per frame (~2 ms in all) for both averages to settle within
+// seconds: the ring drifts slowly at high T, and a single classical particle
+// needs many oscillations before its histogram is smooth.
+const Q_STEPS = 200, C_STEPS = 40;
+
+function newRun(sampler) {
+  return { sampler, hist: new Float64Array(NBINS), nHist: 0, sumX2: 0, sumRg2: 0, nAvg: 0 };
+}
+let Q = null, C = null, frameNo = 0;
+function resetLive() {
+  const opts = { kind: P.kind, k: kFor(P.kind), T: P.T, mass: MASS[P.m] };
+  Q = newRun(createSampler({ ...opts, N: 32, seed: 11, centroidMobility: Math.max(1, 16 * P.T) }));
+  C = newRun(createClassicalSampler({ ...opts, seed: 5 }));
+  frameNo = 0;
 }
 
-// ── live ring: stepped every frame, with running averages and a position histogram ──
-const NBINS = 120;
-const STEPS_PER_FRAME = 100;   // ~1 ms; enough for the slow drift of the ring at high T to average out
-const BURN_IN_FRAMES = 15;
-let live = null;
-function resetLive() {
-  live = {
-    sampler: createSampler({ kind: P.kind, k: kFor(P.kind), T: P.T, mass: MASS[P.m], N: 32, seed: 11 }),
-    hist: new Float64Array(NBINS), nHist: 0,
-    sumRg2: 0, sumX2: 0, nAvg: 0, frame: 0,
-  };
+function advance(run, steps) {
+  const xMax = X_MAX[P.kind];
+  for (let s = 0; s < steps; s++) {
+    run.sampler.step();
+    if (frameNo < BURN_IN_FRAMES) continue;
+    const st = ringStats(run.sampler.x);
+    run.sumX2 += st.x2; run.sumRg2 += st.rg2; run.nAvg++;
+    for (const x of run.sampler.x) {
+      const b = Math.floor(((x + xMax) / (2 * xMax)) * NBINS);
+      if (b >= 0 && b < NBINS) run.hist[b]++;
+    }
+    run.nHist += run.sampler.x.length;
+  }
 }
 
 // ── controls ───────────────────────────────────────────────────
@@ -200,7 +174,7 @@ const kind = segmented({
 document.getElementById('kind-box').appendChild(kind.el);
 
 const mass = segmented({
-  label: 'Isotope:', ariaLabel: 'Isotope simulated live and highlighted',
+  label: 'Isotope:', ariaLabel: 'Isotope simulated',
   options: [['H', 'H', 'm-h'], ['D', 'D', 'm-d'], ['T', 'T', 'm-t']],
   value: P.m, onChange: (v) => { P.m = v; changed(); },
 });
@@ -211,38 +185,13 @@ const sT = slider({ label: 'Temperature  (<i>k</i><sub>B</sub><i>T</i> / &#295;&
   unit: '', decimals: 2, onInput: (v) => touch('T', v) });
 document.getElementById('slider-box').appendChild(sT.el);
 
-const pT = createPlot(document.getElementById('cv-t'),
-  { xlabel: 'temperature', ylabel: 'ring size  Rg', pad: { l: 94, b: 50 } });
-const pCloud = createPlot(document.getElementById('cv-cloud'),
+const pCl = createPlot(document.getElementById('cv-cl'),
+  { xlabel: 'position  x', ylabel: 'energy', pad: { l: 82, b: 50 } });
+const pQ = createPlot(document.getElementById('cv-q'),
   { xlabel: 'position  x', ylabel: 'energy', pad: { l: 82, b: 50 } });
 
 const row = (k, v, cls = '') =>
   `<div class="r-row"><span class="r-key">${k}</span><span class="r-val ${cls}">${v}</span></div>`;
-
-document.getElementById('leg-t').innerHTML = ISOS.map((iso) =>
-  `<span><i style="border-color:${ISOTOPE[iso].color};border-top-style:${ISOTOPE[iso].dash.length ? 'dashed' : 'solid'}"></i>${iso}</span>`
-).join('') + '<span style="color:#8b949e">● live value</span>';
-
-function drawCurves() {
-  const c = curveCache[P.kind];
-  const all = c ? ISOS.flatMap((iso) => c.rg[iso]).filter((v) => v != null) : [];
-  const yTop = Math.max(0.3, ...all) * 1.15;
-  pT.clear().setLimits([0, TMAX], [0, yTop]);
-  if (c) {
-    for (const iso of ISOS) {
-      const n = c.rg[iso].length;
-      if (n < 2) continue;
-      pT.line(T_GRID.slice(0, n), c.rg[iso],
-        { color: ISOTOPE[iso].color, dash: ISOTOPE[iso].dash, width: iso === P.m ? 3.2 : 1.6 });
-    }
-  }
-  if (live && live.nAvg > 0) {
-    pT.marker(P.T, Math.sqrt(live.sumRg2 / live.nAvg), { color: ISOTOPE[P.m].color, r: 7 });
-  }
-  pT.draw();
-  const z = c && c.rg[P.m][0];
-  document.getElementById('rg0').textContent = z != null ? z.toFixed(3) : '…';
-}
 
 function classicalDensity(xs, kind, k, T) {
   const w = xs.map((x) => Math.exp(-potential(x, { kind, k }) / T));
@@ -250,7 +199,13 @@ function classicalDensity(xs, kind, k, T) {
   return w.map((v) => v / Z);
 }
 
-function drawCloud() {
+/**
+ * One panel: the well, the histogram of where the run's particle (or beads)
+ * have been, the classical Boltzmann density, and the particle(s) now. Both
+ * panels share axes and a vertical scale set by the classical curve alone,
+ * which is fixed, so they compare directly.
+ */
+function drawPanel(plot, run, markerR) {
   const k = kFor(P.kind), xMax = X_MAX[P.kind];
   const xs = [], vs = [];
   for (let i = 0; i <= 200; i++) {
@@ -259,80 +214,68 @@ function drawCloud() {
     vs.push(potential(x, { kind: P.kind, k }));
   }
   const yTop = 0.6 * Math.max(...vs);
-
-  // Quantum density from the bead histogram, classical one from the Boltzmann
-  // factor; both are probability densities, drawn on one shared scale. The
-  // scale is set by the classical curve alone, which is fixed: tying it to the
-  // noisy, still-building histogram made the classical curve jump around.
-  // Headroom above it lets a taller quantum peak (quartic well) fit.
   const bw = (2 * xMax) / NBINS;
   const hx = [], hy = [];
   for (let b = 0; b < NBINS; b++) {
     hx.push(-xMax + (b + 0.5) * bw);
-    hy.push(live.nHist ? live.hist[b] / (live.nHist * bw) : 0);
+    hy.push(run.nHist ? run.hist[b] / (run.nHist * bw) : 0);
   }
   const cl = classicalDensity(xs, P.kind, k, P.T);
+  // Headroom above the classical peak lets a taller quantum peak (quartic) fit.
   const scale = (0.6 * yTop) / Math.max(...cl);
+  const col = ISOTOPE[P.m].color;
 
-  pCloud.clear().setLimits([-xMax, xMax], [0, yTop])
+  plot.clear().setLimits([-xMax, xMax], [0, yTop])
     .line(xs, vs, { color: '#8b949e', width: 2.5 })
-    .fillBetween(hx, hy.map((v) => v * scale), 0, { color: ISOTOPE[P.m].color, alpha: 0.35 })
+    .fillBetween(hx, hy.map((v) => v * scale), 0, { color: col, alpha: 0.35 })
     .line(xs, cl.map((v) => v * scale), { color: '#e6edf3', width: 1.8, dash: [5, 5] });
-  const beadY = 0.05 * yTop;
-  for (const x of live.sampler.x) pCloud.marker(x, beadY, { color: ISOTOPE[P.m].color, r: 5 });
-  pCloud.draw();
+  const y = 0.05 * yTop;
+  for (const x of run.sampler.x) plot.marker(x, y, { color: col, r: markerR });
+  plot.draw();
 }
 
-function drawCloudLegend() {
+function drawLegends() {
   const col = ISOTOPE[P.m].color;
-  document.getElementById('leg-c').innerHTML =
-    `<span><i style="border-color:#8b949e"></i>well V(x)</span>` +
-    `<span style="color:${col}">● beads now</span>` +
-    `<span><i style="border-color:${col};border-top-width:6px;opacity:.5"></i>where the beads have been</span>` +
-    `<span><i style="border-color:#e6edf3;border-top-style:dashed"></i>classical particle at temperature T</span>`;
+  const common =
+    `<span><i style="border-color:${col};border-top-width:6px;opacity:.5"></i>where it has been</span>` +
+    `<span><i style="border-color:#e6edf3;border-top-style:dashed"></i>classical particle at temperature T</span>` +
+    `<span><i style="border-color:#8b949e"></i>well V(x)</span>`;
+  document.getElementById('leg-cl').innerHTML = `<span style="color:${col}">● the particle now</span>` + common;
+  document.getElementById('leg-q').innerHTML = `<span style="color:${col}">● the 32 beads now</span>` + common;
 }
 
 function drawReadout() {
-  const n = live.nAvg;
   const cls = P.m === 'D' ? 'd' : P.m === 'T' ? '' : 'h';
+  const cX2 = C.nAvg ? C.sumX2 / C.nAvg : null;
+  const qX2 = Q.nAvg ? Q.sumX2 / Q.nAvg : null;
   document.getElementById('readout').innerHTML =
-    row('Ring size R<sub>g</sub>', n ? Math.sqrt(live.sumRg2 / n).toFixed(3) : '…', cls) +
-    row('Total spread &#10216;x&sup2;&#10217;', n ? (live.sumX2 / n).toFixed(3) : '…');
+    row('Classical spread &#10216;x&sup2;&#10217;', cX2 != null ? cX2.toFixed(3) : '…') +
+    row('Quantum spread &#10216;x&sup2;&#10217;', qX2 != null ? qX2.toFixed(3) : '…', cls) +
+    row('Ring size R<sub>g</sub>', Q.nAvg ? Math.sqrt(Q.sumRg2 / Q.nAvg).toFixed(3) : '…', cls);
+  document.getElementById('ratio').textContent =
+    cX2 && qX2 != null ? (qX2 / cX2).toFixed(2) + '×' : '…';
 }
 
 function frame() {
-  const L = live;
-  for (let s = 0; s < STEPS_PER_FRAME; s++) {
-    L.sampler.step();
-    if (L.frame >= BURN_IN_FRAMES) {
-      const st = ringStats(L.sampler.x);
-      L.sumRg2 += st.rg2; L.sumX2 += st.x2; L.nAvg++;
-      const xMax = X_MAX[P.kind];
-      for (const x of L.sampler.x) {
-        const b = Math.floor(((x + xMax) / (2 * xMax)) * NBINS);
-        if (b >= 0 && b < NBINS) L.hist[b]++;
-      }
-      L.nHist += L.sampler.x.length;
-    }
-  }
-  L.frame++;
-  if (!reducedMotion || L.frame % 30 === 0) {
-    drawCloud();
-    if (L.frame % 10 === 0) { drawReadout(); drawCurves(); }
+  advance(Q, Q_STEPS);
+  advance(C, C_STEPS);
+  frameNo++;
+  if (!reducedMotion || frameNo % 30 === 0) {
+    drawPanel(pCl, C, 8);
+    drawPanel(pQ, Q, 5);
+    if (frameNo % 10 === 0) drawReadout();
   }
   requestAnimationFrame(frame);
 }
 
 function changed() {
   resetLive();
-  drawCloudLegend();
-  ensureCurves(P.kind);
-  drawCurves();
+  drawLegends();
   drawReadout();
   hashState.write(P);
 }
 
-onResize(() => { drawCurves(); drawCloud(); });
+onResize(() => { drawPanel(pCl, C, 8); drawPanel(pQ, Q, 5); });
 changed();
 requestAnimationFrame(frame);
 </script>
